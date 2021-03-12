@@ -1,0 +1,10 @@
+Import('env')
+Import('libs')
+
+
+SConscript('concurrent/SConscript', exports=['env','libs'])
+SConscript('context/SConscript', exports=['env','libs'])
+SConscript('runtime/SConscript', exports=['env','libs'])
+SConscript('support/SConscript', exports=['env','libs'])
+SConscript('trace/SConscript', exports=['env','libs'])
+SConscript('tests/SConscript', exports=['env','libs'])

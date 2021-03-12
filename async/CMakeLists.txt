@@ -1,0 +1,6 @@
+add_subdirectory(support)
+add_subdirectory(concurrent)
+add_subdirectory(context)
+add_subdirectory(runtime)
+add_subdirectory(trace)
+add_subdirectory(tests)

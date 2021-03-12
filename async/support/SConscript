@@ -1,0 +1,25 @@
+set(header_files "thread_local.h 
+                    status.h 
+                    rc_array.h 
+                    any.h 
+                    forward_decl.h  
+                    type_traits.h 
+                    concurrent_vector.h 
+                    string_util.h 
+                    alloc.h 
+                    latch.h 
+                    ref_count.h")
+set(object_files "alloc.cpp
+                  ref_count.cpp
+                  status.cpp
+                  string_util.cpp")
+
+Import('env')
+Import('libs')
+
+build_env = env.build_env.Clone()
+
+obj_files = ['alloc.cpp', 'ref_count.cpp', 'string_util.cpp', 'status.cpp']
+build_env.SmartLibrary('async_support', obj_files, LIBDEPS=['LLVMSupport'])
+
+build_env.Prepend(LIBDEPS=['async_support'])

@@ -1,0 +1,4 @@
+Import('env')
+Import('libs')
+
+Sconscript('memory/Sconscript', exports=['env','libs'])

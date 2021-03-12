@@ -1,0 +1,5 @@
+Import('env')
+Import('libs')
+
+Sconscript('cpu/Sconscript', exports=['env','libs'])
+Sconscript('gpu/Sconscript', exports=['env','libs'])

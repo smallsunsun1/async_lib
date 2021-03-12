@@ -1,0 +1,8 @@
+Import('env')
+Import('libs')
+
+build_env = env.build_env.Clone()
+
+# We don't need runtime code now, may be will be useful in future.
+#obj_files = ['base_runtime.cpp']
+#build_env.SmartLibrary('async_runtime', obj_files, LIBDEPS=['async_context', 'async_concurrent', 'async_support', 'async_trace', 'LLVMSupport'])

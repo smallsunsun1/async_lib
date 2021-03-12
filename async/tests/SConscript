@@ -1,0 +1,17 @@
+Import('env')
+Import('libs')
+
+build_env = env.build_env.Clone()
+
+obj_files1 = ['test_async_speed.cpp']
+obj_files2 = ['function_unittest.cpp']
+DEPS = ['async_context', 'async_trace', 'async_concurrent', 'LLVMSupport', 'async_support', 'threading', 'gtest']
+
+build_env.TestProgram('test_async_speed', obj_files1, LIBDEPS=DEPS)
+build_env.TestProgram('test_string_util', 'string_util_unittest.cpp', LIBDEPS=DEPS)
+build_env.TestProgram('test_function', obj_files2, LIBDEPS=DEPS)
+build_env.TestProgram('test_any', 'any_unittest.cpp', LIBDEPS=DEPS)
+build_env.TestProgram('test_resource', 'resource_unittest.cpp', LIBDEPS=DEPS)
+build_env.TestProgram('test_trace', 'test_trace.cpp', LIBDEPS=DEPS)
+build_env.TestProgram('test_latch', 'latch_unittest.cpp', LIBDEPS=DEPS)
+build_env.TestProgram('test_std_function', 'std_function_unittest.cpp', LIBDEPS=DEPS)

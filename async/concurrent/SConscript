@@ -1,0 +1,10 @@
+Import('env')
+Import('libs')
+
+build_env = env.build_env.Clone()
+
+obj_files = ['concurrent_work_queue.cpp', 'multi_threaded_work_queue.cpp', 'task_queue.cpp']
+build_env.SmartLibrary('async_concurrent', obj_files, LIBDEPS=['async_support', 'LLVMSupport'])
+
+build_env.Prepend(LIBDEPS=['async_concurrent'])
+#build_env.TestProgram('rle_test_ficus', 'rle_test_ficus.cpp', )
