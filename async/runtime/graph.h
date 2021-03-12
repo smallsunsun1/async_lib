@@ -168,6 +168,10 @@ class GraphExecutor : public async::ReferenceCounted<GraphExecutor> {
                                // kernel-info(指示多少Arguments还未Ready)
 };
 
+// 调用此函数前需要保证Graph已经构建完成
+void RunAsyncGraph(AsyncGraph* graph, std::vector<async::RCReference<async::AsyncValue>>& inputs, 
+                    std::vector<async::RCReference<async::AsyncValue>>& results, bool sync=true);
+
 }  // namespace ficus
 
 #endif /* INFERENCE_MEDICAL_BIOIMAGE_BRAIN_COMMON_GRAPH_GRAPH_ */
