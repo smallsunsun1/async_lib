@@ -459,4 +459,20 @@ absl::Span<KernelInfo> GraphExecutor::GetKernelInfo() {
                         mFunctionInfo.mKernelInfos.size());
 }
 
+void RunAsyncGraph(AsyncGraph* graph, std::vector<RCReference<AsyncValue>>& inputs, 
+                    std::vector<RCReference<AsyncValue>>& results, bool sync) {
+  auto* runContext = graph->GetContext();
+  GraphExecutor* execPtr = runContext->Allocate<GraphExecutor>();
+  GraphExecutor* exec = new (execPtr) GraphExecutor(graph);
+  absl::InlinedVector<AsyncValue*, 4> oriArgumentsPtr;
+  oriArgumentsPtr.reserve(inputs.size());
+  for (auto& elem: inputs) {
+    oriArgumentsPtr.push_back(elem.get());
+  }
+  results.resize(graph->GetNumOutputs());
+  GraphExecutor::Execute(exec, absl::MakeConstSpan(oriArgumentsPtr.data(), oriArgumentsPtr.size()), 
+                                absl::MakeSpan(results.data(), results.size()));
+  if (sync) runContext->Await(results);
+}
+
 }  // namespace ficus
