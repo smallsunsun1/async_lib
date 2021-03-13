@@ -1,10 +1,12 @@
 #include "../support/latch.h"
 
-#include <atomic>
-#include <iostream>
-#include <thread>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
 
-#include "gtest/gtest.h"
+#include <atomic>  // for atomic
+#include <thread>  // for thread
+
+#include "gtest/gtest_pred_impl.h"  // for Test, InitGoogleTest, RUN_ALL_TESTS
 
 using namespace ficus;
 using namespace async;
@@ -25,5 +27,5 @@ TEST(LATCH, V1) {
 
 int main(int argc, char* argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
-  (void)RUN_ALL_TESTS();
+  return RUN_ALL_TESTS();
 }

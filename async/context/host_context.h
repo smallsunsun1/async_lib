@@ -5,10 +5,10 @@
 #include <memory>
 #include <type_traits>
 
+#include "async_value_ref.h"
 #include "third_party/abseil-cpp/absl/status/status.h"
 #include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/abseil-cpp/absl/types/span.h"
-#include "async_value_ref.h"
 
 namespace ficus {
 namespace async {
@@ -36,9 +36,7 @@ class HostContext {
   using ResultTypeT = typename UnwrapExpected<std::result_of_t<F()>>::type;
 
  public:
-  HostContext(std::function<void(const DecodedDiagnostic&)> diag_handler,
-              std::unique_ptr<HostAllocator> allocator,
-              std::unique_ptr<ConcurrentWorkQueue> work_queue);
+  HostContext(std::function<void(const DecodedDiagnostic&)> diag_handler, std::unique_ptr<HostAllocator> allocator, std::unique_ptr<ConcurrentWorkQueue> work_queue);
   HostContext(const HostContext&) = delete;
   HostContext& operator=(const HostContext&) = delete;
   ~HostContext();
@@ -55,17 +53,13 @@ class HostContext {
 
   // Constructs an AsyncValue that contains an error which can be further
   // propagated.
-  RCReference<ErrorAsyncValue> MakeErrorAsyncValueRef(
-      DecodedDiagnostic&& diagnostic);
+  RCReference<ErrorAsyncValue> MakeErrorAsyncValueRef(DecodedDiagnostic&& diagnostic);
 
   // Constructs an AsyncValue that contains an error message which can be
   // further propagated.
-  RCReference<ErrorAsyncValue> MakeErrorAsyncValueRef(
-      absl::string_view message);
+  RCReference<ErrorAsyncValue> MakeErrorAsyncValueRef(absl::string_view message);
 
-  std::function<void(const DecodedDiagnostic&)> diag_handler() {
-    return mDiagHandler;
-  }
+  std::function<void(const DecodedDiagnostic&)> diag_handler() { return mDiagHandler; }
 
   //===--------------------------------------------------------------------===//
   // Cancel the current execution
@@ -83,9 +77,7 @@ class HostContext {
   // When HostContext is in the canceled state, GetCancelAsyncValue
   // returns an non-null AsyncValue containing the message for the
   // cancellation. Otherwise, it returns nullptr.
-  AsyncValue* GetCancelAsyncValue() const {
-    return mCancelValue.load(std::memory_order_acquire);
-  }
+  AsyncValue* GetCancelAsyncValue() const { return mCancelValue.load(std::memory_order_acquire); }
   AsyncValueRef<Chain> GetReadyChain() const { return mReadyChain.CopyRef(); }
 
   //===--------------------------------------------------------------------===//
@@ -173,16 +165,14 @@ class HostContext {
   // Example:
   // int a = 1, b = 2;
   // AsyncValueRef<int> r = host->EnqueueWork([a, b] { return a + b; });
-  template <typename F, typename R = ResultTypeT<F>,
-            std::enable_if_t<!std::is_void<R>(), int> = 0>
+  template <typename F, typename R = ResultTypeT<F>, std::enable_if_t<!std::is_void<R>(), int> = 0>
   AsyncValueRef<R> EnqueueWork(F&& work);
 
   // Add some blocking work to the work_queue managed by this CPU device.
   bool EnqueueBlockingWork(unique_function<void()> work);
 
   // Add some blocking work to the work_queue managed by this CPU device.
-  template <typename F, typename R = ResultTypeT<F>,
-            std::enable_if_t<!std::is_void<R>(), int> = 0>
+  template <typename F, typename R = ResultTypeT<F>, std::enable_if_t<!std::is_void<R>(), int> = 0>
   AsyncValueRef<R> EnqueueBlockingWork(F&& work);
 
   // Returns the number of worker threads in the work_queue managed by this CPU
@@ -192,10 +182,8 @@ class HostContext {
 
   // Run the specified function when the specified set of AsyncValue's are all
   // resolved.  This is a set-version of "AndThen".
-  void RunWhenReady(absl::Span<AsyncValue* const> values,
-                    unique_function<void()> callee);
-  void RunWhenReady(absl::Span<const RCReference<AsyncValue>> values,
-                    unique_function<void()> callee);
+  void RunWhenReady(absl::Span<AsyncValue* const> values, unique_function<void()> callee);
+  void RunWhenReady(absl::Span<const RCReference<AsyncValue>> values, unique_function<void()> callee);
 
   //===--------------------------------------------------------------------===//
   // Shared context
@@ -238,8 +226,7 @@ class HostContext {
   int instance_index() const { return mInstancePtr.index(); }
   HostContextPtr instance_ptr() const { return mInstancePtr; }
 
-  SharedContext& GetOrCreateSharedContext(int shared_context_id,
-                                          SharedContextFactory factory);
+  SharedContext& GetOrCreateSharedContext(int shared_context_id, SharedContextFactory factory);
 
   std::atomic<AsyncValue*> mCancelValue{nullptr};
   // Store a ready chain in HostContext to avoid repeated creations of ready
@@ -256,34 +243,24 @@ class HostContext {
 
 template <typename T, typename... Args>
 AsyncValueRef<T> HostContext::MakeConstructedAsyncValueRef(Args&&... args) {
-  return AsyncValueRef<T>(TakeRef(Construct<internal::ConcreteAsyncValue<T>>(
-      mInstancePtr,
-      typename internal::ConcreteAsyncValue<T>::ConstructedPayload{},
-      std::forward<Args>(args)...)));
+  return AsyncValueRef<T>(TakeRef(Construct<internal::ConcreteAsyncValue<T>>(mInstancePtr, typename internal::ConcreteAsyncValue<T>::ConstructedPayload{}, std::forward<Args>(args)...)));
 }
 
 template <typename T, typename... Args>
 AsyncValueRef<T> HostContext::MakeAvailableAsyncValueRef(Args&&... args) {
-  return AsyncValueRef<T>(TakeRef(Construct<internal::ConcreteAsyncValue<T>>(
-      mInstancePtr, typename internal::ConcreteAsyncValue<T>::ConcretePayload{},
-      std::forward<Args>(args)...)));
+  return AsyncValueRef<T>(TakeRef(Construct<internal::ConcreteAsyncValue<T>>(mInstancePtr, typename internal::ConcreteAsyncValue<T>::ConcretePayload{}, std::forward<Args>(args)...)));
 }
 
 template <typename T>
 AsyncValueRef<T> HostContext::MakeUnconstructedAsyncValueRef() {
-  return AsyncValueRef<T>(TakeRef(Construct<internal::ConcreteAsyncValue<T>>(
-      mInstancePtr,
-      typename internal::ConcreteAsyncValue<T>::UnconstructedPayload{})));
+  return AsyncValueRef<T>(TakeRef(Construct<internal::ConcreteAsyncValue<T>>(mInstancePtr, typename internal::ConcreteAsyncValue<T>::UnconstructedPayload{})));
 }
 
 template <typename SharedContextType>
 SharedContextType& HostContext::GetOrCreateSharedContext() {
   int shared_context_id = DenseIdForSharedContext<SharedContextType>();
-  auto factory = [](HostContext* host) -> std::unique_ptr<SharedContext> {
-    return std::make_unique<SharedContextType>(host);
-  };
-  return static_cast<SharedContextType&>(
-      GetOrCreateSharedContext(shared_context_id, factory));
+  auto factory = [](HostContext* host) -> std::unique_ptr<SharedContext> { return std::make_unique<SharedContextType>(host); };
+  return static_cast<SharedContextType&>(GetOrCreateSharedContext(shared_context_id, factory));
 }
 
 template <typename SharedContextType>
@@ -295,20 +272,14 @@ int HostContext::DenseIdForSharedContext() {
 template <typename F, typename R, std::enable_if_t<!std::is_void<R>(), int>>
 AsyncValueRef<R> HostContext::EnqueueWork(F&& work) {
   auto result = this->MakeUnconstructedAsyncValueRef<R>();
-  this->EnqueueWork(
-      [result = result.CopyRef(), work = std::forward<F>(work)]() mutable {
-        result.emplace(work());
-      });
+  this->EnqueueWork([result = result.CopyRef(), work = std::forward<F>(work)]() mutable { result.emplace(work()); });
   return result;
 }
 
 template <typename F, typename R, std::enable_if_t<!std::is_void<R>(), int>>
 AsyncValueRef<R> HostContext::EnqueueBlockingWork(F&& work) {
   auto result = this->MakeUnconstructedAsyncValueRef<R>();
-  bool enqueued = this->EnqueueBlockingWork(
-      [result = result.CopyRef(), work = std::forward<F>(work)]() mutable {
-        result.emplace(work());
-      });
+  bool enqueued = this->EnqueueBlockingWork([result = result.CopyRef(), work = std::forward<F>(work)]() mutable { result.emplace(work()); });
   if (!enqueued) {
     result.SetError("Failed to enqueue blocking work.");
   }
@@ -320,8 +291,7 @@ class SharedContext {
 };
 
 std::unique_ptr<HostContext> CreateSimpleHostContext();
-std::unique_ptr<HostContext> CreateCustomHostContext(int numNonBlockThreads,
-                                                     int numBlockThreads);
+std::unique_ptr<HostContext> CreateCustomHostContext(int numNonBlockThreads, int numBlockThreads);
 
 }  // namespace async
 }  // namespace ficus

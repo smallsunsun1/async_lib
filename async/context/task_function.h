@@ -1,15 +1,14 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_TASK_FUNCTION_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_TASK_FUNCTION_
 
-#include "../support/unique_function.h"
+#include "async/support/unique_function.h"
 
 namespace ficus {
 namespace async {
 
 class TaskFunction {
  public:
-  explicit TaskFunction(unique_function<void()> work)
-      : mFunc(std::move(work)) {}
+  explicit TaskFunction(unique_function<void()> work) : mFunc(std::move(work)) {}
   TaskFunction(TaskFunction&&) = default;
   TaskFunction() = default;
   void operator()() { mFunc(); }

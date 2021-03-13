@@ -28,10 +28,7 @@ class ThreadLocal {
   static size_t Capacity(size_t numThreads) { return numThreads * 2; }
 
   template <typename... Args>
-  explicit ThreadLocal(size_t capacity, Args... args)
-      : mCapacity(capacity),
-        mConstructor(std::forward<Args>(args)...),
-        mNumLockFreeEntries(0) {
+  explicit ThreadLocal(size_t capacity, Args... args) : mCapacity(capacity), mConstructor(std::forward<Args>(args)...), mNumLockFreeEntries(0) {
     assert(mCapacity >= 0);
     mData.resize(capacity);
     mPtrs = new std::atomic<Entry*>[mCapacity];
@@ -65,11 +62,9 @@ class ThreadLocal {
     }
 
     // 如果无锁存储满了，使用lock形式的存储结果
-    if (mNumLockFreeEntries.load(std::memory_order_relaxed) >= mCapacity)
-      return SpilledLocal(this_thread);
+    if (mNumLockFreeEntries.load(std::memory_order_relaxed) >= mCapacity) return SpilledLocal(this_thread);
 
-    int insertionIndex =
-        mNumLockFreeEntries.fetch_add(1, std::memory_order_relaxed);
+    int insertionIndex = mNumLockFreeEntries.fetch_add(1, std::memory_order_relaxed);
     if (insertionIndex >= mCapacity) return SpilledLocal(this_thread);
 
     // 保证在没有竞争的情况下去除mData[insertionIndex]
@@ -98,8 +93,7 @@ class ThreadLocal {
       }
       // Atomic store of the pointer guarantees that any other thread, that will
       // follow this pointer will see all the mutations in the `mData`.
-    } while (!mPtrs[idx].compare_exchange_weak(empty, inserted,
-                                               std::memory_order_release));
+    } while (!mPtrs[idx].compare_exchange_weak(empty, inserted, std::memory_order_release));
 
     return inserted->value;
   }

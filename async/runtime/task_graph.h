@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../support/ref_count.h"
+#include "async/support/ref_count.h"
 
 namespace ficus {
 
@@ -23,14 +23,11 @@ class TaskGraphExecutor;
 class TaskNode {
  public:
   TaskNode() = default;
-  TaskNode(std::function<void()> computeFunc)
-      : mComputeFunc(std::move(computeFunc)) {}
+  TaskNode(std::function<void()> computeFunc) : mComputeFunc(std::move(computeFunc)) {}
   void AddDependency(TaskNode* node);
   void AddSuccessor(TaskNode* node);
   std::vector<TaskNode*>& GetDependencies() { return mDependencies; }
-  const std::vector<TaskNode*>& GetDependencies() const {
-    return mDependencies;
-  }
+  const std::vector<TaskNode*>& GetDependencies() const { return mDependencies; }
   std::vector<TaskNode*>& GetSuccessor() { return mSuccessories; }
   const std::vector<TaskNode*>& GetSuccessor() const { return mSuccessories; }
   unsigned GetNumSuccessor() { return mSuccessories.size(); }
@@ -63,10 +60,8 @@ class TaskGraph : public async::ReferenceCounted<TaskGraph> {
   friend class TaskNode;
   friend class TaskGraphExecutor;
   async::HostContext* mpContext;
-  std::unordered_map<TaskNode*, unsigned>
-      mNodeIndexInfo;  // 记录每个Node对应的Index
-  std::unordered_map<TaskNode*, int>
-      mNodeCountInfo;  // 记录每个Node有多少Dependency
+  std::unordered_map<TaskNode*, unsigned> mNodeIndexInfo;  // 记录每个Node对应的Index
+  std::unordered_map<TaskNode*, int> mNodeCountInfo;       // 记录每个Node有多少Dependency
   std::vector<std::unique_ptr<TaskNode>> mTaskNodes;
 };
 
@@ -78,8 +73,7 @@ class TaskGraphExecutor : public async::ReferenceCounted<TaskGraphExecutor> {
   }
   static void Execute(TaskGraphExecutor* executor);
   void Execute();
-  void ProcessReadyNodeIndex(unsigned nodeId,
-                             std::vector<unsigned>* readyNodeIdx);
+  void ProcessReadyNodeIndex(unsigned nodeId, std::vector<unsigned>* readyNodeIdx);
   void ProcessReadyNodeIndexs(std::vector<unsigned>* readyNodeIndex);
   void ProcessStartNodeIndex(std::vector<unsigned>* readyNodeIndex);
   void Await();

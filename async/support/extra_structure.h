@@ -2,6 +2,7 @@
 #define ASYNC_SUPPORT_EXTRA_STRUCTURE_
 
 #include <algorithm>
+
 #include "type_traits.h"
 
 namespace ficus {
@@ -20,15 +21,11 @@ struct PointerUnionTypeSelector<T, T, RetEq, RetNe> {
   using Return = typename PointerUnionTypeSelectorReturn<RetEq>::Return;
 };
 template <typename T1, typename T2, typename RetEq, typename RetNe>
-struct PointerUnionTypeSelectorReturn<
-    PointerUnionTypeSelector<T1, T2, RetEq, RetNe>> {
-  using Return =
-      typename PointerUnionTypeSelector<T1, T2, RetEq, RetNe>::Return;
+struct PointerUnionTypeSelectorReturn<PointerUnionTypeSelector<T1, T2, RetEq, RetNe>> {
+  using Return = typename PointerUnionTypeSelector<T1, T2, RetEq, RetNe>::Return;
 };
 namespace detail {
-constexpr int bitsRequired(unsigned n) {
-  return n > 1 ? 1 + bitsRequired((n + 1) / 2) : 0;
-}
+constexpr int bitsRequired(unsigned n) { return n > 1 ? 1 + bitsRequired((n + 1) / 2) : 0; }
 template <typename... Ts>
 constexpr int lowBitsAvailable() {
   return std::min<int>({PointerLikeTypeTraits<Ts>::NumLowBitsAvailable...});
@@ -68,36 +65,24 @@ class PointerUnionMembers<Derived, ValTy, I> {
   PointerUnionMembers(ValTy Val) : Val(Val) {}
   friend struct PointerLikeTypeTraits<Derived>;
 };
-template <typename Derived, typename ValTy, int I, typename Type,
-          typename... Types>
-class PointerUnionMembers<Derived, ValTy, I, Type, Types...>
-    : public PointerUnionMembers<Derived, ValTy, I + 1, Types...> {
+template <typename Derived, typename ValTy, int I, typename Type, typename... Types>
+class PointerUnionMembers<Derived, ValTy, I, Type, Types...> : public PointerUnionMembers<Derived, ValTy, I + 1, Types...> {
   using Base = PointerUnionMembers<Derived, ValTy, I + 1, Types...>;
 
  public:
   using Base::Base;
   PointerUnionMembers() = default;
-  PointerUnionMembers(Type v)
-      : Base(ValTy(const_cast<void *>(
-                         PointerLikeTypeTraits<Type>::getAsVoidPointer(v)),
-                   I)) {}
+  PointerUnionMembers(Type v) : Base(ValTy(const_cast<void *>(PointerLikeTypeTraits<Type>::getAsVoidPointer(v)), I)) {}
   using Base::operator=;
   Derived &operator=(Type v) {
-    this->val = ValTy(
-        const_cast<void *>(PointerLikeTypeTraits<Type>::getAsVoidPointer(v)),
-        I);
+    this->val = ValTy(const_cast<void *>(PointerLikeTypeTraits<Type>::getAsVoidPointer(v)), I);
     return static_cast<Derived &>(*this);
   }
 };
 }  // namespace detail
 
 template <typename... Pts>
-class PointerUnion
-    : public detail::PointerUnionMembers<
-          PointerUnion<Pts...>,
-          PointerIntPair<void *, detail::bitsRequired(sizeof...(Pts)), int,
-                         detail::PointerUnionUIntTraits<Pts...>>,
-          0, Pts...> {
+class PointerUnion : public detail::PointerUnionMembers<PointerUnion<Pts...>, PointerIntPair<void *, detail::bitsRequired(sizeof...(Pts)), int, detail::PointerUnionUIntTraits<Pts...>>, 0, Pts...> {
   using First = typename detail::GetFirstType<Pts...>::type;
   using Base = typename PointerUnion::PointerUnionMembers;
 
@@ -110,8 +95,7 @@ class PointerUnion
   template <typename T>
   bool is() const {
     constexpr int Index = detail::TypeIndex<T, Pts...>::Index;
-    static_assert(Index < sizeof...(Pts),
-                  "PointerUnion::is<T> given type not in the union");
+    static_assert(Index < sizeof...(Pts), "PointerUnion::is<T> given type not in the union");
     return this->Val.getInt() == Index;
   }
   template <typename T>
@@ -126,12 +110,8 @@ class PointerUnion
   }
   First *getAddrOfPtr1() {
     assert(is<First>() && "Val is not the first pointer");
-    assert(
-        PointerLikeTypeTraits<First>::getAsVoidPointer(get<First>()) ==
-            this->Val.getPointer() &&
-        "Can't get the address because PointerLikeTypeTraits changes the ptr");
-    return const_cast<First *>(
-        reinterpret_cast<const First *>(this->Val.getAddrOfPointer()));
+    assert(PointerLikeTypeTraits<First>::getAsVoidPointer(get<First>()) == this->Val.getPointer() && "Can't get the address because PointerLikeTypeTraits changes the ptr");
+    return const_cast<First *>(reinterpret_cast<const First *>(this->Val.getAddrOfPointer()));
   }
 
   const PointerUnion &operator=(std::nullptr_t) {
@@ -164,18 +144,13 @@ bool operator<(PointerUnion<PTs...> lhs, PointerUnion<PTs...> rhs) {
 
 template <typename... PTs>
 struct PointerLikeTypeTraits<PointerUnion<PTs...>> {
-  static inline void *getAsVoidPointer(const PointerUnion<PTs...> &P) {
-    return P.getOpaqueValue();
-  }
+  static inline void *getAsVoidPointer(const PointerUnion<PTs...> &P) { return P.getOpaqueValue(); }
 
-  static inline PointerUnion<PTs...> getFromVoidPointer(void *P) {
-    return PointerUnion<PTs...>::getFromOpaqueValue(P);
-  }
+  static inline PointerUnion<PTs...> getFromVoidPointer(void *P) { return PointerUnion<PTs...>::getFromOpaqueValue(P); }
 
   // The number of bits available are the min of the pointer types minus the
   // bits needed for the discriminator.
-  static constexpr int NumLowBitsAvailable = PointerLikeTypeTraits<decltype(
-      PointerUnion<PTs...>::Val)>::NumLowBitsAvailable;
+  static constexpr int NumLowBitsAvailable = PointerLikeTypeTraits<decltype(PointerUnion<PTs...>::Val)>::NumLowBitsAvailable;
 };
 
 }  // namespace async

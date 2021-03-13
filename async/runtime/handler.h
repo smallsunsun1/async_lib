@@ -3,9 +3,9 @@
 
 #include <string>
 
-#include "../context/native_function.h"
-#include "third_party/abseil-cpp/absl/strings/string_view.h"
+#include "async/context/native_function.h"
 #include "function_op.h"
+#include "third_party/abseil-cpp/absl/strings/string_view.h"
 
 namespace ficus {
 namespace async {
@@ -14,9 +14,7 @@ class BaseRuntime;
 
 class FunctionHandler {
  public:
-  explicit FunctionHandler(absl::string_view name, BaseRuntime* runtime,
-                           FunctionHandler* handler)
-      : mName(name), mRuntime(runtime), mFallback(handler) {}
+  explicit FunctionHandler(absl::string_view name, BaseRuntime* runtime, FunctionHandler* handler) : mName(name), mRuntime(runtime), mFallback(handler) {}
   FunctionHandler* GetFallBackHandler() { return mFallback; }
   absl::string_view GetName() const { return mName; }
   BaseRuntime* GetBaseRuntime() { return mRuntime; }

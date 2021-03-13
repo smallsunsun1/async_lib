@@ -5,13 +5,15 @@ project(project_async)
 cmake_minimum_required(VERSION 3.15)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED 14)
-set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 
 set(LIB_TYPE "STATIC" CACHE STRING "build library type")
 set(CMAKE_PREFIX_PATH libs/)
 
 add_definitions(-DEIGEN_USE_THREADS)
+
+set(CMAKE_CXX_FLAGS "-Wno-invalid-offsetof")
 
 option(USE_ASAN "variable which indicate whether to use address sanitizer" OFF)
 option(USE_CUDA "variable which indicate whether to build with cuda" OFF)

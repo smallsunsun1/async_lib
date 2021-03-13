@@ -1,7 +1,7 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_DEVICE_GPU_MEMORY_GPU_BUFFER_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_DEVICE_GPU_MEMORY_GPU_BUFFER_
 
-#include "../../../support/ref_count.h"
+#include "async/support/ref_count.h"
 
 namespace ficus {
 namespace async {

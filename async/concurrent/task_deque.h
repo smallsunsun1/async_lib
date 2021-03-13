@@ -6,8 +6,9 @@
 #include <cassert>
 #include <cstdint>
 #include <mutex>
+#include <vector>
 
-#include "../context/task_function.h"
+#include "async/context/task_function.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
 
 namespace ficus {
@@ -17,10 +18,8 @@ class TaskDeque {
  public:
   static constexpr unsigned kCapacity = 1024;
 
-  static_assert((kCapacity > 2) && (kCapacity <= (64u << 10u)),
-                "TaskDeque capacity must be in [4, 65536] range");
-  static_assert((kCapacity & (kCapacity - 1)) == 0,
-                "TaskDeque capacity must be a power of two for fast masking");
+  static_assert((kCapacity > 2) && (kCapacity <= (64u << 10u)), "TaskDeque capacity must be in [4, 65536] range");
+  static_assert((kCapacity & (kCapacity - 1)) == 0, "TaskDeque capacity must be a power of two for fast masking");
 
   TaskDeque() : mFront(0), mBack(0) {
     for (unsigned i = 0; i < kCapacity; i++) {
@@ -40,8 +39,7 @@ class TaskDeque {
     unsigned front = mFront.load(std::memory_order_relaxed);
     Elem* e = &mArray[front & kMask];
     uint8_t s = e->state.load(std::memory_order_relaxed);
-    if (s != kEmpty || !e->state.compare_exchange_strong(
-                           s, kBusy, std::memory_order_acquire)) {
+    if (s != kEmpty || !e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
       return absl::optional<TaskFunction>(std::move(task));
     }
     mFront.store(front + kIncrement, std::memory_order_relaxed);
@@ -57,8 +55,7 @@ class TaskDeque {
     unsigned front = mFront.load(std::memory_order_relaxed);
     Elem* e = &mArray[(front - 1) & kMask];
     uint8_t s = e->state.load(std::memory_order_relaxed);
-    if (s != kReady || !e->state.compare_exchange_strong(
-                           s, kBusy, std::memory_order_acquire)) {
+    if (s != kReady || !e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
       return absl::nullopt;
     }
     TaskFunction task = std::move(e->task);
@@ -77,8 +74,7 @@ class TaskDeque {
     unsigned back = mBack.load(std::memory_order_relaxed);
     Elem* e = &mArray[(back - 1) & kMask];
     uint8_t s = e->state.load(std::memory_order_relaxed);
-    if (s != kEmpty || !e->state.compare_exchange_strong(
-                           s, kBusy, std::memory_order_acquire)) {
+    if (s != kEmpty || !e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
       return absl::optional<TaskFunction>(std::move(task));
     }
     back = ((back - 1) & kMask2) | (back & ~kMask2);
@@ -98,8 +94,7 @@ class TaskDeque {
     unsigned back = mBack.load(std::memory_order_relaxed);
     Elem* e = &mArray[back & kMask];
     uint8_t s = e->state.load(std::memory_order_relaxed);
-    if (s != kReady || !e->state.compare_exchange_strong(
-                           s, kBusy, std::memory_order_acquire)) {
+    if (s != kReady || !e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
       return absl::nullopt;
     }
     TaskFunction task = std::move(e->task);
@@ -124,9 +119,7 @@ class TaskDeque {
       Elem* e = &mArray[mid & kMask];
       uint8_t s = e->state.load(std::memory_order_relaxed);
       if (n == 0) {
-        if (s != kReady || !e->state.compare_exchange_strong(
-                               s, kBusy, std::memory_order_acquire))
-          continue;
+        if (s != kReady || !e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) continue;
         start = mid;
       } else {
         // Note: no need to store temporal kBusy, we exclusively own these

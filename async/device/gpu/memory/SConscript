@@ -1,9 +1,0 @@
-Import('env')
-Import('libs')
-
-build_env = env.build_env.Clone()
-
-obj_files = ['device_memory.cpp', 'gpu_allocator.cpp', 'gpu_buffer.cpp']
-build_env.SmartLibrary('gpu_async_memory', obj_files, LIBDEPS=['LLVMSupport'])
-
-build_env.Prepend(LIBDEPS=['gpu_async_memory'])

@@ -35,9 +35,7 @@ class ConcurrentVector {
   // Return the number of elements currently valid in this vector.  The vector
   // only grows, so this is conservative w.r.t. the execution of the current
   // thread.
-  size_t size() const {
-    return State::Decode(mState.load(std::memory_order_relaxed)).size;
-  }
+  size_t size() const { return State::Decode(mState.load(std::memory_order_relaxed)).size; }
 
   // Insert a new element at the end. If the current buffer is full, we allocate
   // a new buffer with twice as much capacity and copy the items in the

@@ -1,9 +1,11 @@
 #include "../support/string_util.h"
 
-#include <iostream>
-#include <vector>
+#include <gtest/gtest-message.h>    // for Message
+#include <gtest/gtest-test-part.h>  // for TestPartResult
 
-#include "gtest/gtest.h"
+#include <vector>  // for vector
+
+#include "gtest/gtest_pred_impl.h"  // for Test, AssertionResult, InitGoogle...
 
 TEST(STRCAT, V1) {
   std::string s = "sss";
@@ -17,5 +19,5 @@ TEST(STRCAT, V1) {
 
 int main(int argc, char* argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
-  (void)RUN_ALL_TESTS();
+  return RUN_ALL_TESTS();
 }

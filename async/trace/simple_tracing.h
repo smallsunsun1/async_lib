@@ -27,10 +27,8 @@ class ScopeTimeInfoUtility {
   TimeInfo mTime;
 
  public:
-  ScopeTimeInfoUtility(std::string name, Time now)
-      : mTime{std::move(name), std::move(now)} {}
-  ScopeTimeInfoUtility(std::string name, Time start, Time end)
-      : mTime{std::move(name), std::move(start), std::move(end)} {}
+  ScopeTimeInfoUtility(std::string name, Time now) : mTime{std::move(name), std::move(now)} {}
+  ScopeTimeInfoUtility(std::string name, Time start, Time end) : mTime{std::move(name), std::move(start), std::move(end)} {}
   static Time Now() { return std::chrono::steady_clock::now(); }
   ~ScopeTimeInfoUtility();
 };

@@ -14,8 +14,7 @@ struct DecodedLocation {
 class Location {
  public:
   Location() = default;
-  Location(const LocationHandler* handler, intptr_t data)
-      : data(data), mHandler(handler) {}
+  Location(const LocationHandler* handler, intptr_t data) : data(data), mHandler(handler) {}
   explicit operator bool() const { return mHandler != nullptr; }
   DecodedLocation Decode() const;
   intptr_t data = 0;

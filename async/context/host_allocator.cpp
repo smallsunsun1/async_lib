@@ -2,7 +2,7 @@
 
 #include <atomic>
 
-#include "../support/alloc.h"
+#include "async/support/alloc.h"
 
 namespace ficus {
 namespace async {
@@ -17,9 +17,7 @@ class MallocAllocator : public HostAllocator {
 };
 
 void HostAllocator::VtableAnchor() {}
-std::unique_ptr<HostAllocator> CreateMallocAllocator() {
-  return std::make_unique<MallocAllocator>();
-}
+std::unique_ptr<HostAllocator> CreateMallocAllocator() { return std::make_unique<MallocAllocator>(); }
 
 }  // namespace async
 }  // namespace ficus

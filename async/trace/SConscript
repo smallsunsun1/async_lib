@@ -1,9 +1,0 @@
-Import('env')
-Import('libs')
-
-build_env = env.build_env.Clone()
-
-obj_files = ['simple_tracing.cpp', 'tracing.cpp']
-build_env.SmartLibrary('async_trace', obj_files, LIBDEPS=['LLVMSupport'])
-
-build_env.Prepend(LIBDEPS=['async_trace'])

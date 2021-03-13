@@ -1,7 +1,7 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_ASYNC_VALUE_REF_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_ASYNC_VALUE_REF_
 
-#include "../support/ref_count.h"
+#include "async/support/ref_count.h"
 #include "async_value.h"
 #include "diagnostic.h"
 #include "location.h"
@@ -16,16 +16,13 @@ class AsyncValueRef {
   AsyncValueRef() = default;
   // Support implicit conversion from AsyncValueRef<Derived> to
   // AsyncValueRef<Base>.
-  template <typename DerivedT,
-            std::enable_if_t<std::is_base_of<T, DerivedT>::value, int> = 0>
+  template <typename DerivedT, std::enable_if_t<std::is_base_of<T, DerivedT>::value, int> = 0>
   AsyncValueRef(AsyncValueRef<DerivedT>&& u) : mValue(u.ReleaseRCRef()) {}
 
-  explicit AsyncValueRef(RCReference<AsyncValue> value)
-      : mValue(std::move(value)) {}
+  explicit AsyncValueRef(RCReference<AsyncValue> value) : mValue(std::move(value)) {}
 
   // Support implicit conversion from RCReference<AsyncValue>.
-  AsyncValueRef(RCReference<ErrorAsyncValue> value)
-      : mValue(std::move(value)) {}
+  AsyncValueRef(RCReference<ErrorAsyncValue> value) : mValue(std::move(value)) {}
 
   AsyncValueRef& operator=(RCReference<ErrorAsyncValue> new_value) {
     mValue = std::move(new_value);
@@ -47,8 +44,7 @@ class AsyncValueRef {
 
   // Return the stored value as a subclass type. The AsyncValueRef must be
   // available.
-  template <typename SubclassT,
-            typename = std::enable_if_t<std::is_base_of<T, SubclassT>::value>>
+  template <typename SubclassT, typename = std::enable_if_t<std::is_base_of<T, SubclassT>::value>>
   SubclassT& get() const {
     return mValue->get<SubclassT>();
   }
@@ -89,20 +85,12 @@ class AsyncValueRef {
   const DecodedDiagnostic& GetError() const { return mValue->GetError(); }
 
   // Returns the underlying error, or nullptr if there is none.
-  const DecodedDiagnostic* GetErrorIfPresent() const {
-    return mValue->GetErrorIfPresent();
-  }
+  const DecodedDiagnostic* GetErrorIfPresent() const { return mValue->GetErrorIfPresent(); }
 
-  void SetError(absl::string_view message) const {
-    return SetError(DecodedDiagnostic{message});
-  }
-  void SetError(DecodedDiagnostic diag) const {
-    mValue->SetError(std::move(diag));
-  }
+  void SetError(absl::string_view message) const { return SetError(DecodedDiagnostic{message}); }
+  void SetError(DecodedDiagnostic diag) const { mValue->SetError(std::move(diag)); }
 
-  void SetError(const absl::Status& error) const {
-    mValue->SetError(DecodedDiagnostic(error));
-  }
+  void SetError(const absl::Status& error) const { mValue->SetError(DecodedDiagnostic(error)); }
 
   explicit operator bool() const { return mValue.get() != nullptr; }
 

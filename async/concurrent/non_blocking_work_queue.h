@@ -1,7 +1,7 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONCURRENT_NON_BLOCKING_WORK_QUEUE_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONCURRENT_NON_BLOCKING_WORK_QUEUE_
 
-#include "../context/task_function.h"
+#include "async/context/task_function.h"
 #include "task_deque.h"
 #include "work_queue_base.h"
 
@@ -20,8 +20,7 @@ struct WorkQueueTraits<NonBlockingWorkQueue<ThreadingEnvironmentTy>> {
 };
 
 template <typename ThreadingEnvironment>
-class NonBlockingWorkQueue
-    : public WorkQueueBase<NonBlockingWorkQueue<ThreadingEnvironment>> {
+class NonBlockingWorkQueue : public WorkQueueBase<NonBlockingWorkQueue<ThreadingEnvironment>> {
   using Base = WorkQueueBase<NonBlockingWorkQueue<ThreadingEnvironment>>;
 
   using Queue = typename Base::Queue;
@@ -59,10 +58,7 @@ class NonBlockingWorkQueue
 };
 
 template <typename ThreadingEnvironment>
-NonBlockingWorkQueue<ThreadingEnvironment>::NonBlockingWorkQueue(
-    QuiescingState* quiescingState, int numThreads)
-    : WorkQueueBase<NonBlockingWorkQueue>(quiescingState, kThreadNamePrefix,
-                                          numThreads) {}
+NonBlockingWorkQueue<ThreadingEnvironment>::NonBlockingWorkQueue(QuiescingState* quiescingState, int numThreads) : WorkQueueBase<NonBlockingWorkQueue>(quiescingState, kThreadNamePrefix, numThreads) {}
 
 template <typename ThreadingEnvironment>
 void NonBlockingWorkQueue<ThreadingEnvironment>::AddTask(TaskFunction task) {
@@ -110,22 +106,19 @@ void NonBlockingWorkQueue<ThreadingEnvironment>::AddTask(TaskFunction task) {
   // program, that is, this is kept alive while any threads can potentially be
   // in Schedule.
   if (!inlineTask.has_value()) {
-    if (!skipNotify && IsNotifyParkedThreadRequired())
-      mEventCount.Notify(/*notify_all=*/false);
+    if (!skipNotify && IsNotifyParkedThreadRequired()) mEventCount.Notify(/*notify_all=*/false);
   } else {
     (*inlineTask)();  // Push failed, execute directly.
   }
 }
 
 template <typename ThreadingEnvironment>
-absl::optional<TaskFunction>
-NonBlockingWorkQueue<ThreadingEnvironment>::NextTask(Queue* queue) {
+absl::optional<TaskFunction> NonBlockingWorkQueue<ThreadingEnvironment>::NextTask(Queue* queue) {
   return queue->PopFront();
 }
 
 template <typename ThreadingEnvironment>
-absl::optional<TaskFunction> NonBlockingWorkQueue<ThreadingEnvironment>::Steal(
-    Queue* queue) {
+absl::optional<TaskFunction> NonBlockingWorkQueue<ThreadingEnvironment>::Steal(Queue* queue) {
   return queue->PopBack();
 }
 
