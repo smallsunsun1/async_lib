@@ -1,0 +1,2 @@
+add_executable(end2end_test_v1 end2end_test_v1.cpp)
+target_link_libraries(end2end_test_v1 PRIVATE async_context async_runtime)
