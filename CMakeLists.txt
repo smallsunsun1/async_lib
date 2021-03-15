@@ -12,9 +12,10 @@ set(CMAKE_PREFIX_PATH libs/)
 
 add_definitions(-DEIGEN_USE_THREADS)
 
+set(CMAKE_CXX_FLAGS "")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -flto")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 
 option(USE_ASAN "variable which indicate whether to use address sanitizer" OFF)
 option(USE_CUDA "variable which indicate whether to build with cuda" OFF)
@@ -29,7 +30,7 @@ endif()
 if(USE_CXX_20)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -fcoroutines")
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+    set(CMAKE_CXX_STANDARD 14)
 endif()
 
 

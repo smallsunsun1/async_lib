@@ -33,6 +33,8 @@ class TensorTraits: {
     static const TensorDtype kTensorDtype;
     static bool classof(Tensor* v) {return v->isTensorType(kTensorDtype);}
 };
+template <typename Derived>
+const 
 
 }
 }
