@@ -1,19 +1,20 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_LATCH_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_LATCH_
 
-#include <atomic>
-#include <cassert>
-#include <condition_variable>
-#include <cstddef>
-#include <mutex>
+#include <stdint.h>  // for uint64_t
+
+#include <atomic>              // for atomic
+#include <cassert>             // for assert
+#include <condition_variable>  // for condition_variable
+#include <cstddef>             // for ptrdiff_t
+#include <mutex>               // for mutex, lock_guard, unique_lock
 
 namespace ficus {
 namespace async {
 
 class latch {
  public:
-  explicit latch(std::ptrdiff_t count)
-      : state_(static_cast<uint64_t>(count) << 1), notified_(false) {
+  explicit latch(std::ptrdiff_t count) : state_(static_cast<uint64_t>(count) << 1), notified_(false) {
     assert(count >= 0);
     assert(static_cast<uint64_t>(count) < (1ull << 63));
   }

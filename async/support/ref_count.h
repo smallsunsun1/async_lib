@@ -11,15 +11,9 @@ namespace ficus {
 namespace async {
 #ifndef NDEBUG
 extern std::atomic<size_t> total_reference_counter_objects;
-inline size_t GetNumReferenceCountedObjects() {
-  return total_reference_counter_objects.load(std::memory_order_relaxed);
-}
-inline void AddNumReferenceCountedObjects() {
-  total_reference_counter_objects.fetch_add(1, std::memory_order_relaxed);
-}
-inline void DropNumReferenceCountedObjects() {
-  total_reference_counter_objects.fetch_sub(1, std::memory_order_relaxed);
-}
+inline size_t GetNumReferenceCountedObjects() { return total_reference_counter_objects.load(std::memory_order_relaxed); }
+inline void AddNumReferenceCountedObjects() { total_reference_counter_objects.fetch_add(1, std::memory_order_relaxed); }
+inline void DropNumReferenceCountedObjects() { total_reference_counter_objects.fetch_sub(1, std::memory_order_relaxed); }
 #else
 inline void AddNumReferenceCountedObjects() {}
 inline void DropNumReferenceCountedObjects() {}
@@ -29,8 +23,7 @@ class ReferenceCounted {
  public:
   ReferenceCounted() : mRefCounted(1) { AddNumReferenceCountedObjects(); }
   ~ReferenceCounted() {
-    assert(mRefCounted.load() == 0 &&
-           "Shouldn't destroy a reference counted object with references!");
+    assert(mRefCounted.load() == 0 && "Shouldn't destroy a reference counted object with references!");
     DropNumReferenceCountedObjects();
   }
   // 不能拷贝
@@ -52,11 +45,8 @@ template <typename T>
 class RCReference {
  public:
   RCReference() : mPointer(nullptr) {}
-  RCReference(RCReference&& other) : mPointer(other.mPointer) {
-    other.mPointer = nullptr;
-  }
-  template <typename U,
-            typename = std::enable_if_t<std::is_base_of<T, U>::value>>
+  RCReference(RCReference&& other) : mPointer(other.mPointer) { other.mPointer = nullptr; }
+  template <typename U, typename = std::enable_if_t<std::is_base_of<T, U>::value>>
   RCReference(RCReference<U>&& u) : mPointer(u.mPointer) {
     u.mPointer = nullptr;
   }

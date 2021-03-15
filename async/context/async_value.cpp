@@ -9,8 +9,7 @@ namespace ficus {
 namespace async {
 class NotifierListNode {
  public:
-  explicit NotifierListNode(unique_function<void()> notification)
-      : mNext(nullptr), mNotification(std::move(notification)) {}
+  explicit NotifierListNode(unique_function<void()> notification) : mNext(nullptr), mNotification(std::move(notification)) {}
 
  private:
   friend class AsyncValue;
@@ -21,8 +20,7 @@ uint16_t AsyncValue::CreateTypeInfoAndReturnTypeIdImpl(Destructor destructor) {
   TypeInfo typeInfo{destructor};
   size_t typeId = GetTypeInfoTableSingleton()->emplace_back(typeInfo) + 1;
   // Detect overflow.
-  assert(typeId < std::numeric_limits<uint16_t>::max() &&
-         "Too many different AsyncValue types.");
+  assert(typeId < std::numeric_limits<uint16_t>::max() && "Too many different AsyncValue types.");
   return typeId;
 }
 AsyncValue::TypeInfoTable* AsyncValue::GetTypeInfoTableSingleton() {
@@ -57,17 +55,14 @@ void AsyncValue::Destroy() {
 // need to change our state and clear out the notifications. The current state
 // must be unavailable (i.e. kUnconstructed or kConstructed).
 void AsyncValue::NotifyAvailable(State availableState) {
-  assert((kind() == Kind::kConcrete || kind() == Kind::kIndirect) &&
-         "Should only be used by ConcreteAsyncValue or IndirectAsyncValue");
+  assert((kind() == Kind::kConcrete || kind() == Kind::kIndirect) && "Should only be used by ConcreteAsyncValue or IndirectAsyncValue");
 
   assert(availableState == State::kConcrete || availableState == State::kError);
 
   // Mark the value as available, ensuring that new queries for the state see
   // the value that got filled in.
-  auto oldValue = mWaitersAndState.exchange(
-      WaitersAndState(nullptr, availableState), std::memory_order_acq_rel);
-  assert(oldValue.getInt() == State::kUnconstructed ||
-         oldValue.getInt() == State::kConstructed);
+  auto oldValue = mWaitersAndState.exchange(WaitersAndState(nullptr, availableState), std::memory_order_acq_rel);
+  assert(oldValue.getInt() == State::kUnconstructed || oldValue.getInt() == State::kConstructed);
 
   RunWaiters(oldValue.getPointer());
 }
@@ -87,8 +82,7 @@ void AsyncValue::RunWaiters(NotifierListNode* list) {
 // If the value is available or becomes available, this calls the closure
 // immediately. Otherwise, the add closure to the waiter list where it will be
 // called when the value becomes available.
-void AsyncValue::EnqueueWaiter(unique_function<void()>&& waiter,
-                               WaitersAndState oldValue) {
+void AsyncValue::EnqueueWaiter(unique_function<void()>&& waiter, WaitersAndState oldValue) {
   // Create the node for our waiter.
   auto* node = GetHostContext()->Construct<NotifierListNode>(std::move(waiter));
   auto old_state = oldValue.getInt();
@@ -100,13 +94,10 @@ void AsyncValue::EnqueueWaiter(unique_function<void()>&& waiter,
   // appear to happen before it's added to the list.
   node->mNext = oldValue.getPointer();
   auto new_value = WaitersAndState(node, old_state);
-  while (!mWaitersAndState.compare_exchange_weak(oldValue, new_value,
-                                                 std::memory_order_acq_rel,
-                                                 std::memory_order_acquire)) {
+  while (!mWaitersAndState.compare_exchange_weak(oldValue, new_value, std::memory_order_acq_rel, std::memory_order_acquire)) {
     // While swapping in our waiter, the value could have become available.  If
     // so, just run the waiter.
-    if (oldValue.getInt() == State::kConcrete ||
-        oldValue.getInt() == State::kError) {
+    if (oldValue.getInt() == State::kConcrete || oldValue.getInt() == State::kError) {
       assert(oldValue.getPointer() == nullptr);
       node->mNext = nullptr;
       RunWaiters(node);
@@ -118,8 +109,7 @@ void AsyncValue::EnqueueWaiter(unique_function<void()>&& waiter,
 
   // compare_exchange_weak succeeds. The oldValue must be in either
   // kUnconstructed or kConstructed state.
-  assert(oldValue.getInt() == State::kUnconstructed ||
-         oldValue.getInt() == State::kConstructed);
+  assert(oldValue.getInt() == State::kUnconstructed || oldValue.getInt() == State::kConstructed);
 }
 
 void AsyncValue::SetError(DecodedDiagnostic diag_in) {
@@ -133,8 +123,7 @@ void AsyncValue::SetError(DecodedDiagnostic diag_in) {
       GetTypeInfo().destructor(this, /*destroys_object=*/false);
     }
     char* thisPtr = reinterpret_cast<char*>(this);
-    auto& error = *reinterpret_cast<DecodedDiagnostic**>(
-        thisPtr + AsyncValue::kDataOrErrorOffset);
+    auto& error = *reinterpret_cast<DecodedDiagnostic**>(thisPtr + AsyncValue::kDataOrErrorOffset);
     error = new DecodedDiagnostic(std::move(diag_in));
     NotifyAvailable(State::kError);
   } else {
@@ -173,10 +162,7 @@ void IndirectAsyncValue::ForwardTo(RCReference<AsyncValue> value) {
     // Copy value here because the evaluation order of
     // value->AndThen(std::move(value)) is not defined prior to C++17.
     AsyncValue* value2 = value.get();
-    value2->AndThen(
-        [this2 = FormRef(this), value2 = std::move(value)]() mutable {
-          this2->ForwardTo(std::move(value2));
-        });
+    value2->AndThen([this2 = FormRef(this), value2 = std::move(value)]() mutable { this2->ForwardTo(std::move(value2)); });
   }
 }
 

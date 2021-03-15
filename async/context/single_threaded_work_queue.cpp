@@ -2,10 +2,10 @@
 #include <mutex>
 #include <vector>
 
-#include "../concurrent/concurrent_work_queue.h"
+#include "async/concurrent/concurrent_work_queue.h"
+#include "async_value.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
 #include "third_party/abseil-cpp/absl/types/span.h"
-#include "async_value.h"
 
 namespace ficus {
 namespace async {
@@ -15,8 +15,7 @@ class SingleThreadedWorkQueue : public ConcurrentWorkQueue {
   SingleThreadedWorkQueue() {}
   std::string name() const override { return "single-threaded"; }
   void AddTask(TaskFunction work) override;
-  absl::optional<TaskFunction> AddBlockingTask(TaskFunction work,
-                                               bool allow_queuing) override;
+  absl::optional<TaskFunction> AddBlockingTask(TaskFunction work, bool allow_queuing) override;
   void Quiesce() override;
   void Await(absl::Span<const RCReference<AsyncValue>> values) override;
   int GetParallelismLevel() const override { return 1; }
@@ -35,8 +34,7 @@ void SingleThreadedWorkQueue::AddTask(TaskFunction work) {
   }
   mCv.notify_all();
 }
-absl::optional<TaskFunction> SingleThreadedWorkQueue::AddBlockingTask(
-    TaskFunction work, bool allow_queuing) {
+absl::optional<TaskFunction> SingleThreadedWorkQueue::AddBlockingTask(TaskFunction work, bool allow_queuing) {
   if (!allow_queuing) return {std::move(work)};
   {
     std::lock_guard<std::mutex> l(mMu);
@@ -60,8 +58,7 @@ void SingleThreadedWorkQueue::Quiesce() {
     local_work_items.clear();
   }
 }
-void SingleThreadedWorkQueue::Await(
-    absl::Span<const RCReference<AsyncValue>> values) {
+void SingleThreadedWorkQueue::Await(absl::Span<const RCReference<AsyncValue>> values) {
   int values_remaining = values.size();
   for (auto& value : values) {
     value->AndThen([this, &values_remaining]() mutable {
@@ -76,9 +73,7 @@ void SingleThreadedWorkQueue::Await(
     std::lock_guard<std::mutex> l(mMu);
     return values_remaining != 0;
   };
-  auto no_items_and_values_remaining = [this, &values_remaining]() -> bool {
-    return values_remaining != 0 && mWorkItems.empty();
-  };
+  auto no_items_and_values_remaining = [this, &values_remaining]() -> bool { return values_remaining != 0 && mWorkItems.empty(); };
   std::vector<TaskFunction> local_work_items;
   int next_work_item_index = 0;
   while (has_values()) {
@@ -99,16 +94,11 @@ void SingleThreadedWorkQueue::Await(
   }
   if (next_work_item_index != local_work_items.size()) {
     std::lock_guard<std::mutex> l(mMu);
-    mWorkItems.insert(mWorkItems.begin(),
-                      std::make_move_iterator(local_work_items.begin() +
-                                              next_work_item_index),
-                      std::make_move_iterator(local_work_items.end()));
+    mWorkItems.insert(mWorkItems.begin(), std::make_move_iterator(local_work_items.begin() + next_work_item_index), std::make_move_iterator(local_work_items.end()));
   }
 }
 
-std::unique_ptr<ConcurrentWorkQueue> CreateSingleThreadedWorkQueue() {
-  return std::make_unique<SingleThreadedWorkQueue>();
-}
+std::unique_ptr<ConcurrentWorkQueue> CreateSingleThreadedWorkQueue() { return std::make_unique<SingleThreadedWorkQueue>(); }
 
 }  // namespace async
 }  // namespace ficus

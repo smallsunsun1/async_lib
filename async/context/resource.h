@@ -1,15 +1,18 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_RESOURCE_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_RESOURCE_
 
-#include <memory>
-#include <mutex>
-#include <unordered_map>
+#include <assert.h>  // for assert
 
-#include "../support/type_traits.h"
-#include "third_party/abseil-cpp/absl/strings/string_view.h"
-#include "third_party/abseil-cpp/absl/types/any.h"
-#include "third_party/abseil-cpp/absl/types/optional.h"
-#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
+#include <memory>
+#include <mutex>  // for mutex
+#include <unordered_map>
+#include <utility>  // for for...
+
+#include "async/support/type_traits.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"  // for fla...
+#include "third_party/abseil-cpp/absl/strings/string_view.h"      // for str...
+#include "third_party/abseil-cpp/absl/types/any.h"                // for any...
+#include "third_party/abseil-cpp/absl/types/optional.h"           // for nul...
 
 namespace ficus {
 namespace async {
@@ -37,15 +40,13 @@ class ResourceManager {
   template <typename T, typename... Args>
   T* GetOrCreateResource(absl::string_view name, Args&&... args) {
     std::lock_guard<std::mutex> lock(mMu);
-    auto res =
-        mResource.try_emplace(name, TypeTag<T>(), std::forward<Args>(args)...);
+    auto res = mResource.try_emplace(name, absl::make_any<T>(std::forward<Args>(args)...));
     return absl::any_cast<T>(&res.first->second);
   }
   template <typename T, typename... Args>
   T* CreateResource(absl::string_view name, Args&&... args) {
     std::lock_guard<std::mutex> lock(mMu);
-    auto res =
-        mResource.try_emplace(name, TypeTag<T>(), std::forward<Args>(args)...);
+    auto res = mResource.try_emplace(name, absl::make_any<T>(std::forward<Args>(args)...));
     return absl::any_cast<T>(&res.first->second);
   }
   void DeleteResource(absl::string_view name) {

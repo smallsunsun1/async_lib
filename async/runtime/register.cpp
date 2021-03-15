@@ -3,8 +3,7 @@
 namespace ficus {
 namespace async {
 
-void KernelFnRegister::InsertKernelFn(absl::string_view name,
-                                      AsyncKernelFn fn) {
+void KernelFnRegister::InsertKernelFn(absl::string_view name, AsyncKernelFn fn) {
   if (mFuncLibs.find(name) != mFuncLibs.end()) {
     assert(false && "Current Function Already Exist!");
   }
@@ -18,8 +17,7 @@ void KernelFnRegister::RemoveKernelFn(absl::string_view name) {
   }
 }
 
-absl::optional<AsyncKernelFn> KernelFnRegister::GetKernelFn(
-    absl::string_view name) {
+absl::optional<AsyncKernelFn> KernelFnRegister::GetKernelFn(absl::string_view name) {
   if (mFuncLibs.find(name) == mFuncLibs.end()) {
     return absl::nullopt;
   }

@@ -1,14 +1,14 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_STRING_UTIL_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_STRING_UTIL_
 
-#include <sstream>
-#include <string>
-#include <vector>
+#include <sstream>  // for basic_ostream::operator<<, operator<<, stringstream
+#include <string>   // for string, operator<<
+#include <utility>  // for forward
+#include <vector>   // for vector
 
 namespace ficus {
 namespace async {
-std::vector<std::string> StrSplit(const std::string& s,
-                                  const std::string& delimer);
+std::vector<std::string> StrSplit(const std::string& s, const std::string& delimer);
 
 // TODO(jhsun) 效率较低的实现，后续为了提升字符串操作效率需要使用新的StrCat实现
 template <typename T>

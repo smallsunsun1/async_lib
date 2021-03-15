@@ -7,9 +7,9 @@
 #include <string>
 #include <type_traits>
 
-#include "../support/concurrent_vector.h"
-#include "../support/ref_count.h"
-#include "../support/unique_function.h"
+#include "async/support/concurrent_vector.h"
+#include "async/support/ref_count.h"
+#include "async/support/unique_function.h"
 #include "diagnostic.h"
 #include "host_context_ptr.h"
 #include "location.h"
@@ -139,8 +139,7 @@ class AsyncValue {
   /// process. This is intended for debugging/assertions only, and shouldn't be
   /// used for mainline logic in the runtime.
   static ssize_t GetNumAsyncValueInstances() {
-    assert(AsyncValueAllocationTrackingEnabled() &&
-           "AsyncValue instance tracking disabled!");
+    assert(AsyncValueAllocationTrackingEnabled() && "AsyncValue instance tracking disabled!");
     return total_allocated_async_values_.load(std::memory_order_relaxed);
   }
 
@@ -213,9 +212,7 @@ class AsyncValue {
   };
 
   // Return which state this AsyncValue is in.
-  State state() const {
-    return mWaitersAndState.load(std::memory_order_acquire).getInt();
-  }
+  State state() const { return mWaitersAndState.load(std::memory_order_acquire).getInt(); }
 
  protected:
   // -----------------------------------------------------------
@@ -230,23 +227,12 @@ class AsyncValue {
 
   template <typename T>
   AsyncValue(HostContextPtr host, Kind kind, State state, TypeTag<T>)
-      : mHostContext(host),
-        mKind(kind),
-        mHasVtable(std::is_polymorphic<T>()),
-        mTypeId(GetTypeId<T>()),
-        mWaitersAndState(WaitersAndState(nullptr, state)) {
-    if (AsyncValueAllocationTrackingEnabled())
-      total_allocated_async_values_.fetch_add(1, std::memory_order_relaxed);
+      : mHostContext(host), mKind(kind), mHasVtable(std::is_polymorphic<T>()), mTypeId(GetTypeId<T>()), mWaitersAndState(WaitersAndState(nullptr, state)) {
+    if (AsyncValueAllocationTrackingEnabled()) total_allocated_async_values_.fetch_add(1, std::memory_order_relaxed);
   }
 
-  AsyncValue(HostContextPtr host, Kind kind, State state)
-      : mHostContext(host),
-        mKind(kind),
-        mHasVtable(false),
-        mTypeId(0),
-        mWaitersAndState(WaitersAndState(nullptr, state)) {
-    if (AsyncValueAllocationTrackingEnabled())
-      total_allocated_async_values_.fetch_add(1, std::memory_order_relaxed);
+  AsyncValue(HostContextPtr host, Kind kind, State state) : mHostContext(host), mKind(kind), mHasVtable(false), mTypeId(0), mWaitersAndState(WaitersAndState(nullptr, state)) {
+    if (AsyncValueAllocationTrackingEnabled()) total_allocated_async_values_.fetch_add(1, std::memory_order_relaxed);
   }
 
   AsyncValue(const AsyncValue&) = delete;
@@ -266,16 +252,14 @@ class AsyncValue {
   // safely cast to `T`. This means it is useful mainly as a debugging aid for
   // use in assert() etc.
 
-  template <typename T,
-            typename std::enable_if<internal::kMaybeBase<T>>::type* = nullptr>
+  template <typename T, typename std::enable_if<internal::kMaybeBase<T>>::type* = nullptr>
   bool IsTypeIdCompatible() const {
     // We can't do a GetTypeId<T> in this case because `T` might be an abstract
     // class.  So we conservatively return true.
     return true;
   }
 
-  template <typename T,
-            typename std::enable_if<!internal::kMaybeBase<T>>::type* = nullptr>
+  template <typename T, typename std::enable_if<!internal::kMaybeBase<T>>::type* = nullptr>
   bool IsTypeIdCompatible() const {
     return GetTypeId<T>() == mTypeId;
   }
@@ -296,8 +280,7 @@ class AsyncValue {
   // ConcreteAsyncValue concreate_type_id_ field.
   template <typename T>
   static uint16_t CreateTypeInfoAndReturnTypeId() {
-    return CreateTypeInfoAndReturnTypeIdImpl(
-        DestructorFn<internal::ConcreteAsyncValue<T>>);
+    return CreateTypeInfoAndReturnTypeIdImpl(DestructorFn<internal::ConcreteAsyncValue<T>>);
   }
 
   static uint16_t CreateTypeInfoAndReturnTypeIdImpl(Destructor destructor);
@@ -319,13 +302,9 @@ class AsyncValue {
 
   struct NotifierListNodePointerTraits {
     static inline void* getAsVoidPointer(NotifierListNode* ptr) { return ptr; }
-    static inline NotifierListNode* getFromVoidPointer(void* ptr) {
-      return static_cast<NotifierListNode*>(ptr);
-    }
+    static inline NotifierListNode* getFromVoidPointer(void* ptr) { return static_cast<NotifierListNode*>(ptr); }
     // NotifierListNode has an alignment of at least alignof(void*).
-    enum {
-      NumLowBitsAvailable = PointerLikeTypeTraits<void**>::NumLowBitsAvailable
-    };
+    enum { NumLowBitsAvailable = PointerLikeTypeTraits<void**>::NumLowBitsAvailable };
   };
 
   // The waiter list and the state are compacted into one single atomic word as
@@ -337,8 +316,7 @@ class AsyncValue {
   //
   // Invariant: If the state is not available, then the waiter list must be
   // nullptr.
-  using WaitersAndState = PointerIntPair<NotifierListNode*, 2, State::StateEnum,
-                                         NotifierListNodePointerTraits>;
+  using WaitersAndState = PointerIntPair<NotifierListNode*, 2, State::StateEnum, NotifierListNodePointerTraits>;
   std::atomic<WaitersAndState> mWaitersAndState;
 
   /// We assume (and static_assert) that this is the offset of
@@ -380,8 +358,7 @@ class AsyncValue {
   // Returns the TypeInfoTable instance (there is one per process).
   static TypeInfoTable* GetTypeInfoTableSingleton();
 
-  void EnqueueWaiter(unique_function<void()>&& waiter,
-                     WaitersAndState oldValue);
+  void EnqueueWaiter(unique_function<void()>&& waiter, WaitersAndState oldValue);
 
   /// This is a global counter of the number of AsyncValue instances currently
   /// live in the process.  This is intended to be used for debugging only, and
@@ -391,8 +368,7 @@ class AsyncValue {
 };
 
 // We only optimize the code for 64-bit architectures for now.
-static_assert(sizeof(AsyncValue) == 16 || sizeof(void*) != 8,
-              "Unexpected size for AsyncValue");
+static_assert(sizeof(AsyncValue) == 16 || sizeof(void*) != 8, "Unexpected size for AsyncValue");
 
 namespace internal {
 // Subclass for storing the payload of the AsyncValue
@@ -412,31 +388,23 @@ class ConcreteAsyncValue : public AsyncValue {
   struct ConcretePayload {};
 
   // Make a ConcreteAsyncValue with kUnconstructed state.
-  explicit ConcreteAsyncValue(HostContextPtr host, UnconstructedPayload)
-      : AsyncValue(host, Kind::kConcrete, State::kUnconstructed, TypeTag<T>()) {
-    VerifyOffsets();
-  }
+  explicit ConcreteAsyncValue(HostContextPtr host, UnconstructedPayload) : AsyncValue(host, Kind::kConcrete, State::kUnconstructed, TypeTag<T>()) { VerifyOffsets(); }
 
   // Make a ConcreteAsyncValue with kError state.
-  explicit ConcreteAsyncValue(HostContextPtr host, DecodedDiagnostic diagnostic)
-      : AsyncValue(host, Kind::kConcrete, State::kError, TypeTag<T>()) {
+  explicit ConcreteAsyncValue(HostContextPtr host, DecodedDiagnostic diagnostic) : AsyncValue(host, Kind::kConcrete, State::kError, TypeTag<T>()) {
     mError = new DecodedDiagnostic(std::move(diagnostic));
     VerifyOffsets();
   }
 
   // Make a ConcreteAsyncValue with kConstructed state.
   template <typename... Args>
-  explicit ConcreteAsyncValue(HostContextPtr host, ConstructedPayload,
-                              Args&&... args)
-      : AsyncValue(host, Kind::kConcrete, State::kConstructed, TypeTag<T>()) {
+  explicit ConcreteAsyncValue(HostContextPtr host, ConstructedPayload, Args&&... args) : AsyncValue(host, Kind::kConcrete, State::kConstructed, TypeTag<T>()) {
     new (&mData) T(std::forward<Args>(args)...);
   }
 
   // Make a ConcreteAsyncValue with kConcrete state.
   template <typename... Args>
-  explicit ConcreteAsyncValue(HostContextPtr host, ConcretePayload,
-                              Args&&... args)
-      : AsyncValue(host, Kind::kConcrete, State::kConcrete, TypeTag<T>()) {
+  explicit ConcreteAsyncValue(HostContextPtr host, ConcretePayload, Args&&... args) : AsyncValue(host, Kind::kConcrete, State::kConcrete, TypeTag<T>()) {
     new (&mData) T(std::forward<Args>(args)...);
   }
 
@@ -476,9 +444,7 @@ class ConcreteAsyncValue : public AsyncValue {
     NotifyAvailable(State::kConcrete);
   }
 
-  static bool classof(const AsyncValue* v) {
-    return v->kind() == AsyncValue::Kind::kConcrete;
-  }
+  static bool classof(const AsyncValue* v) { return v->kind() == AsyncValue::Kind::kConcrete; }
 
  private:
   friend class AsyncValue;
@@ -498,12 +464,10 @@ class ConcreteAsyncValue : public AsyncValue {
   }
 
   static void VerifyOffsets() {
-    static_assert(offsetof(ConcreteAsyncValue<T>, mData) ==
-                      AsyncValue::kDataOrErrorOffset,
+    static_assert(offsetof(ConcreteAsyncValue<T>, mData) == AsyncValue::kDataOrErrorOffset,
                   "Offset of ConcreteAsyncValue::mData is assumed to be "
                   "AsyncValue::kDataOrErrorOffset == 16");
-    static_assert(offsetof(ConcreteAsyncValue<T>, mError) ==
-                      AsyncValue::kDataOrErrorOffset,
+    static_assert(offsetof(ConcreteAsyncValue<T>, mError) == AsyncValue::kDataOrErrorOffset,
                   "Offset of ConcreteAsyncValue::mError is assumed to be "
                   "AsyncValue::kDataOrErrorOffset == 16");
   }
@@ -512,18 +476,14 @@ class ConcreteAsyncValue : public AsyncValue {
 };
 
 template <typename T>
-const uint16_t ConcreteAsyncValue<T>::concrete_type_id_ =
-    AsyncValue::CreateTypeInfoAndReturnTypeId<T>();
+const uint16_t ConcreteAsyncValue<T>::concrete_type_id_ = AsyncValue::CreateTypeInfoAndReturnTypeId<T>();
 }  // namespace internal
 
 struct DummyValueForErrorAsyncValue {};
 
-class ErrorAsyncValue
-    : public internal::ConcreteAsyncValue<DummyValueForErrorAsyncValue> {
+class ErrorAsyncValue : public internal::ConcreteAsyncValue<DummyValueForErrorAsyncValue> {
  public:
-  ErrorAsyncValue(HostContextPtr host, DecodedDiagnostic diagnostic)
-      : internal::ConcreteAsyncValue<DummyValueForErrorAsyncValue>(
-            host, std::move(diagnostic)) {}
+  ErrorAsyncValue(HostContextPtr host, DecodedDiagnostic diagnostic) : internal::ConcreteAsyncValue<DummyValueForErrorAsyncValue>(host, std::move(diagnostic)) {}
 };
 
 // IndirectAsyncValue represents an uncomputed AsyncValue of unspecified kind
@@ -534,22 +494,17 @@ class IndirectAsyncValue : public AsyncValue {
   friend class AsyncValue;
 
  public:
-  explicit IndirectAsyncValue(HostContextPtr host)
-      : AsyncValue(host, Kind::kIndirect, State::kUnconstructed) {}
+  explicit IndirectAsyncValue(HostContextPtr host) : AsyncValue(host, Kind::kIndirect, State::kUnconstructed) {}
 
   IndirectAsyncValue* AddRef() { return AddRef(1); }
-  IndirectAsyncValue* AddRef(uint32_t count) {
-    return static_cast<IndirectAsyncValue*>(AsyncValue::AddRef(count));
-  }
+  IndirectAsyncValue* AddRef(uint32_t count) { return static_cast<IndirectAsyncValue*>(AsyncValue::AddRef(count)); }
 
   // Mark this IndirectAsyncValue as forwarding to the specified value. This
   // gives the IndirectAsyncValue a +1 reference.
   // This method must be called at most once.
   void ForwardTo(RCReference<AsyncValue> value);
 
-  static bool classof(const AsyncValue* v) {
-    return v->kind() == AsyncValue::Kind::kIndirect;
-  }
+  static bool classof(const AsyncValue* v) { return v->kind() == AsyncValue::Kind::kIndirect; }
 
  private:
   ~IndirectAsyncValue() { Destroy(); }
@@ -568,10 +523,8 @@ class IndirectAsyncValue : public AsyncValue {
 // Implementation details follow.  Clients should ignore them.
 //
 inline AsyncValue::~AsyncValue() {
-  assert(mWaitersAndState.load().getPointer() == nullptr &&
-         "An async value with waiters should never have refcount of zero");
-  if (AsyncValueAllocationTrackingEnabled())
-    total_allocated_async_values_.fetch_sub(1, std::memory_order_relaxed);
+  assert(mWaitersAndState.load().getPointer() == nullptr && "An async value with waiters should never have refcount of zero");
+  if (AsyncValueAllocationTrackingEnabled()) total_allocated_async_values_.fetch_sub(1, std::memory_order_relaxed);
 
   // Catch use-after-free errors more eagerly, by triggering the size assertion
   // in the 'get' accessor.
@@ -585,23 +538,15 @@ inline bool AsyncValue::IsAvailable() const {
 
 inline bool AsyncValue::IsError() const { return state() == State::kError; }
 
-inline bool AsyncValue::IsUnconstructed() const {
-  return state() == State::kUnconstructed;
-}
+inline bool AsyncValue::IsUnconstructed() const { return state() == State::kUnconstructed; }
 
-inline bool AsyncValue::IsConstructed() const {
-  return state() == State::kConstructed;
-}
+inline bool AsyncValue::IsConstructed() const { return state() == State::kConstructed; }
 
-inline bool AsyncValue::IsConcrete() const {
-  return state() == State::kConcrete;
-}
+inline bool AsyncValue::IsConcrete() const { return state() == State::kConcrete; }
 
 // Return true if this is an IndirectAsyncValue that hasn't been resolved.
 // Currently an IndirectAsyncValue is available if and only if it is resolved.
-inline bool AsyncValue::IsUnresolvedIndirect() const {
-  return IsUnavailable() && (kind() == Kind::kIndirect);
-}
+inline bool AsyncValue::IsUnresolvedIndirect() const { return IsUnavailable() && (kind() == Kind::kIndirect); }
 
 inline AsyncValue* AsyncValue::AddRef(uint32_t count) {
   if (count > 0) {
@@ -652,12 +597,10 @@ const T& AsyncValue::get() const {
 
   switch (kind()) {
     case Kind::kConcrete:
-      assert((s == State::kConstructed || s == State::kConcrete) &&
-             "Cannot call get() when ConcreteAsyncValue isn't constructed.");
+      assert((s == State::kConstructed || s == State::kConcrete) && "Cannot call get() when ConcreteAsyncValue isn't constructed.");
       return GetConcreteValue<T>();
     case Kind::kIndirect:
-      assert(s == State::kConcrete &&
-             "Cannot call get() when IndirectAsyncValue isn't ok.");
+      assert(s == State::kConcrete && "Cannot call get() when IndirectAsyncValue isn't ok.");
       auto* ivValue = static_cast<const IndirectAsyncValue*>(this)->mValue;
       assert(ivValue && "Indirect value not resolved");
       return ivValue->get<T>();
@@ -679,8 +622,7 @@ void AsyncValue::emplace(Args&&... args) {
   assert(GetTypeId<T>() == mTypeId && "Incorrect accessor");
   assert(IsUnconstructed() && kind() == Kind::kConcrete);
 
-  static_cast<internal::ConcreteAsyncValue<T>*>(this)->emplace(
-      std::forward<Args>(args)...);
+  static_cast<internal::ConcreteAsyncValue<T>*>(this)->emplace(std::forward<Args>(args)...);
 }
 
 // Returns the underlying error, or nullptr if there is none.
@@ -690,8 +632,7 @@ inline const DecodedDiagnostic* AsyncValue::GetErrorIfPresent() const {
       if (state() != State::kError) return nullptr;
 
       const char* thisPtr = reinterpret_cast<const char*>(this);
-      return *reinterpret_cast<const DecodedDiagnostic* const*>(
-          thisPtr + AsyncValue::kDataOrErrorOffset);
+      return *reinterpret_cast<const DecodedDiagnostic* const*>(thisPtr + AsyncValue::kDataOrErrorOffset);
     }
     case Kind::kIndirect: {
       auto* ivValue = static_cast<const IndirectAsyncValue*>(this)->mValue;
@@ -716,8 +657,7 @@ void AsyncValue::AndThen(WaiterT&& waiter) {
   // to see if the value is present. Check for them, and immediately run the
   // lambda if it is already here.
   auto oldValue = mWaitersAndState.load(std::memory_order_acquire);
-  if (oldValue.getInt() == State::kConcrete ||
-      oldValue.getInt() == State::kError) {
+  if (oldValue.getInt() == State::kConcrete || oldValue.getInt() == State::kError) {
     assert(oldValue.getPointer() == nullptr);
     waiter();
     return;

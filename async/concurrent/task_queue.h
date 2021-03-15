@@ -7,7 +7,7 @@
 #include <limits>
 #include <mutex>
 
-#include "../context/task_function.h"
+#include "async/context/task_function.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
 
 namespace ficus {
@@ -18,10 +18,8 @@ class TaskQueue {
  public:
   static const unsigned kCapacity = 1024;
 
-  static_assert((kCapacity > 2) && (kCapacity <= (64u << 10u)),
-                "TaskQueue capacity must be in [4, 65536] range");
-  static_assert((kCapacity & (kCapacity - 1)) == 0,
-                "TaskQueue capacity must be a power of two for fast masking");
+  static_assert((kCapacity > 2) && (kCapacity <= (64u << 10u)), "TaskQueue capacity must be in [4, 65536] range");
+  static_assert((kCapacity & (kCapacity - 1)) == 0, "TaskQueue capacity must be a power of two for fast masking");
 
   TaskQueue() : mFront(0), mBack(0) {
     for (unsigned i = 0; i < kCapacity; ++i) mArray[i].state.store(i);
@@ -46,8 +44,7 @@ class TaskQueue {
       int64_t diff = static_cast<int64_t>(state) - static_cast<int64_t>(front);
 
       // Try to acquire an ownership of element at `front`.
-      if (diff == 0 && mFront.compare_exchange_strong(
-                           front, front + 1, std::memory_order_relaxed)) {
+      if (diff == 0 && mFront.compare_exchange_strong(front, front + 1, std::memory_order_relaxed)) {
         break;
       }
 
@@ -75,12 +72,10 @@ class TaskQueue {
     for (;;) {
       e = &mArray[back & kMask];
       unsigned state = e->state.load(std::memory_order_acquire);
-      int64_t diff =
-          static_cast<int64_t>(state) - static_cast<int64_t>(back + 1);
+      int64_t diff = static_cast<int64_t>(state) - static_cast<int64_t>(back + 1);
 
       // Element at `back` is ready, try to acquire its ownership.
-      if (diff == 0 && mBack.compare_exchange_strong(
-                           back, back + 1, std::memory_order_relaxed)) {
+      if (diff == 0 && mBack.compare_exchange_strong(back, back + 1, std::memory_order_relaxed)) {
         break;
       }
 

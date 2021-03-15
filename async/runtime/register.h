@@ -3,10 +3,10 @@
 
 #include <unordered_map>
 
+#include "async_kernel.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 #include "third_party/abseil-cpp/absl/strings/string_view.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
-#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
-#include "async_kernel.h"
 
 namespace ficus {
 namespace async {
@@ -26,8 +26,7 @@ KernelFnRegister& GetKernelFnRegister() {
   return fnRegister;
 }
 
-#define REGISTER_KERNEL_FN(name_, func) \
-  GetKernelFnRegister().InsertKernelFn(name_, func);
+#define REGISTER_KERNEL_FN(name_, func) GetKernelFnRegister().InsertKernelFn(name_, func);
 #define UNREGISTER_KERNEL_FN(name_) GetKernelFnRegister().RemoveKernelFn(name_);
 #define GET_KERNEL_FN(name_) GetKernelFnRegister().GetKernelFn(name_);
 

@@ -24,9 +24,7 @@ class HostContextPtr {
  private:
   friend class HostContext;
 
-  explicit HostContextPtr(int index) : mIndex{static_cast<uint8_t>(index)} {
-    assert(index < kDummyIndex);
-  }
+  explicit HostContextPtr(int index) : mIndex{static_cast<uint8_t>(index)} { assert(index < kDummyIndex); }
   uint8_t index() const { return mIndex; }
 
   static constexpr uint8_t kDummyIndex = 255;

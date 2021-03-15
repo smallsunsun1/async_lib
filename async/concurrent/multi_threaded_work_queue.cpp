@@ -1,7 +1,7 @@
-#include "../context/async_value.h"
-#include "../support/latch.h"
-#include "../support/ref_count.h"
-#include "../support/string_util.h"
+#include "async/context/async_value.h"
+#include "async/support/latch.h"
+#include "async/support/ref_count.h"
+#include "async/support/string_util.h"
 #include "blocking_work_queue.h"
 #include "concurrent_work_queue.h"
 #include "environment.h"
@@ -17,15 +17,12 @@ class MultiThreadedWorkQueue : public ConcurrentWorkQueue {
   MultiThreadedWorkQueue(int numThreads, int maxBlockingWorkQueueThread);
   ~MultiThreadedWorkQueue() override;
 
-  std::string name() const override {
-    return StrCat("Multi-threaded C++ work queue (", mNumThreads, " threads)");
-  }
+  std::string name() const override { return StrCat("Multi-threaded C++ work queue (", mNumThreads, " threads)"); }
 
   int GetParallelismLevel() const final { return mNumThreads; }
 
   void AddTask(TaskFunction task) final;
-  absl::optional<TaskFunction> AddBlockingTask(TaskFunction task,
-                                               bool allow_queuing) final;
+  absl::optional<TaskFunction> AddBlockingTask(TaskFunction task, bool allow_queuing) final;
   void Quiesce() final;
   void Await(absl::Span<const RCReference<AsyncValue>> values) final;
   bool IsInWorkerThread() const final;
@@ -37,8 +34,7 @@ class MultiThreadedWorkQueue : public ConcurrentWorkQueue {
   internal::BlockingWorkQueue<ThreadingEnvironment> mBlockingWorkQueue;
 };
 
-MultiThreadedWorkQueue::MultiThreadedWorkQueue(int numThreads,
-                                               int maxBlockingWorkQueueThread)
+MultiThreadedWorkQueue::MultiThreadedWorkQueue(int numThreads, int maxBlockingWorkQueueThread)
     : mNumThreads(numThreads),
       mQuiescingState(std::make_unique<internal::QuiescingState>()),
       mNonBlockingWorkQueue(mQuiescingState.get(), numThreads),
@@ -49,12 +45,9 @@ MultiThreadedWorkQueue::~MultiThreadedWorkQueue() {
   Quiesce();
 }
 
-void MultiThreadedWorkQueue::AddTask(TaskFunction task) {
-  mNonBlockingWorkQueue.AddTask(std::move(task));
-}
+void MultiThreadedWorkQueue::AddTask(TaskFunction task) { mNonBlockingWorkQueue.AddTask(std::move(task)); }
 
-absl::optional<TaskFunction> MultiThreadedWorkQueue::AddBlockingTask(
-    TaskFunction task, bool allow_queuing) {
+absl::optional<TaskFunction> MultiThreadedWorkQueue::AddBlockingTask(TaskFunction task, bool allow_queuing) {
   if (allow_queuing) {
     return mBlockingWorkQueue.EnqueueBlockingTask(std::move(task));
   } else {
@@ -82,8 +75,7 @@ void MultiThreadedWorkQueue::Quiesce() {
   }
 }
 
-void MultiThreadedWorkQueue::Await(
-    absl::Span<const RCReference<AsyncValue>> values) {
+void MultiThreadedWorkQueue::Await(absl::Span<const RCReference<AsyncValue>> values) {
   // We might block on a latch waiting for the completion of all tasks, and
   // this is not allowed to do inside non blocking work queue.
   mNonBlockingWorkQueue.CheckCallerThread("MultiThreadedWorkQueue::Await");
@@ -100,15 +92,11 @@ void MultiThreadedWorkQueue::Await(
   valuesRemaining.wait();
 }
 
-bool MultiThreadedWorkQueue::IsInWorkerThread() const {
-  return mNonBlockingWorkQueue.IsInWorkerThread();
-}
+bool MultiThreadedWorkQueue::IsInWorkerThread() const { return mNonBlockingWorkQueue.IsInWorkerThread(); }
 
-std::unique_ptr<ConcurrentWorkQueue> CreateMultiThreadedWorkQueue(
-    int numThreads, int numBlockingThreads) {
+std::unique_ptr<ConcurrentWorkQueue> CreateMultiThreadedWorkQueue(int numThreads, int numBlockingThreads) {
   assert(numThreads > 0 && numBlockingThreads > 0);
-  return std::make_unique<MultiThreadedWorkQueue>(numThreads,
-                                                  numBlockingThreads);
+  return std::make_unique<MultiThreadedWorkQueue>(numThreads, numBlockingThreads);
 }
 
 }  // namespace async

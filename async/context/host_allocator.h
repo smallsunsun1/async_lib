@@ -44,29 +44,22 @@ class HostAllocator {
 
 std::unique_ptr<HostAllocator> CreateMallocAllocator();
 std::unique_ptr<HostAllocator> CreateFixedSizeAllocator(size_t capacity = 1024);
-std::unique_ptr<HostAllocator> CreateProfiledAllocator(
-    std::unique_ptr<HostAllocator> allocator);
-std::unique_ptr<HostAllocator> CreateLeakCheckAllocator(
-    std::unique_ptr<HostAllocator> allocator);
+std::unique_ptr<HostAllocator> CreateProfiledAllocator(std::unique_ptr<HostAllocator> allocator);
+std::unique_ptr<HostAllocator> CreateLeakCheckAllocator(std::unique_ptr<HostAllocator> allocator);
 template <typename ObjectT>
 class HostArray {
  public:
   HostArray() {}
-  HostArray(size_t num_objects, HostAllocator* host_allocator)
-      : mArray(absl::Span<ObjectT>(
-            host_allocator->Allocate<ObjectT>(num_objects), num_objects)),
-        mHostAllocator(host_allocator) {}
+  HostArray(size_t num_objects, HostAllocator* host_allocator) : mArray(absl::Span<ObjectT>(host_allocator->Allocate<ObjectT>(num_objects), num_objects)), mHostAllocator(host_allocator) {}
 
   ~HostArray() {
     // Destroy all of the objects.
     for (auto& object : mArray) object.~ObjectT();
-    if (mHostAllocator != nullptr)
-      mHostAllocator->Deallocate(mArray.data(), mArray.size());
+    if (mHostAllocator != nullptr) mHostAllocator->Deallocate(mArray.data(), mArray.size());
   }
 
   // HostArray is move-only.
-  HostArray(HostArray&& other)
-      : mArray(other.mArray), mHostAllocator(other.mHostAllocator) {
+  HostArray(HostArray&& other) : mArray(other.mArray), mHostAllocator(other.mHostAllocator) {
     other.mArray = {};
     other.mHostAllocator = nullptr;
   }

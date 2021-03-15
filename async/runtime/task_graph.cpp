@@ -1,9 +1,9 @@
 #include "task_graph.h"
 
-#include "../context/async_value.h"
-#include "../context/chain.h"
-#include "../context/host_context.h"
-#include "../support/latch.h"
+#include "async/context/async_value.h"
+#include "async/context/chain.h"
+#include "async/context/host_context.h"
+#include "async/support/latch.h"
 
 using namespace ficus;
 
@@ -44,8 +44,7 @@ void TaskGraphExecutor::Execute() {
   ProcessStartNodeIndex(&readyNodeIdx);
   ProcessReadyNodeIndexs(&readyNodeIdx);
 }
-void TaskGraphExecutor::ProcessStartNodeIndex(
-    std::vector<unsigned>* readyNodeIndex) {
+void TaskGraphExecutor::ProcessStartNodeIndex(std::vector<unsigned>* readyNodeIndex) {
   for (auto& node : mGraph->mTaskNodes) {
     // 这个node可以直接被执行
     if (node->GetNumDependencies() == 0) {
@@ -53,8 +52,7 @@ void TaskGraphExecutor::ProcessStartNodeIndex(
     }
   }
 }
-void TaskGraphExecutor::ProcessReadyNodeIndex(
-    unsigned nodeId, std::vector<unsigned>* readyNodeIdx) {
+void TaskGraphExecutor::ProcessReadyNodeIndex(unsigned nodeId, std::vector<unsigned>* readyNodeIdx) {
   TaskNode* node = mGraph->mTaskNodes[nodeId].get();
   (*node)();  // 执行完毕，修改readyNodeIndex
   int count = mTotalTaskCount.fetch_sub(1);
@@ -67,12 +65,10 @@ void TaskGraphExecutor::ProcessReadyNodeIndex(
     mFinishChain->emplace<async::Chain>();
   }
 }
-void TaskGraphExecutor::ProcessReadyNodeIndexs(
-    std::vector<unsigned>* readyNodeIndex) {
+void TaskGraphExecutor::ProcessReadyNodeIndexs(std::vector<unsigned>* readyNodeIndex) {
   // 完成队列非空
   while (!readyNodeIndex->empty()) {
-    for (auto iter = std::next(readyNodeIndex->begin(), 1);
-         iter != readyNodeIndex->end(); ++iter) {
+    for (auto iter = std::next(readyNodeIndex->begin(), 1); iter != readyNodeIndex->end(); ++iter) {
       unsigned kernelId = *iter;
       AddRef();
       GetContext()->EnqueueWork([this, kernelId]() {
@@ -90,8 +86,7 @@ void TaskGraphExecutor::Await() {
   async::latch lat(1);
   absl::InlinedVector<async::AsyncValue*, 4> input;
   input.push_back(mFinishChain.get());
-  GetContext()->RunWhenReady(absl::MakeConstSpan(input.data(), input.size()),
-                             [&lat]() { lat.count_down(1); });
+  GetContext()->RunWhenReady(absl::MakeConstSpan(input.data(), input.size()), [&lat]() { lat.count_down(1); });
   lat.wait();
 }
 void TaskGraphExecutor::Destroy() {

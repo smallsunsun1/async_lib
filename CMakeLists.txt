@@ -3,24 +3,33 @@ if (POLICY CMP0048)
 endif (POLICY CMP0048)
 project(project_async)
 cmake_minimum_required(VERSION 3.15)
-set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED 14)
-set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 
 set(LIB_TYPE "STATIC" CACHE STRING "build library type")
 set(CMAKE_PREFIX_PATH libs/)
 
 add_definitions(-DEIGEN_USE_THREADS)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -flto")
+
 option(USE_ASAN "variable which indicate whether to use address sanitizer" OFF)
 option(USE_CUDA "variable which indicate whether to build with cuda" OFF)
+option(USE_CXX_20 "variable which indicate whether to build with -std=c++20 standard" OFF)
 if(USE_ASAN)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -O1 -fno-omit-frame-pointer")
 endif()
 if(USE_CUDA)
     enable_language(CUDA)
     add_definitions(-DEIGEN_USE_GPU)
+endif()
+if(USE_CXX_20)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -fcoroutines")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif()
 
 

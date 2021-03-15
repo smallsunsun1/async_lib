@@ -1,26 +1,23 @@
 #include "diagnostic.h"
 
-#include "../support/string_util.h"
-#include "third_party/abseil-cpp/absl/status/status.h"
-#include "third_party/abseil-cpp/absl/strings/string_view.h"
+#include "async/support/string_util.h"
 #include "execution_context.h"
 #include "host_context.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
+#include "third_party/abseil-cpp/absl/strings/string_view.h"
 
 namespace ficus {
 namespace async {
-DecodedDiagnostic::DecodedDiagnostic(const absl::Status& error)
-    : message(error.message()) {}
+DecodedDiagnostic::DecodedDiagnostic(const absl::Status& error) : message(error.message()) {}
 std::ostream& operator<<(std::ostream& os, const DecodedDiagnostic& diag) {
   if (diag.location) {
-    os << diag.location->filename << ":" << diag.location->line << ":"
-       << diag.location->column << ": ";
+    os << diag.location->filename << ":" << diag.location->line << ":" << diag.location->column << ": ";
   } else {
     os << "UnknownLocation: ";
   }
   return os << diag.message;
 }
-DecodedDiagnostic EmitError(const ExecutionContext& exec_ctx,
-                            absl::string_view message) {
+DecodedDiagnostic EmitError(const ExecutionContext& exec_ctx, absl::string_view message) {
   auto decoded_loc = exec_ctx.location().Decode();
   auto diag = DecodedDiagnostic(decoded_loc, message);
   auto* host = exec_ctx.host();

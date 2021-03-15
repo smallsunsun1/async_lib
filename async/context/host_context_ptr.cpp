@@ -4,8 +4,7 @@
 
 namespace ficus {
 namespace async {
-HostContextPtr::HostContextPtr(HostContext* host)
-    : HostContextPtr{host->instance_ptr()} {}
+HostContextPtr::HostContextPtr(HostContext* host) : HostContextPtr{host->instance_ptr()} {}
 
 HostContext* HostContextPtr::get() const {
   assert(mIndex != kDummyIndex);
