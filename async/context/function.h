@@ -28,7 +28,7 @@ class Function {
   // Execute this function on the specified HostContext, passing the specified
   // arguments. This returns one AsyncValue for each result.
   virtual void Execute(absl::Span<AsyncValue* const> arguments, absl::Span<RCReference<AsyncValue>> results, HostContext* host) const = 0;
-  static void Execute(const Function* func, std::vector<RCReference<AsyncValue>>& arguments, std::vector<RCReference<AsyncValue>>& results, HostContext* ctx, bool blockedTask=false);
+  static void Execute(const Function* func, std::vector<RCReference<AsyncValue>>& arguments, std::vector<RCReference<AsyncValue>>& results, HostContext* ctx, bool blockedTask = false);
   // Reference counting operations, used by async kernels to keep the underlying
   // storage for a function alive.
   virtual void AddRef() const = 0;

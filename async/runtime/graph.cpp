@@ -7,10 +7,10 @@
 #include <set>
 #include <string>
 
+#include "absl/container/inlined_vector.h"
 #include "async/context/async_value.h"
 #include "async/context/kernel_frame.h"
 #include "async/context/native_function.h"
-#include "absl/container/inlined_vector.h"
 #include "nlohmann/json.hpp"
 
 namespace ficus {

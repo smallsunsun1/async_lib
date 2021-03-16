@@ -5,9 +5,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include "async/context/async_value.h"
 #include "async/context/native_function.h"
 #include "async/support/ref_count.h"
-#include "async/context/async_value.h"
 #include "async_kernel.h"
 
 namespace ficus {

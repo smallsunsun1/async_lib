@@ -1,8 +1,8 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_DEVICE_GPU_MEMORY_DEVICE_MEMORY_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_DEVICE_GPU_MEMORY_DEVICE_MEMORY_
 
-#include <type_traits>
 #include <iostream>
+#include <type_traits>
 
 #include "async/support/ref_count.h"
 #include "async/support/type_traits.h"
@@ -134,7 +134,7 @@ class DeviceMemory {
   T* Pointer() { return mPair.getPointer(); }
   typename std::conditional<PointerLikeTypeTraits<T*>::NumLowBitsAvailable >= 2, PointerIntPair<T*, 2, DeviceType>, PointDeviceTypePair>::type
       mPair;  //通常指针align大小为3bit，这里小于2bit可以压缩到一个PointIntPair
-  friend std::ostream& operator<<(std::ostream& os, const DeviceMemory& Pointer) { return os << Pointer.data() << "\n";} 
+  friend std::ostream& operator<<(std::ostream& os, const DeviceMemory& Pointer) { return os << Pointer.data() << "\n"; }
 };
 
 }  // namespace gpu
