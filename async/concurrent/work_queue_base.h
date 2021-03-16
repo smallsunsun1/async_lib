@@ -64,7 +64,6 @@ class Quiescing {
 };
 class PendingTask {
  public:
- public:
   explicit PendingTask(QuiescingState* state) : mState(state) {
     assert(state != nullptr);
     mState->mNumPendingTasks.fetch_add(1, std::memory_order_relaxed);
