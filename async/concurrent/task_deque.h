@@ -16,7 +16,7 @@ namespace async {
 namespace internal {
 class TaskDeque {
  public:
-  static constexpr unsigned kCapacity = 1024;
+  static constexpr unsigned kCapacity = 4096;
 
   static_assert((kCapacity > 2) && (kCapacity <= (64u << 10u)), "TaskDeque capacity must be in [4, 65536] range");
   static_assert((kCapacity & (kCapacity - 1)) == 0, "TaskDeque capacity must be a power of two for fast masking");
