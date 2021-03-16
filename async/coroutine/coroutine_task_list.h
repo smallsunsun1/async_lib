@@ -1,0 +1,7 @@
+#ifndef ASYNC_COROUTINE_COROUTINE_TASK_LIST_
+#define ASYNC_COROUTINE_COROUTINE_TASK_LIST_
+
+#include <atomic>
+#include <mutex>
+
+#endif /* ASYNC_COROUTINE_COROUTINE_TASK_LIST_ */

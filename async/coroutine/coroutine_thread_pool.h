@@ -15,6 +15,8 @@
 namespace ficus {
 namespace async {
 
+class CoroutineThreadPool;
+
 class ScheduleOperation {
  public:
   ScheduleOperation(CoroutineThreadPool* pool) : mThreadPool(pool) {}
@@ -40,6 +42,7 @@ class CoroutineThreadPool : public ConcurrentWorkQueue {
   ScheduleOperation Schedule() noexcept { return ScheduleOperation{this}; }
 
  private:
+  void ScheduleImpl(ScheduleOperation* operation) noexcept;
   const uint32_t mNumThreads;
   std::unique_ptr<internal::QuiescingState> mQuiescingState;
   internal::NonBlockingWorkQueue<ThreadingEnvironment> mNonBlockingWorkQueue;
