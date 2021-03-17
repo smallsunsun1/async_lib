@@ -5,7 +5,7 @@
 #include "coroutine_task_deque.h"
 #include "coroutine_task_queue.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 namespace internal {
 
@@ -18,17 +18,17 @@ template <typename ThreadingEnvironmentTy>
 struct WorkQueueTraits<NonBlockingCoroutineQueue<ThreadingEnvironmentTy>> {
   using ThreadingEnvironment = ThreadingEnvironmentTy;
   using Thread = typename ThreadingEnvironment::Thread;
-  using Queue = typename ::ficus::async::internal::CoroutineTaskDeque;
+  using Queue = typename ::sss::async::internal::CoroutineTaskDeque;
 };
 template <typename ThreadingEnvironmentTy>
 struct WorkQueueTraits<BlockingCoroutineQueue<ThreadingEnvironmentTy>> {
   using ThreadingEnvironment = ThreadingEnvironmentTy;
   using Thread = typename ThreadingEnvironment::Thread;
-  using Queue = typename ::ficus::async::internal::CoroutineTaskQueue;
+  using Queue = typename ::sss::async::internal::CoroutineTaskQueue;
 };
 
 }  // namespace internal
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* ASYNC_COROUTINE_COROUTINE_QUEUE_TRAITS_ */

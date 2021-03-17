@@ -7,7 +7,7 @@
 #include "third_party/abseil-cpp/absl/strings/string_view.h"
 #include "third_party/abseil-cpp/absl/types/span.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 // 这个类不负责对其中的AsyncValue*进行析构，需要手动析构
@@ -148,6 +148,6 @@ class RAIIKernelFrame : public AsyncKernelFrame {
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_KERNEL_FRAME_ */

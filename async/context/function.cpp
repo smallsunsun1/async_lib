@@ -1,6 +1,6 @@
 #include "function.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 void Function::Execute(const Function* func, std::vector<RCReference<AsyncValue>>& arguments, std::vector<RCReference<AsyncValue>>& results, HostContext* ctx, bool blockedTask) {
@@ -18,4 +18,4 @@ void Function::Execute(const Function* func, std::vector<RCReference<AsyncValue>
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

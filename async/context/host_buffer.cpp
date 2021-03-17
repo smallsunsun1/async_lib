@@ -2,7 +2,7 @@
 
 #include "host_allocator.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 RCReference<HostBuffer> HostBuffer::CreateUninitialized(size_t size, size_t alignment, HostAllocator* allocator) {
@@ -28,4 +28,4 @@ void HostBuffer::Destroy() {
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

@@ -9,7 +9,7 @@
 
 #include "third_party/abseil-cpp/absl/types/optional.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 class ScheduleOperation;
@@ -53,6 +53,6 @@ class CoroutineTaskQueue {
 
 }  // namespace internal
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* ASYNC_COROUTINE_COROUTINE_TASK_QUEUE_ */

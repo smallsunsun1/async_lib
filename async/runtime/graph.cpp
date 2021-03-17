@@ -13,7 +13,7 @@
 #include "async/context/native_function.h"
 #include "nlohmann/json.hpp"
 
-namespace ficus {
+namespace sss {
 
 using namespace async;
 using json = nlohmann::json;
@@ -435,4 +435,4 @@ void RunAsyncGraph(AsyncGraph* graph, std::vector<RCReference<AsyncValue>>& argu
   if (sync) runContext->Await(results);
 }
 
-}  // namespace ficus
+}  // namespace sss

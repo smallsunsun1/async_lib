@@ -1,6 +1,6 @@
 #include "register.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 void KernelFnRegister::InsertKernelFn(absl::string_view name, AsyncKernelFn fn) {
@@ -25,4 +25,4 @@ absl::optional<AsyncKernelFn> KernelFnRegister::GetKernelFn(absl::string_view na
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

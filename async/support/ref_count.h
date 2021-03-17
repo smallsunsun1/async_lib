@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace ficus {
+namespace sss {
 namespace async {
 #ifndef NDEBUG
 extern std::atomic<size_t> total_reference_counter_objects;
@@ -143,6 +143,6 @@ void swap(RCReference<T>& a, RCReference<T>& b) {
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_REF_COUNT_ */

@@ -1,10 +1,10 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_CHAIN_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_CHAIN_
 
-namespace ficus {
+namespace sss {
 namespace async {
 struct Chain {};
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_CHAIN_ */

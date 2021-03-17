@@ -2,9 +2,9 @@
 
 #include "coroutine_thread_pool.h"
 
-const unsigned ficus::async::internal::CoroutineTaskQueue::kCapacity;
+const unsigned sss::async::internal::CoroutineTaskQueue::kCapacity;
 
-namespace ficus {
+namespace sss {
 namespace async {
 namespace internal {
 
@@ -74,4 +74,4 @@ unsigned CoroutineTaskQueue::Size() const {
 
 }  // namespace internal
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

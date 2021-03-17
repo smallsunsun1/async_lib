@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 std::mutex* Tracing::GetTracingMutex() {
@@ -16,4 +16,4 @@ Tracing* Tracing::GetTracing() {
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

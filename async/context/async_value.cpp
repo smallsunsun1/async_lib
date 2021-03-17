@@ -5,7 +5,7 @@
 #include "host_context.h"
 #include "task_function.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 class NotifierListNode {
  public:
@@ -167,4 +167,4 @@ void IndirectAsyncValue::ForwardTo(RCReference<AsyncValue> value) {
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

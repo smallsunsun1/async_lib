@@ -1,7 +1,7 @@
 #include "coroutine_thread_pool.h"
 #include "absl/synchronization/notification.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 void ScheduleOperation::await_suspend(std::coroutine_handle<> awaitingCoroutine) noexcept {

@@ -15,7 +15,7 @@
 #include "async/context/async_value_ref.h"  // for AsyncValueRef
 #include "async/support/ref_count.h"        // for RCReference, TakeRef, async
 
-using namespace ficus;
+using namespace sss;
 using namespace async;
 
 void LargeCompute(AsyncValue* const* inputs, int numArguments, RCReference<AsyncValue>* result, int numResult, HostContext* ctx) {

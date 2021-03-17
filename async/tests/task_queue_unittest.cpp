@@ -9,7 +9,7 @@
 #include "async/context/task_function.h"
 #include "gtest/gtest.h"
 
-using namespace ficus;
+using namespace sss;
 using namespace async;
 using namespace std::chrono;
 

@@ -9,7 +9,7 @@
 #include "alloc.h"
 #include "extra_structure.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 template <typename FunctionT>
@@ -181,6 +181,6 @@ class unique_function<R(Ts...) const> : public detail::UniqueFunctionBase<R, Ts.
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* ASYNC_SUPPORT_UNIQUE_FUNCTION_ */

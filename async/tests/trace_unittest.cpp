@@ -2,7 +2,7 @@
 
 #include "../trace/simple_tracing.h"
 
-using namespace ficus;
+using namespace sss;
 using namespace async;
 
 int main() {

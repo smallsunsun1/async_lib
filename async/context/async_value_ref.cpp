@@ -6,7 +6,7 @@
 #include "third_party/abseil-cpp/absl/status/status.h"
 #include "third_party/abseil-cpp/absl/strings/string_view.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 RCReference<ErrorAsyncValue> EmitErrorAsync(const ExecutionContext& execCtx, absl::string_view message) {
@@ -16,4 +16,4 @@ RCReference<ErrorAsyncValue> EmitErrorAsync(const ExecutionContext& execCtx, abs
 RCReference<ErrorAsyncValue> EmitErrorAsync(const ExecutionContext& execCtx, absl::Status error) { return EmitErrorAsync(execCtx, error.message()); }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

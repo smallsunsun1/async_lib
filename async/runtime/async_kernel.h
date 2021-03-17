@@ -5,7 +5,7 @@
 #include <functional>
 #include <vector>
 
-namespace ficus {
+namespace sss {
 
 namespace async {
 class CommonAsyncKernelFrame;
@@ -36,6 +36,6 @@ struct FunctionInfo {
   std::vector<KernelInfo> mKernelInfos;          // 存储了对应Kernel中有多少Arguments还未ready
 };
 
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_BIOIMAGE_BRAIN_COMMON_GRAPH_ASYNC_KERNEL_ */

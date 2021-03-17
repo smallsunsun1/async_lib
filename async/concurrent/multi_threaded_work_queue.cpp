@@ -7,7 +7,7 @@
 #include "environment.h"
 #include "non_blocking_work_queue.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 class MultiThreadedWorkQueue : public ConcurrentWorkQueue {
@@ -100,4 +100,4 @@ std::unique_ptr<ConcurrentWorkQueue> CreateMultiThreadedWorkQueue(int numThreads
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

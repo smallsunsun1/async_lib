@@ -3,7 +3,7 @@
 
 #include <memory>
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 class HostContext;
@@ -21,6 +21,6 @@ class BaseRuntime {
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_RUNTIME_BASE_RUNTIME_ */

@@ -9,7 +9,7 @@
 
 #include "async/support/ref_count.h"
 
-namespace ficus {
+namespace sss {
 
 namespace async {
 class AsyncValue;
@@ -87,6 +87,6 @@ class TaskGraphExecutor : public async::ReferenceCounted<TaskGraphExecutor> {
   TaskGraph* mGraph;
 };
 
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_BIOIMAGE_BRAIN_COMMON_GRAPH_TASK_GRAPH_ */

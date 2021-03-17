@@ -5,7 +5,7 @@
 #include "async/context/host_context.h"
 #include "async/support/latch.h"
 
-using namespace ficus;
+using namespace sss;
 
 void TaskNode::AddDependency(TaskNode* node) {
   node->mSuccessories.push_back(this);

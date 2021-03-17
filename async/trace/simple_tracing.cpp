@@ -6,7 +6,7 @@
 #include <thread>
 #include <tuple>
 
-namespace ficus {
+namespace sss {
 namespace async {
 namespace {
 const auto kProcessStart = std::chrono::steady_clock::now();
@@ -116,4 +116,4 @@ void ScopeTracing::RecordTracing(std::string name) {
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

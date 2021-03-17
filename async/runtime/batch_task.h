@@ -14,7 +14,7 @@
 #include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
 #include "third_party/eigen3/unsupported/Eigen/CXX11/ThreadPool"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 class BatchTask {
@@ -164,6 +164,6 @@ class StreamBatchScheduler : public BatchScheduler<TaskType> {
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_RUNTIME_BATCH_TASK_ */

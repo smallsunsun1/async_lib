@@ -5,7 +5,7 @@
 #include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 #include "third_party/abseil-cpp/absl/strings/string_view.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 namespace {
 using WorkQueueFactoryMap = absl::flat_hash_map<absl::string_view, WorkQueueFactory>;
@@ -34,4 +34,4 @@ std::unique_ptr<ConcurrentWorkQueue> CreateWorkQueue(absl::string_view config) {
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

@@ -5,7 +5,7 @@
 #include "third_party/abseil-cpp/absl/container/inlined_vector.h"
 #include "third_party/abseil-cpp/absl/types/span.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 template <typename T>
 class RCArray {
@@ -54,6 +54,6 @@ class RCArray {
   absl::InlinedVector<T*, 4> mValues;
 };
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_RC_ARRAY_ */

@@ -8,7 +8,7 @@
 #include "third_party/abseil-cpp/absl/strings/string_view.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 class KernelFnRegister {
@@ -31,6 +31,6 @@ KernelFnRegister& GetKernelFnRegister() {
 #define GET_KERNEL_FN(name_) GetKernelFnRegister().GetKernelFn(name_);
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* ASYNC_RUNTIME_REGISTER_ */

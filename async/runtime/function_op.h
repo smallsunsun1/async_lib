@@ -1,7 +1,7 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_RUNTIME_FUNCTION_OP_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_RUNTIME_FUNCTION_OP_
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 class FunctionOp {
@@ -10,6 +10,6 @@ class FunctionOp {
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_RUNTIME_FUNCTION_OP_ */

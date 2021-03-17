@@ -14,7 +14,7 @@
 #include "async/concurrent/work_queue_base.h"
 #include "coroutine_queue_traits.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 class CoroutineThreadPool;
@@ -86,6 +86,6 @@ class CoroutineThreadPool : public ConcurrentWorkQueue {
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* ASYNC_COROUTINE_COROUTINE_THREAD_POOL_ */

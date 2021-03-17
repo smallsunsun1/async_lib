@@ -1,6 +1,6 @@
 #include "native_function.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 void SimpleFunction::Execute(absl::Span<AsyncValue* const> arguments, absl::Span<RCReference<AsyncValue>> results, HostContext* host) const {
@@ -36,4 +36,4 @@ void SimpleFunction::Execute(absl::Span<AsyncValue* const> arguments, absl::Span
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

@@ -9,7 +9,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace ficus {
+namespace sss {
 namespace async {
 template <typename T>
 class Task;
@@ -204,6 +204,6 @@ Task<T&> TaskPromise<T&>::get_return_object() noexcept {
 }  // namespace detail
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* ASYNC_COROUTINE_TASK_ */

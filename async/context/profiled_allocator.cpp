@@ -5,7 +5,7 @@
 
 #include "host_allocator.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 namespace {
@@ -75,4 +75,4 @@ std::unique_ptr<HostAllocator> CreateProfiledAllocator(std::unique_ptr<HostAlloc
 }  // namespace
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

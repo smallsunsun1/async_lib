@@ -8,7 +8,7 @@
 #include "third_party/abseil-cpp/absl/strings/string_view.h"
 #include "third_party/abseil-cpp/absl/types/span.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 using NativeCallable = void (*)(AsyncValue* const* arguments, int numArguments, RCReference<AsyncValue>* results, int num_results, HostContext* host);
 
@@ -79,6 +79,6 @@ Function* NewFunction(absl::string_view name, GeneralCallable&& callable) {
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_NATIVE_FUNCTION_ */

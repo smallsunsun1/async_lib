@@ -6,7 +6,7 @@
 #include <utility>  // for forward
 #include <vector>   // for vector
 
-namespace ficus {
+namespace sss {
 namespace async {
 std::vector<std::string> StrSplit(const std::string& s, const std::string& delimer);
 
@@ -28,6 +28,6 @@ std::string StrCat(Args&&... args) {
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_STRING_UTIL_ */

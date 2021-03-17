@@ -7,7 +7,7 @@
 #include "third_party/abseil-cpp/absl/types/optional.h"
 #include "third_party/abseil-cpp/absl/types/span.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 class SingleThreadedWorkQueue : public ConcurrentWorkQueue {
@@ -101,4 +101,4 @@ void SingleThreadedWorkQueue::Await(absl::Span<const RCReference<AsyncValue>> va
 std::unique_ptr<ConcurrentWorkQueue> CreateSingleThreadedWorkQueue() { return std::make_unique<SingleThreadedWorkQueue>(); }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

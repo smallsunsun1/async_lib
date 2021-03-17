@@ -2,7 +2,7 @@
 
 #include "host_context.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 HostContextPtr::HostContextPtr(HostContext* host) : HostContextPtr{host->instance_ptr()} {}
 
@@ -12,4 +12,4 @@ HostContext* HostContextPtr::get() const {
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

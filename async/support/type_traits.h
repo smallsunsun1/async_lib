@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace ficus {
+namespace sss {
 namespace async {
 template <typename T>
 struct TypeTag {};
@@ -186,6 +186,6 @@ struct PointerLikeTypeTraits<PointerIntPair<PointerTy, IntBits, IntType, PtrTrai
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_TYPE_TRAITS_ */

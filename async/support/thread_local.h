@@ -10,7 +10,7 @@
 #include "third_party/abseil-cpp/absl/functional/function_ref.h"
 #include "third_party/abseil-cpp/absl/types/optional.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 namespace internal {
@@ -159,6 +159,6 @@ class ThreadLocal {
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_THREAD_LOCAL_ */

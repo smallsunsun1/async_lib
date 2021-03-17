@@ -9,7 +9,7 @@
 #include "third_party/abseil-cpp/absl/types/optional.h"
 #include "third_party/abseil-cpp/absl/types/span.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 class AsyncValue;
 class ConcurrentWorkQueue {
@@ -37,7 +37,7 @@ using WorkQueueFactory = unique_function<std::unique_ptr<ConcurrentWorkQueue>(ab
 std::unique_ptr<ConcurrentWorkQueue> CreateWorkQueue(absl::string_view config);
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONCURRENT_CONCURRENT_WORK_QUEUE_ \
         */

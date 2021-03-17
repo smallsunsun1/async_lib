@@ -1,7 +1,7 @@
 #ifndef ASYNC_TENSOR_TENSOR_
 #define ASYNC_TENSOR_TENSOR_
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 enum class TensorDtype { kFloat = 0, kDouble = 1, kInt = 2, kString = 3 };
@@ -30,6 +30,6 @@ template <typename Derived>
 const
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* ASYNC_TENSOR_TENSOR_ */

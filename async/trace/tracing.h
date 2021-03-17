@@ -8,7 +8,7 @@
 
 #include "third_party/abseil-cpp/absl/status/status.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 enum class TracingLevel { Default = 0, Verbose = 1, Debug = 2 };
@@ -24,6 +24,6 @@ class Tracing {
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_TRACE_TRACING_ */

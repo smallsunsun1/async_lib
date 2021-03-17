@@ -10,7 +10,7 @@
 #include "task_queue.h"
 #include "work_queue_base.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 namespace internal {
 
@@ -21,7 +21,7 @@ template <typename ThreadingEnvironmentTy>
 struct WorkQueueTraits<BlockingWorkQueue<ThreadingEnvironmentTy>> {
   using ThreadingEnvironment = ThreadingEnvironmentTy;
   using Thread = typename ThreadingEnvironment::Thread;
-  using Queue = ::ficus::async::internal::TaskQueue;
+  using Queue = ::sss::async::internal::TaskQueue;
 };
 
 template <typename ThreadingEnvironment>
@@ -303,7 +303,7 @@ bool BlockingWorkQueue<ThreadingEnvironment>::Empty(Queue* queue) {
 
 }  // namespace internal
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONCURRENT_BLOCKING_WORK_QUEUE_ \
         */

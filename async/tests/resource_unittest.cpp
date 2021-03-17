@@ -8,10 +8,10 @@
 
 #include "absl/container/flat_hash_map.h"  // for BitMask
 #include "absl/types/optional.h"           // for optional
-#include "async/support/type_traits.h"     // for async, ficus
+#include "async/support/type_traits.h"     // for async, sss
 #include "gtest/gtest_pred_impl.h"         // for Test, InitGoogleTest, RUN_...
 
-using namespace ficus;
+using namespace sss;
 using namespace async;
 
 static const std::string res1 = "123";

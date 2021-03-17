@@ -14,7 +14,7 @@
 #include "third_party/abseil-cpp/absl/types/any.h"                // for any...
 #include "third_party/abseil-cpp/absl/types/optional.h"           // for nul...
 
-namespace ficus {
+namespace sss {
 namespace async {
 class ResourceManager {
  public:
@@ -64,6 +64,6 @@ class ResourceManager {
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_RESOURCE_ */

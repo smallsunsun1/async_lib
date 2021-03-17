@@ -4,7 +4,7 @@
 #include <mutex>
 #include <vector>
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 template <typename T>
@@ -113,4 +113,4 @@ class ConcurrentVector {
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

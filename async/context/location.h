@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace ficus {
+namespace sss {
 namespace async {
 class LocationHandler;
 struct DecodedLocation {
@@ -40,6 +40,6 @@ inline DecodedLocation Location::Decode() const {
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_LOCATION_ */

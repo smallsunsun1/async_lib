@@ -16,7 +16,7 @@
 #include "async/support/ref_count.h"        // for RCReference, TakeRef, async
 #include "gtest/gtest_pred_impl.h"          // for Test, InitGoogleTest, RUN...
 
-using namespace ficus;
+using namespace sss;
 using namespace async;
 
 void LargeCompute(AsyncValue* const* inputs, int numArguments, RCReference<AsyncValue>* result, int numResult, HostContext* ctx) {

@@ -2,7 +2,7 @@
 
 #include "coroutine_thread_pool.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 namespace internal {
 
@@ -108,4 +108,4 @@ unsigned CoroutineTaskDeque::PopBackHalf(std::vector<ScheduleOperation*>* result
 
 }  // namespace internal
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

@@ -8,7 +8,7 @@
 
 #include "gtest/gtest_pred_impl.h"  // for Test, InitGoogleTest, RUN_ALL_TESTS
 
-using namespace ficus;
+using namespace sss;
 using namespace async;
 
 TEST(LATCH, V1) {

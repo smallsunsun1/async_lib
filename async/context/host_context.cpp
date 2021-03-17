@@ -11,7 +11,7 @@
 #include "host_allocator.h"
 #include "location.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 void LocationHandler::VtableAnchor() {}
@@ -215,4 +215,4 @@ std::unique_ptr<HostContext> CreateCustomHostContext(int numNonBlockThreads, int
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

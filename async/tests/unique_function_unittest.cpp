@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-using namespace ficus;
+using namespace sss;
 using namespace async;
 
 TEST(UNQIUE_FUNCTION, V1) {

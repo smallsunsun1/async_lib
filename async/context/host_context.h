@@ -10,7 +10,7 @@
 #include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/abseil-cpp/absl/types/span.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 class DecodedDiagnostic;
@@ -294,6 +294,6 @@ std::unique_ptr<HostContext> CreateSimpleHostContext();
 std::unique_ptr<HostContext> CreateCustomHostContext(int numNonBlockThreads, int numBlockThreads);
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_HOST_CONTEXT_ */

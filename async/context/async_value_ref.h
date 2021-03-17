@@ -7,7 +7,7 @@
 #include "location.h"
 #include "third_party/abseil-cpp/absl/status/statusor.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 class ExecutionContext;
 template <typename T>
@@ -124,6 +124,6 @@ class AsyncValueRef {
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_ASYNC_VALUE_REF_ */

@@ -7,7 +7,7 @@
 #include "function_op.h"
 #include "third_party/abseil-cpp/absl/strings/string_view.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 class BaseRuntime;
@@ -27,6 +27,6 @@ class FunctionHandler {
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_RUNTIME_HANDLER_ */

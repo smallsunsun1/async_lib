@@ -6,7 +6,7 @@
 #include "third_party/abseil-cpp/absl/status/status.h"
 #include "third_party/abseil-cpp/absl/strings/string_view.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 DecodedDiagnostic::DecodedDiagnostic(const absl::Status& error) : message(error.message()) {}
 std::ostream& operator<<(std::ostream& os, const DecodedDiagnostic& diag) {
@@ -26,4 +26,4 @@ DecodedDiagnostic EmitError(const ExecutionContext& exec_ctx, absl::string_view 
 }
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss

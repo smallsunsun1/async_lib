@@ -5,7 +5,7 @@
 
 #include "type_traits.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 template <typename T>
@@ -154,6 +154,6 @@ struct PointerLikeTypeTraits<PointerUnion<PTs...>> {
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* ASYNC_SUPPORT_EXTRA_STRUCTURE_ */

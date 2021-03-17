@@ -46,7 +46,7 @@ struct TestAwaitable {
   int await_resume() { return 100; }
 };
 
-using namespace ficus;
+using namespace sss;
 using namespace async;
 
 Task<int> TaskTest() {

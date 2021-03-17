@@ -5,7 +5,7 @@
 #include "task_deque.h"
 #include "work_queue_base.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 namespace internal {
 
@@ -16,7 +16,7 @@ template <typename ThreadingEnvironmentTy>
 struct WorkQueueTraits<NonBlockingWorkQueue<ThreadingEnvironmentTy>> {
   using ThreadingEnvironment = ThreadingEnvironmentTy;
   using Thread = typename ThreadingEnvironment::Thread;
-  using Queue = typename ::ficus::async::internal::TaskDeque;
+  using Queue = typename ::sss::async::internal::TaskDeque;
 };
 
 template <typename ThreadingEnvironment>
@@ -129,7 +129,7 @@ bool NonBlockingWorkQueue<ThreadingEnvironment>::Empty(Queue* queue) {
 
 }  // namespace internal
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONCURRENT_NON_BLOCKING_WORK_QUEUE_ \
         */

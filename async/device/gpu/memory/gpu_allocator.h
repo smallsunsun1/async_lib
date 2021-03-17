@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-namespace ficus {
+namespace sss {
 namespace async {
 namespace gpu {
 
@@ -15,7 +15,7 @@ class GpuAllocator {
 
 }  // namespace gpu
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_DEVICE_GPU_MEMORY_GPU_ALLOCATOR_ \
         */

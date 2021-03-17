@@ -10,7 +10,7 @@
 #include "async/support/ref_count.h"
 #include "async_kernel.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 class AsyncValue;
 class Function;
@@ -135,6 +135,6 @@ class GraphExecutor : public async::ReferenceCounted<GraphExecutor> {
 
 void RunAsyncGraph(AsyncGraph* graph, std::vector<async::RCReference<async::AsyncValue>>& arguments, std::vector<async::RCReference<async::AsyncValue>>& results, bool sync = true);
 
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_BIOIMAGE_BRAIN_COMMON_GRAPH_GRAPH_ */

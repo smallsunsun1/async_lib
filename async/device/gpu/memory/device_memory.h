@@ -7,7 +7,7 @@
 #include "async/support/ref_count.h"
 #include "async/support/type_traits.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 namespace gpu {
 
@@ -139,7 +139,7 @@ class DeviceMemory {
 
 }  // namespace gpu
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_DEVICE_GPU_MEMORY_DEVICE_MEMORY_ \
         */

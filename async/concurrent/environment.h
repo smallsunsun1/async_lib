@@ -4,7 +4,7 @@
 #include <memory>
 #include <thread>
 
-namespace ficus {
+namespace sss {
 namespace async {
 namespace internal {
 struct StdThreadingEnvironment {
@@ -20,6 +20,6 @@ struct StdThreadingEnvironment {
 
 }  // namespace internal
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONCURRENT_ENVIRONMENT_ */

@@ -4,7 +4,7 @@
 #include "third_party/abseil-cpp/absl/container/inlined_vector.h"
 #include "tracing.h"
 
-namespace ficus {
+namespace sss {
 namespace async {
 
 class SimpleTracing : public Tracing {
@@ -47,6 +47,6 @@ class ScopeTracing : public Tracing {
 };
 
 }  // namespace async
-}  // namespace ficus
+}  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_TRACE_SIMPLE_TRACING_ */
