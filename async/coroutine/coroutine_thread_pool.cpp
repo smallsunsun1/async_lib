@@ -1,6 +1,9 @@
 #include "coroutine_thread_pool.h"
 #include "absl/synchronization/notification.h"
 
+namespace ficus {
+namespace async {
+
 void ScheduleOperation::await_suspend(std::coroutine_handle<> awaitingCoroutine) noexcept {
     mAwaitingCoroutine = awaitingCoroutine;
     mThreadPool->ScheduleImpl(this);
@@ -8,10 +11,10 @@ void ScheduleOperation::await_suspend(std::coroutine_handle<> awaitingCoroutine)
 
 void CoroutineThreadPool::WorkerLoop(int threadId) {
   PerThread* pt = GetPerThread();
-  pt->parent = &mDerived;
-  pt->rng = FastRng(ThreadingEnvironment::ThisThreadIdHash());
-  pt->thread_id = thread_id;
-  Queue* q = &(mThreadData[thread_id].queue);
+  pt->parent = this;
+  pt->rng = internal::FastRng(ThreadingEnvironment::ThisThreadIdHash());
+  pt->thread_id = threadId;
+  Queue* q = &(mThreadData[threadId].queue);
   while (!mCancelled) {
     absl::optional<ScheduleOperation*> t = NextTask(q);
     if (!t.has_value()) {
@@ -58,7 +61,6 @@ void CoroutineThreadPool::AddTask(ScheduleOperation* task) {
     if (pt->parent == this) {
         // 属于当前线程池的worker
         Queue& q = mThreadData[pt->thread_id].queue;
-        skipNotify = q.Empty();
         inlineTask = q.PushFront(std::move(task));
     } else {
         unsigned rnd = internal::FastReduce(pt->rng(), mNumThreads);
@@ -68,5 +70,8 @@ void CoroutineThreadPool::AddTask(ScheduleOperation* task) {
     if (inlineTask.has_value()) {
         (*inlineTask)->mAwaitingCoroutine.resume();
     }
+}
+
+}
 }
 

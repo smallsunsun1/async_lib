@@ -46,6 +46,21 @@ absl::optional<ScheduleOperation*> CoroutineTaskDeque::PopFront() {
   return absl::optional<ScheduleOperation*>(task);
 }
 
+absl::optional<ScheduleOperation*> CoroutineTaskDeque::PushBack(ScheduleOperation* task) {
+  std::lock_guard<std::mutex> lock(mMutex);
+    unsigned back = mBack.load(std::memory_order_relaxed);
+    Elem* e = &mArray[(back - 1) & kMask];
+    uint8_t s = e->state.load(std::memory_order_relaxed);
+    if (s != kEmpty || !e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
+      return absl::optional<ScheduleOperation*>(task);
+    }
+    back = ((back - 1) & kMask2) | (back & ~kMask2);
+    mBack.store(back, std::memory_order_relaxed);
+    e->task = task;
+    e->state.store(kReady, std::memory_order_release);
+    return absl::nullopt;
+}
+
 absl::optional<ScheduleOperation*> CoroutineTaskDeque::PopBack() {
   if (Empty()) return absl::nullopt;
 

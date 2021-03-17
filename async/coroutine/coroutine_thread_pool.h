@@ -40,12 +40,12 @@ class CoroutineThreadPool : public ConcurrentWorkQueue {
 
  public:
   ~CoroutineThreadPool() override;
-  explicit CoroutineThreadPool(int numThreads, int maxBlockingWorkQueueThread):mNumThread(numThreads),
-        mCancelled(false), mCoprimes(internal::ComputeCoprimes(numThreads)) {
+  explicit CoroutineThreadPool(int numThreads, int maxBlockingWorkQueueThread):mNumThreads(numThreads),
+        mCancelled(false), mCoprimes(internal::ComputeCoprimes(numThreads)), mThreadData(numThreads) {
     assert(numThreads >= 1 && "thread number must be larger than 1");
     for (int i = 0; i < numThreads; ++i) {
       mThreadData[i].thread = ThreadingEnvironment::StartThread([this, i](){
-        WorkLoop(i);
+        WorkerLoop(i);
       });
     }
   }
@@ -58,12 +58,10 @@ class CoroutineThreadPool : public ConcurrentWorkQueue {
   absl::optional<ScheduleOperation*> Steal(Queue* queue);
   absl::optional<ScheduleOperation*> Steal();
 
-  static PerThread* GetPerThread() {
-    static thread_local PerThread perThread;
-    PerThread* pt = &perThread;
-    return pt;
-  }
  private:
+  friend class ScheduleOperation;
+  CoroutineThreadPool(const CoroutineThreadPool&) = delete;
+  CoroutineThreadPool& operator=(const CoroutineThreadPool&) = delete;
   void ScheduleImpl(ScheduleOperation* operation) noexcept;
   const uint32_t mNumThreads;
   struct PerThread {
@@ -73,12 +71,18 @@ class CoroutineThreadPool : public ConcurrentWorkQueue {
     int thread_id;  // Worker thread index in the workers queue
   };
   struct ThreadData {
+    ThreadData(): thread(), queue() {}
     std::unique_ptr<Thread> thread;
     Queue queue;
   };
   std::vector<ThreadData> mThreadData;
   std::vector<unsigned> mCoprimes;
   std::atomic<bool> mCancelled;
+  static PerThread* GetPerThread() {
+    static thread_local PerThread perThread;
+    PerThread* pt = &perThread;
+    return pt;
+  }
 };
 
 }  // namespace async

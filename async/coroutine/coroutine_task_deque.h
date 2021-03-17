@@ -22,6 +22,11 @@ class CoroutineTaskDeque {
   static_assert((kCapacity > 2) && (kCapacity <= (64u << 10u)), "CoroutineTaskDeque capacity must be in [4, 65536] range");
   static_assert((kCapacity & (kCapacity - 1)) == 0, "CoroutineTaskDeque capacity must be a power of two for fast masking");
 
+  CoroutineTaskDeque() : mFront(0), mBack(0) {
+    for (unsigned i = 0; i < kCapacity; i++) {
+      mArray[i].state.store(kEmpty, std::memory_order_relaxed);
+    }
+  }
   CoroutineTaskDeque(const CoroutineTaskDeque&) = delete;
   void operator=(const CoroutineTaskDeque&) = delete;
 
@@ -37,6 +42,7 @@ class CoroutineTaskDeque {
 
   absl::optional<ScheduleOperation*> PushFront(ScheduleOperation* task);
   absl::optional<ScheduleOperation*> PopFront();
+  absl::optional<ScheduleOperation*> PushBack(ScheduleOperation* task);
   absl::optional<ScheduleOperation*> PopBack();
   unsigned PopBackHalf(std::vector<ScheduleOperation*>* result);
 
