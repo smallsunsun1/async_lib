@@ -1,12 +1,13 @@
 #include "coroutine_thread_pool.h"
+
 #include "absl/synchronization/notification.h"
 
 namespace sss {
 namespace async {
 
 void ScheduleOperation::await_suspend(std::coroutine_handle<> awaitingCoroutine) noexcept {
-    mAwaitingCoroutine = awaitingCoroutine;
-    mThreadPool->ScheduleImpl(this);
+  mAwaitingCoroutine = awaitingCoroutine;
+  mThreadPool->ScheduleImpl(this);
 }
 
 void CoroutineThreadPool::WorkerLoop(int threadId) {
@@ -18,25 +19,19 @@ void CoroutineThreadPool::WorkerLoop(int threadId) {
   while (!mCancelled) {
     absl::optional<ScheduleOperation*> t = NextTask(q);
     if (!t.has_value()) {
-        t = Steal();
+      t = Steal();
     }
     if (t.has_value()) {
-        (*t)->mAwaitingCoroutine.resume();
+      (*t)->mAwaitingCoroutine.resume();
     }
   }
 }
 
-void CoroutineThreadPool::ScheduleImpl(ScheduleOperation* operation) noexcept {
-    AddTask(operation);
-}
+void CoroutineThreadPool::ScheduleImpl(ScheduleOperation* operation) noexcept { AddTask(operation); }
 
-absl::optional<ScheduleOperation*> CoroutineThreadPool::NextTask(Queue* queue) {
-    return queue->PopFront();
-}
+absl::optional<ScheduleOperation*> CoroutineThreadPool::NextTask(Queue* queue) { return queue->PopFront(); }
 
-absl::optional<ScheduleOperation*> CoroutineThreadPool::Steal(Queue* queue) {
-    return queue->PopBack();
-}
+absl::optional<ScheduleOperation*> CoroutineThreadPool::Steal(Queue* queue) { return queue->PopBack(); }
 
 absl::optional<ScheduleOperation*> CoroutineThreadPool::Steal() {
   PerThread* pt = GetPerThread();
@@ -56,22 +51,21 @@ absl::optional<ScheduleOperation*> CoroutineThreadPool::Steal() {
 }
 
 void CoroutineThreadPool::AddTask(ScheduleOperation* task) {
-    PerThread* pt = GetPerThread();
-    absl::optional<ScheduleOperation*> inlineTask;
-    if (pt->parent == this) {
-        // 属于当前线程池的worker
-        Queue& q = mThreadData[pt->thread_id].queue;
-        inlineTask = q.PushFront(std::move(task));
-    } else {
-        unsigned rnd = internal::FastReduce(pt->rng(), mNumThreads);
-        Queue& q = mThreadData[rnd].queue;
-        inlineTask = q.PushBack(std::move(task));
-    }
-    if (inlineTask.has_value()) {
-        (*inlineTask)->mAwaitingCoroutine.resume();
-    }
+  PerThread* pt = GetPerThread();
+  absl::optional<ScheduleOperation*> inlineTask;
+  if (pt->parent == this) {
+    // 属于当前线程池的worker
+    Queue& q = mThreadData[pt->thread_id].queue;
+    inlineTask = q.PushFront(std::move(task));
+  } else {
+    unsigned rnd = internal::FastReduce(pt->rng(), mNumThreads);
+    Queue& q = mThreadData[rnd].queue;
+    inlineTask = q.PushBack(std::move(task));
+  }
+  if (inlineTask.has_value()) {
+    (*inlineTask)->mAwaitingCoroutine.resume();
+  }
 }
 
-}
-}
-
+}  // namespace async
+}  // namespace sss

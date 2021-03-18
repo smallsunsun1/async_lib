@@ -9,10 +9,10 @@
 #include "async/concurrent/blocking_work_queue.h"
 #include "async/concurrent/concurrent_work_queue.h"
 #include "async/concurrent/environment.h"
-#include "async/support/string_util.h"
 #include "async/concurrent/work_queue_base.h"
 #include "async/coroutine/coroutine_task_deque.h"
 #include "async/coroutine/coroutine_task_queue.h"
+#include "async/support/string_util.h"
 
 namespace sss {
 namespace async {
@@ -41,17 +41,14 @@ class CoroutineThreadPool {
  public:
   ~CoroutineThreadPool() {
     mCancelled.store(true, std::memory_order_relaxed);
-    for (auto& thread: mThreadData) {
+    for (auto& thread : mThreadData) {
       thread.thread->join();
     }
   }
-  explicit CoroutineThreadPool(int numThreads): mNumThreads(numThreads),
-        mCancelled(false), mCoprimes(internal::ComputeCoprimes(numThreads)), mThreadData(numThreads) {
+  explicit CoroutineThreadPool(int numThreads) : mNumThreads(numThreads), mCancelled(false), mCoprimes(internal::ComputeCoprimes(numThreads)), mThreadData(numThreads) {
     assert(numThreads >= 1 && "thread number must be larger than 1");
     for (int i = 0; i < numThreads; ++i) {
-      mThreadData[i].thread = ThreadingEnvironment::StartThread([this, i](){
-        WorkerLoop(i);
-      });
+      mThreadData[i].thread = ThreadingEnvironment::StartThread([this, i]() { WorkerLoop(i); });
     }
   }
   void WorkerLoop(int threadId);
@@ -72,11 +69,11 @@ class CoroutineThreadPool {
   struct PerThread {
     constexpr PerThread() : parent(nullptr), rng(0), thread_id(-1) {}
     CoroutineThreadPool* parent;
-    internal::FastRng rng;    // Random number generator
-    int thread_id;  // Worker thread index in the workers queue
+    internal::FastRng rng;  // Random number generator
+    int thread_id;          // Worker thread index in the workers queue
   };
   struct ThreadData {
-    ThreadData(): thread(), queue() {}
+    ThreadData() : thread(), queue() {}
     std::unique_ptr<Thread> thread;
     Queue queue;
   };

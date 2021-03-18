@@ -5,11 +5,11 @@ namespace sss {
 namespace async {
 
 struct AnyData {
-    template <typename T>
-    AnyData(T&&) {}
+  template <typename T>
+  AnyData(T&&) {}
 };
 
-}
-}
+}  // namespace async
+}  // namespace sss
 
 #endif /* ASYNC_COROUTINE_INTERNAL_DATA_TYPES_ */

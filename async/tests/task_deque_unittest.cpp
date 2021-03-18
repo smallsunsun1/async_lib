@@ -41,11 +41,11 @@ TEST(TaskQueueTool, EnPopqueueTest) {
       }
     });
   }
-  for (auto& refThread: totalThreads) {
-      refThread.join();
+  for (auto& refThread : totalThreads) {
+    refThread.join();
   }
-  for (auto& refThread: totalPopThreads) {
-      refThread.join();
+  for (auto& refThread : totalPopThreads) {
+    refThread.join();
   }
   auto endEn1 = high_resolution_clock::now();
   int duration = duration_cast<microseconds>(endEn1 - startEn1).count();
@@ -69,20 +69,20 @@ TEST(TaskQueueTool, EnPopqueueTest) {
       for (int j = 0; j < numIterations; ++j) {
         std::lock_guard<std::mutex> lock(globalMutex);
         if (!mLockQueue.empty()) {
-            mLockQueue.pop_front();
+          mLockQueue.pop_front();
         }
       }
     });
   }
-  for (auto& refThread: totalThreads) {
-      refThread.join();
+  for (auto& refThread : totalThreads) {
+    refThread.join();
   }
-  for (auto& refThread: totalPopThreads) {
-      refThread.join();
+  for (auto& refThread : totalPopThreads) {
+    refThread.join();
   }
   auto endEn2 = high_resolution_clock::now();
   int duration2 = duration_cast<microseconds>(endEn2 - startEn2).count();
-  std::cout << "lock_free algorithm time cost: " << duration << "\n" 
+  std::cout << "lock_free algorithm time cost: " << duration << "\n"
             << "lock_based algorithm time cost: " << duration2 << std::endl;
   totalThreads.clear();
   totalPopThreads.clear();
