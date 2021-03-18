@@ -49,6 +49,13 @@ auto get_awaiter(T&& value) -> decltype(get_awaiter_impl(std::forward<T>(value),
     return get_awaiter_impl(std::forward<T>(value), 1);
 }
 
+template <typename T, typename F = std::void_t<>>
+struct is_awaitable : std::false_type {};
+
+template <typename T>
+struct is_awaitbale<T, std::void_t<decltype(get_awaiter(std::declval<T>()))>> : public std::true_type {};
+
+
 }
 }
 }

@@ -11,10 +11,16 @@ Task<void> DoSimpleWorkOnThreadPool(CoroutineThreadPool& pool) {
     std::cout << "Hello World!\n";
 }
 
+Task<int> DoSimpleReturnValueOnThreadPool(CoroutineThreadPool& pool) {
+    co_await pool.Schedule();
+    co_return 100;
+}
 
 int main() {
     CoroutineThreadPool pool(10);
     Task<void> res = DoSimpleWorkOnThreadPool(pool);
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    Task<int> res2 = DoSimpleReturnValueOnThreadPool(pool);
     SyncWait(res);
+    int result = SyncWait(res2);
+    std::cout << result << std::endl;
 }

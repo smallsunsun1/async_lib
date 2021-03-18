@@ -9,10 +9,10 @@
 #include "async/concurrent/blocking_work_queue.h"
 #include "async/concurrent/concurrent_work_queue.h"
 #include "async/concurrent/environment.h"
-#include "async/concurrent/non_blocking_work_queue.h"
 #include "async/support/string_util.h"
 #include "async/concurrent/work_queue_base.h"
-#include "coroutine_queue_traits.h"
+#include "async/coroutine/coroutine_task_deque.h"
+#include "async/coroutine/coroutine_task_queue.h"
 
 namespace sss {
 namespace async {
