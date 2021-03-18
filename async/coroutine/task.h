@@ -13,7 +13,7 @@ namespace sss {
 namespace async {
 template <typename T>
 class Task;
-namespace detail {
+namespace internal {
 class BasePromise {
   friend class Awaitable;
   struct Awaitable {
@@ -118,11 +118,11 @@ class TaskPromise<T&> : public BasePromise {
   T* mValue;
   std::exception_ptr mException;
 };
-}  // namespace detail
+}  // namespace internal
 template <typename T = void>
 class Task {
  public:
-  using promise_type = detail::TaskPromise<T>;
+  using promise_type = internal::TaskPromise<T>;
   using value_type = T;
   Task() noexcept : mCoroutine(nullptr) {}
   explicit Task(std::coroutine_handle<promise_type> coroutine) : mCoroutine(coroutine) {}
@@ -191,7 +191,7 @@ class Task {
  private:
   std::coroutine_handle<promise_type> mCoroutine;
 };
-namespace detail {
+namespace internal {
 template <typename T>
 Task<T> TaskPromise<T>::get_return_object() noexcept {
   return Task<T>{std::coroutine_handle<TaskPromise>::from_promise(*this)};
@@ -201,7 +201,7 @@ template <typename T>
 Task<T&> TaskPromise<T&>::get_return_object() noexcept {
   return Task<T&>{std::coroutine_handle<TaskPromise>::from_promise(*this)};
 }
-}  // namespace detail
+}  // namespace internal
 
 }  // namespace async
 }  // namespace sss
