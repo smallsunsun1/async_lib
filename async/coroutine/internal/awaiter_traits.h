@@ -49,7 +49,19 @@ template <typename T, typename F = std::void_t<>>
 struct is_awaitable : std::false_type {};
 
 template <typename T>
-struct is_awaitbale<T, std::void_t<decltype(get_awaiter(std::declval<T>()))>> : public std::true_type {};
+struct is_awaitable<T, std::void_t<decltype(get_awaiter(std::declval<T>()))>> : public std::true_type {};
+
+template <typename T>
+struct remove_rvalue_reference {
+  using type = T;
+};
+template <typename T>
+struct remove_rvalue_reference<T&&> {
+  using type = T;
+};
+
+template <typename T>
+using remove_rvalue_reference_t = typename remove_rvalue_reference<T>::type;
 
 }  // namespace internal
 }  // namespace async

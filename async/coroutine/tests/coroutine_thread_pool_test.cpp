@@ -10,11 +10,13 @@ using namespace async;
 
 Task<void> DoSimpleWorkOnThreadPool(CoroutineThreadPool& pool) {
   co_await pool.Schedule();
+  std::cout << std::this_thread::get_id() << std::endl;
   std::cout << "Hello World!\n";
 }
 
 Task<int> DoSimpleReturnValueOnThreadPool(CoroutineThreadPool& pool) {
   co_await pool.Schedule();
+  std::cout << std::this_thread::get_id() << std::endl;
   co_return 100;
 }
 

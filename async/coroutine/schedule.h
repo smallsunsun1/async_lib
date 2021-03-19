@@ -3,6 +3,7 @@
 
 #include "coroutine_thread_pool.h"
 #include "task.h"
+#include "internal/awaiter_traits.h"
 
 namespace sss {
 namespace async {
@@ -19,7 +20,7 @@ SchedulerTransform<Executor> ScheduleOn(Executor& exec) {
 }
 
 template <typename Awaitable, typename Scheduler>
-auto ScheduleOn(Scheduler& scheduler, Awaitable&& awaitable) -> {
+auto ScheduleOn(Scheduler& scheduler, Awaitable&& awaitable) -> Task<internal::remove_rvalue_reference_t<typename awaitable_traits<Awaitable>::await_result_t>> {
   co_await scheduler.Schedule();
   co_return co_await std::forward<Awaitable>(awaitable);
 }
