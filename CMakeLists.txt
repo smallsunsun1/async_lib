@@ -30,10 +30,10 @@ if(USE_ASAN)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -O1 -fno-omit-frame-pointer")
 endif()
 if(USE_CUDA)
-    set(CUDA_INCLUDES "/usr/local/include/cuda")
+    set(CUDA_INCLUDES "/usr/local/cuda/include/")
     enable_language(CUDA)
     add_definitions(-DEIGEN_USE_GPU)
-    include_directories(CUDA_INCLUDES)
+    include_directories(${CUDA_INCLUDES})
 endif()
 if(USE_CXX_20)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -fcoroutines")
@@ -50,32 +50,20 @@ FetchContent_Declare(
     GIT_TAG        release-1.10.0
 )
 FetchContent_MakeAvailable(googletest)
-FetchContent_Declare(
-    nlohmann_json
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG        v3.9.0
-)
-FetchContent_MakeAvailable(nlohmann_json)
+
 # FetchContent_Declare(
 #     gRPC 
 #     GIT_REPOSITORY https://github.com/grpc/grpc
 #     GIT_TAG v1.35.0
 # )
 # FetchContent_MakeAvailable(gRPC)
-# FetchContent_Declare(
-#     absl 
-#     GIT_REPOSITORY https://github.com/abseil/abseil-cpp
-#     GIT_TAG lts_2020_09_23
-# )
-# FetchContent_MakeAvailable(absl)
 
 enable_testing()
 
-include_directories(third_party/libs/include)
 include_directories(third_party/eigen3)
-include_directories(third_party/abseil-cpp)
 include_directories(./)
-# link_directories(third_party/libs/lib)
+include_directories(third_party/abseil-cpp)
+
 link_libraries(pthread)
 add_subdirectory(third_party)
 add_subdirectory(async)

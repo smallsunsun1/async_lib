@@ -144,23 +144,161 @@ public:
     CoroutineHandle get_return_object() {
         return CoroutineHandle::from_promise(*this);
     }
-    void return_value(T&& value)
+    void return_void() {
+        assert(false);
+    }
+    void Start(WhenAllCounter& counter) {
+        mCounter = &counter;
+        CoroutineHandle::from_promise(*this).resume();
+    }
     auto initial_suspend() noexcept {
         return std::suspend_always{};
     }
-    void unhandled_exception() noexcept {}
-    auto final_suspend() noexcept {}
+    void unhandled_exception() noexcept {
+        mException = std::current_exception();
+    }
+    auto yield_value(T&& value) {
+        mResult = std::addressof(value);
+        return final_suspend();
+    }
+    auto final_suspend() noexcept {
+        class Awaitable {
+        public:
+            bool await_ready() const noexcept {return false;}
+            void await_suspend(CoroutineHandle handle) const noexcept {
+                handle.promise().mCounter->Notify();
+            }
+            void await_resume() const noexcept {}
+        };
+        return Awaitable{};
+    }
+    T& get() & {
+        if (mException) {
+            std::rethrow_exception(mException);
+        }
+        return *mResult;
+    } 
+    T&& get() && {
+        if (mException) {
+            std::rethrow_exception(mException);
+        }
+        return std::forward<T>(*mResult);
+    }
 private:
+    WhenAllCounter* mCounter;
+    std::exception_ptr mException;
+    T* mResult;
+};
+
+template <>
+class WhenAllPromise<void> {
+public:
+    using CoroutineHandle = std::coroutine_handle<WhenAllPromise<void>>;
+    auto get_return_object() {
+        CoroutineHandle::from_promise(*this);
+    }
+    auto initial_suspend() {
+        return std::suspend_always{};
+    }
+    auto final_suspend() {
+        class Awaitable {
+        public:
+            bool await_ready() {return false;}
+            void await_suspend(CoroutineHandle handle) {
+                handle.promise().mCounter->Notify();
+            }
+            void await_resume() {}
+        };
+        return Awaitable{};
+    }
+    void Start(WhenAllCounter& counter) {
+        mCounter = &counter;
+        CoroutineHandle::from_promise(*this).resume();
+    } 
+    void return_void() {}
+    void get() {
+        if (mException) {
+            std::rethrow_exception(mException);
+        }
+    }
+    void unhandled_exception() {
+        mException = std::current_exception();
+    }
+private:
+    WhenAllCounter* mCounter;
     std::exception_ptr mException;
 };
 
 template <typename T>
 class WhenAllTasks<T> {
 public:
-    using promise_type = WhenAllPromise<T>; 
+    using promise_type = WhenAllPromise<T>;
+    using CoroutineHandle = std::coroutine_handle<promise_type>;
+    WhenAllTasks() noexcept {}
+    WhenAllTasks(CoroutineHandle handle) noexcept: mCoroutineHandle(handle) {}
+    WhenAllTasks(WhenAllTasks&& other) noexcept: mCoroutineHandle(std::exchange(other.mCoroutineHandle, CoroutineHandle{})) {}
+    ~WhenAllTasks() {
+        if (mCoroutineHandle) {
+            mCoroutineHandle.destroy();
+        }
+    }
+    decltype(auto) get() & {
+        return mCoroutineHandle.promise().get();
+    }
+    decltype(auto) get() && {
+        return std::move(mCoroutineHandle.promise().get());
+    }
+    decltype(auto) get_non_void_value() & {
+        if constexpr (std::is_void<std::invoke_result_t<&WhenAllTasks::get>>::value) {
+            get();
+            return AnyData();
+        } else {
+            return get();
+        }
+    }
+    decltype(auto) get_non_void_value() && {
+        if constexpr (std::is_void<std::invoke_result_t<&WhenAllTasks::get>>::value) {
+            get();
+            return AnyData();
+        } else {
+            return std::move(get());
+        }
+    }
 private:
+    template <typename Tasks>
+    friend class WhenAllAwaitable;
+    void Start(WhenAllCounter& counter) {
+        mCoroutineHandle.promise().Start(counter);
+    }
+    WhenAllTasks(const WhenAllTasks&) = delete;
+    WhenAllTasks& operator=(const WhenAllTasks&) = delete;
     std::coroutine_handle<promise_type> mCoroutineHandle;
 };
+
+template <typename ...Awaitables, typename F = WhenAllAwaitable<Awaitables...>, 
+          typename Result = typename awaitable_traits<F>::await_result_t, 
+          std::enable_if_t<!std::is_void<Result>::value, int> = 0>
+WhenAllTasks<Result> make_when_all_tasks(Awaitables... awaitables) {
+    WhenAllAwaitable allAwaitable(std::forward<Awaitables>(awaitables)...);
+    co_yield co_await std::forward<WhenAllAwaitable>(allAwaitable)
+}
+template <typename ...Awaitables, typename F = WhenAllAwaitable<Awaitables...>, 
+          typename Result = typename awaitable_traits<F>::await_result_t, 
+          std::enable_if_t<std::is_void<Result>::value, int> = 0>
+WhenAllTasks<void> make_when_all_tasks(Awaitables... awaitables) {
+    WhenAllAwaitable allAwaitable(std::forward<Awaitables>(awaitables)...);
+    co_await std::forward<WhenAllAwaitable>(allAwaitable);
+}
+template <typename AwaitableT, typename Result = typename awaitable_traits<AwaitableT>::await_result_t,
+          std::enable_if_t<!std::is_void<Result>::value, int> = 0>
+WhenAllTasks<Result> make_when_all_tasks(AwaitableT&& awaitable) {
+    co_yield co_await std::forward<AwaitableT>(awaitable);
+}
+template <typename AwaitableT, typename Result = typename awaitable_traits<AwaitableT>::await_result_t,
+          std::enable_if_t<std::is_void<Result>::value, int> = 0>
+WhenAllTasks<void> make_when_all_tasks(AwaitableT&& awaitable) {
+    co_await std::forward<AwaitableT>(awaitable);
+}
 
 }  // namespace internal
 }  // namespace async

@@ -5,6 +5,7 @@ namespace sss {
 namespace async {
 
 struct AnyData {
+  AnyData() {}
   template <typename T>
   AnyData(T&&) {}
 };

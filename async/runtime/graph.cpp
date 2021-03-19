@@ -11,12 +11,10 @@
 #include "async/context/async_value.h"
 #include "async/context/kernel_frame.h"
 #include "async/context/native_function.h"
-#include "nlohmann/json.hpp"
 
 namespace sss {
 
 using namespace async;
-using json = nlohmann::json;
 
 // 一些Helper函数
 AsyncValue* GetAsyncValuePtr(const AsyncValueInfo& info) { return info.mValue.load(std::memory_order_acquire); }
@@ -129,44 +127,8 @@ AsyncNode* AsyncGraph::emplace_back(std::vector<std::string> inputNames, std::ve
   mAsyncNodes.push_back(node);
   return node;
 }
-void AsyncGraph::Dump(const std::string& filename) const {
-  json result;
-  for (int i = 0; i < mAsyncNodes.size(); ++i) {
-    json tempValue;
-    AsyncNode* curNode = mAsyncNodes[i];
-    tempValue["name"] = curNode->mFuncName;
-    json inputs(curNode->mInputNames);
-    json outputs(curNode->mOutputNames);
-    tempValue["inputs"] = inputs;
-    tempValue["outputs"] = outputs;
-    tempValue["is_strict_fn"] = curNode->mIsStrictFunc;
-    result.push_back(tempValue);
-  }
-  std::ofstream outf(filename);
-  outf << result;
-  outf.close();
-}
-void AsyncGraph::Load(const std::string& filename) {
-  std::ifstream inFile(filename);
-  json jData;
-  inFile >> jData;
-  for (int i = 0; i < jData.size(); ++i) {
-    json curValue = jData[i];
-    std::vector<std::string> inputNames;
-    std::vector<std::string> outputNames;
-    bool isStrictFn = curValue["is_strict_fn"];
-    std::string funcName = curValue["name"];
-    const json& inputJson = jData[i]["inputs"].get<json>();
-    for (int j = 0; j < inputJson.size(); ++j) {
-      inputNames.push_back(inputJson[j]);
-    }
-    const json& outputJson = jData[i]["outputs"].get<json>();
-    for (int j = 0; j < outputJson.size(); ++j) {
-      outputNames.push_back(outputJson[j]);
-    }
-    this->emplace_back(std::move(inputNames), std::move(outputNames), nullptr, funcName, isStrictFn);
-  }
-}
+void AsyncGraph::Dump(const std::string& filename) const {}
+void AsyncGraph::Load(const std::string& filename) {}
 unsigned AsyncGraph::GetNumOutputs() const {
   unsigned numRes = 0;
   for (const auto& value : mFunctionInfo.mAsyncValueInfos) {

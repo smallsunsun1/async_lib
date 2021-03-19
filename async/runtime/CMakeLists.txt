@@ -1,5 +1,5 @@
 file(GLOB header_files "*.h")
 file(GLOB object_files "*.cpp")
 add_library(async_runtime ${LIB_TYPE} ${object_files})
-target_link_libraries(async_runtime PUBLIC async_context async_support async_trace async_concurrent nlohmann_json::nlohmann_json)
+target_link_libraries(async_runtime PUBLIC async_context async_support async_trace async_concurrent)
 target_precompile_headers(async_runtime PRIVATE ${header_files})

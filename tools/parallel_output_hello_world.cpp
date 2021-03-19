@@ -3,7 +3,7 @@
 #include "async/context/kernel_frame.h"
 #include "async/context/host_context.h"
 
-using namespace ficus;
+using namespace sss;
 using namespace async;
 
 int main() {
