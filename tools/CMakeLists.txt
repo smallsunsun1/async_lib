@@ -1,2 +1,4 @@
 add_executable(parallel_output_hello_world parallel_output_hello_world.cpp)
 target_link_libraries(parallel_output_hello_world PRIVATE async_context async_runtime)
+
+add_subdirectory(image_tools)
