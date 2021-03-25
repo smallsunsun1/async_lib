@@ -46,9 +46,6 @@ int main() {
     RunAsyncGraph(graph.get(), results[i], results[i + 1], true);
   }
   runContext->Await(results[numIters]);
-  // for (int i = 0; i < numIters * 100; ++i) {
-  //     LargeComputeFn(iterRangeValue);
-  // }
   auto end = high_resolution_clock::now();
   std::cout << duration_cast<nanoseconds>(end - start).count();
 }

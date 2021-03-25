@@ -87,6 +87,8 @@ class TaskGraphExecutor : public async::ReferenceCounted<TaskGraphExecutor> {
   TaskGraph* mGraph;
 };
 
+void RunTaskGraph(TaskGraph* graph, bool sync = true);
+
 }  // namespace sss
 
 #endif /* INFERENCE_MEDICAL_BIOIMAGE_BRAIN_COMMON_GRAPH_TASK_GRAPH_ */

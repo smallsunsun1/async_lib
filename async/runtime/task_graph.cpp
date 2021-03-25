@@ -5,7 +5,7 @@
 #include "async/context/host_context.h"
 #include "async/support/latch.h"
 
-using namespace sss;
+namespace sss {
 
 void TaskNode::AddDependency(TaskNode* node) {
   node->mSuccessories.push_back(this);
@@ -92,4 +92,15 @@ void TaskGraphExecutor::Await() {
 void TaskGraphExecutor::Destroy() {
   this->~TaskGraphExecutor();
   GetContext()->Deallocate<TaskGraphExecutor>(this);
+}
+
+void RunTaskGraph(TaskGraph* graph, bool sync) {
+  async::HostContext* context = graph->GetContext();
+  TaskGraphExecutor* memory = context->Allocate<TaskGraphExecutor>();
+  TaskGraphExecutor* executor = new (memory) TaskGraphExecutor(graph);
+  executor->Execute();
+  if (sync) executor->Await();
+  executor->DropRef();
+}
+
 }

@@ -20,7 +20,6 @@ target_link_libraries(test_task_deque PRIVATE ${libs_for_test})
 add_executable(test_task_queue task_queue_unittest.cpp)
 target_link_libraries(test_task_queue PRIVATE ${libs_for_test})
 
-add_test(NAME any COMMAND test_any)
 add_test(NAME function COMMAND test_function)
 add_test(NAME latch COMMAND test_latch)
 add_test(NAME resource COMMAND test_resource)
