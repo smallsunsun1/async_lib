@@ -28,13 +28,11 @@ int main() {
   RCReference<TaskGraph> graph = TakeRef(graphOri);
   std::vector<TaskNode*> nodes;
   for (int i = 0; i < 100; ++i) {
-      TaskNode* node = graph->emplace_back([i](){
-          std::cout << LargeComputeFn(i) << std::endl;
-      });
-      nodes.push_back(node);
+    TaskNode* node = graph->emplace_back([i]() { std::cout << LargeComputeFn(i) << std::endl; });
+    nodes.push_back(node);
   }
   for (int i = 0; i < nodes.size() - 1; ++i) {
-      nodes[i]->AddSuccessor(nodes[i+1]);
+    nodes[i]->AddSuccessor(nodes[i + 1]);
   }
   graph->BuildGraph();
 

@@ -2,8 +2,8 @@
 #define ASYNC_COROUTINE_SCHEDULE_
 
 #include "coroutine_thread_pool.h"
-#include "task.h"
 #include "internal/awaiter_traits.h"
+#include "task.h"
 
 namespace sss {
 namespace async {
