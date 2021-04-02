@@ -21,7 +21,7 @@ class KernelFnRegister {
   absl::flat_hash_map<absl::string_view, AsyncKernelFn> mFuncLibs;
 };
 
-KernelFnRegister& GetKernelFnRegister() {
+inline KernelFnRegister& GetKernelFnRegister() {
   static KernelFnRegister fnRegister;
   return fnRegister;
 }

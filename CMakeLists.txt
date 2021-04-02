@@ -3,7 +3,7 @@ if (POLICY CMP0048)
 endif (POLICY CMP0048)
 project(project_async)
 cmake_minimum_required(VERSION 3.15)
-set(CMAKE_CXX_STANDARD_REQUIRED 14)
+set(CMAKE_CXX_STANDARD_REQUIRED 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
@@ -39,7 +39,7 @@ endif()
 if(USE_CXX_20)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -fcoroutines")
 else()
-    set(CMAKE_CXX_FLAGS "-std=c++14")
+    set(CMAKE_CXX_FLAGS "-std=c++1z")
 endif()
 
 
@@ -60,7 +60,7 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-find_package(OpenCV REQUIRED)
+# find_package(OpenCV REQUIRED)
 
 include_directories(third_party/eigen3)
 include_directories(./)
