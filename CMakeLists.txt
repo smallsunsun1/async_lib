@@ -25,7 +25,7 @@ endif()
 
 option(USE_ASAN "variable which indicate whether to use address sanitizer" OFF)
 option(USE_CUDA "variable which indicate whether to build with cuda" OFF)
-option(USE_CXX_20 "variable which indicate whether to build with -std=c++20 standard" OFF)
+option(USE_CXX_20 "variable which indicate whether to build with -std=c++20 standard" ON)
 if(USE_ASAN)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -O1 -fno-omit-frame-pointer")
 endif()

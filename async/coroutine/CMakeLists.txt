@@ -6,6 +6,8 @@ add_executable(coroutine_test tests/coroutine_test.cpp)
 target_link_libraries(coroutine_test async_coroutine)
 add_executable(coroutine_thread_pool_test tests/coroutine_thread_pool_test.cpp)
 target_link_libraries(coroutine_thread_pool_test async_coroutine)
+add_executable(when_all_test tests/when_all_test.cpp)
 
 add_test(NAME test_coroutine COMMAND coroutine_test)
 add_test(NAME test_coroutine_thread_pool COMMAND coroutine_thread_pool_test)
+add_test(NAME test_when_all COMMAND when_all_test)
