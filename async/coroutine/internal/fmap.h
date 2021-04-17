@@ -60,6 +60,32 @@ struct FunctionMapTransform {
 };
 
 }  // namespace internal
+
+template <typename Func, typename Awaitable, std::enable_if_t<internal::is_awaitable<Awaitable>::value, int> = 0>
+auto FMap(Func&& func, Awaitable&& awaitable) {
+  return internal::FunctionMapAwaitable<std::remove_cv_t<std::remove_reference_t<Func>>, std::remove_cv_t<std::remove_reference_t<Awaitable>>>(std::forward<Func>(func),
+                                                                                                                                               std::forward<Awaitable>(awaitable));
+}
+template <typename Func>
+auto FMap(Func&& func) {
+  return internal::FunctionMapTransform<Func>(std::forward<Func>(func));
+}
+
+template <typename T, typename Func>
+decltype(auto) operator|(T&& value, internal::FunctionMapTransform<Func>&& transform) {
+  return FMap(std::forward<Func>(transform.func), std::forward<T>(value));
+}
+
+template <typename T, typename Func>
+decltype(auto) operator|(T&& value, const internal::FunctionMapTransform<Func>& transform) {
+  return FMap(transform.func, std::forward<T>(value));
+}
+
+template <typename T, typename Func>
+decltype(auto) operator|(T&& value, internal::FunctionMapTransform<Func>& transform) {
+  return FMap(transform.func, std::forward<T>(value));
+}
+
 }  // namespace async
 }  // namespace sss
 
