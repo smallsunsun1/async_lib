@@ -19,17 +19,17 @@ fi
 # mv grpc-1.36.4 grpc
 # fi
 
-if [ ! -f "opencv.zip" ]; then 
-wget https://github.com/opencv/opencv/archive/4.5.1.zip -O opencv.zip 
-unzip opencv.zip 
-mv opencv-4.5.1 opencv 
-cd opencv 
-mkdir -p build && cd build 
-cmake -GNinja .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../../../third_party_libs -DCMAKE_CXX_COMPILER=/usr/bin/g++-5 -DCMAKE_C_COMPILER=/usr/bin/gcc-5
-cmake --build . -j20 
-cd ..
-cd ..
-fi 
+#if [ ! -f "opencv.zip" ]; then 
+#wget https://github.com/opencv/opencv/archive/4.5.1.zip -O opencv.zip 
+#unzip opencv.zip 
+#mv opencv-4.5.1 opencv 
+#cd opencv 
+#mkdir -p build && cd build 
+#cmake -GNinja .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../../../third_party_libs -DCMAKE_CXX_COMPILER=/usr/bin/g++-5 -DCMAKE_C_COMPILER=/usr/bin/gcc-5
+#cmake --build . -j20 
+#cd ..
+#cd ..
+#fi 
 
 # mkdir -p build && cd build 
 # cmake -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=/usr/bin/g++-5 -DCMAKE_C_COMPILER=/usr/bin/gcc-5 ..
