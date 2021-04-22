@@ -9,9 +9,7 @@ enum class TensorDtype { kFloat = 0, kDouble = 1, kInt = 2, kString = 3 };
 class Tensor {
  public:
   enum class TensorType { kUnknownTypeTensor = 0, kHostDenseTensor = 1, kDeviceDenseTensor = 2 };
-  bool isTensorType(TensorType inTensorType) const {
-    return tensorType == inTensorType;
-  }
+  bool isTensorType(TensorType inTensorType) const { return tensorType == inTensorType; }
 
  protected:
   Tensor(const Tensor&) = delete;
