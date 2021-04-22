@@ -6,6 +6,6 @@ Now it's only based on abseil ,googletest, eigen and a minimal dependent on nolm
 
 Some custom execution mode such as GraphMode and TaskGraphMode are added.
 
-Start to add some coroutine functions and tools.
+Start to add some coroutine functions and tools. Currently coroutine are just under development and should not be used.
 
 Please refer to documents for more detailed explantion.
