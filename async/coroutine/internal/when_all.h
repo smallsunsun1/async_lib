@@ -17,10 +17,10 @@ class WhenAllCounter {
   bool IsReady() { return mCount.load() == 0; }
   bool TryAwait(std::coroutine_handle<> awaitCoroutine) {
     mAwaitingCoroutine = awaitCoroutine;
-    return mCount.fetch_sub(1, std::memory_order_acl_rel) > 1;
+    return mCount.fetch_sub(1, std::memory_order_acq_rel) > 1;
   }
   void Notify() noexcept {
-    if (mCount.fetch_sub(1, std::memory_order_acl_rel) == 1) {
+    if (mCount.fetch_sub(1, std::memory_order_acq_rel) == 1) {
       mAwaitingCoroutine.resume();
     }
   }
@@ -55,7 +55,7 @@ class WhenAllAwaitable<std::tuple<Tasks...>> {
     class Awaitable {
      public:
       bool await_ready() const noexcept { return mAwaitable.IsReady(); }
-      bool await_suspend(std::coroutine_handle<> handle) noexcept { mAwaitable.TryAwait(handle); }
+      bool await_suspend(std::coroutine_handle<> handle) noexcept { return mAwaitable.TryAwait(handle); }
       std::tuple<Tasks...>& await_resume() { return mAwaitable.mTasks; }
 
      private:
@@ -64,10 +64,10 @@ class WhenAllAwaitable<std::tuple<Tasks...>> {
     return Awaitable{*this};
   }
   auto operator co_await() && noexcept {
-    class Awaitbale {
+    class Awaitable {
      public:
       bool await_ready() const noexcept { return mAwaitable.IsReady(); }
-      bool await_suspend(std::coroutine_handle<> handle) noexcept { mAwaitable.TryAwait(handle); }
+      bool await_suspend(std::coroutine_handle<> handle) noexcept { return mAwaitable.TryAwait(handle); }
       std::tuple<Tasks...>&& await_resume() { return std::move(mAwaitable.mTasks); }
 
      private:
@@ -91,7 +91,7 @@ class WhenAllAwaitable<std::tuple<Tasks...>> {
 };
 
 template <typename TasksContainer>
-class WhenAllAwaitable<TasksContainer> {
+class WhenAllAwaitable {
  public:
   WhenAllAwaitable(TasksContainer&& tasksContainer) : mTasksContainer(std::forward<TasksContainer>(tasksContainer)), mCounter(tasksContainer.size()) {}
   WhenAllAwaitable(WhenAllAwaitable&& other) : mCounter(other.mTasksContainer.size()), mTasksContainer(std::move(other.mTasksContainer)) {}
@@ -102,19 +102,19 @@ class WhenAllAwaitable<TasksContainer> {
      public:
       bool await_ready() noexcept { return mAwaitable.IsReady(); }
       bool await_suspend(std::coroutine_handle<> handle) noexcept { return mAwaitable.TryAwait(handle); }
-      TaskContainer& await_resume() noexcept { return mTasksContainer; }
+      TasksContainer& await_resume() noexcept { return mTasksContainer; }
 
      private:
       WhenAllAwaitable& mAwaitable;
     };
-    return Awaitable { *this }
+    return Awaitable { *this };
   }
   auto operator co_await() && noexcept {
     class Awaitable {
      public:
       bool await_ready() noexcept { return mAwaitable.IsReady(); }
       bool await_suspend(std::coroutine_handle<> handle) noexcept { return mAwaitable.TryAwait(handle); }
-      TaskContainer&& await_resume() noexcept { return std::move(mTasksContainer); }
+      TasksContainer&& await_resume() noexcept { return std::move(mTasksContainer); }
 
      private:
       WhenAllAwaitable& mAwaitable;
@@ -214,7 +214,7 @@ class WhenAllPromise<void> {
 };
 
 template <typename T>
-class WhenAllTasks<T> {
+class WhenAllTasks {
  public:
   using promise_type = WhenAllPromise<T>;
   using CoroutineHandle = std::coroutine_handle<promise_type>;
@@ -228,16 +228,16 @@ class WhenAllTasks<T> {
   }
   decltype(auto) get() & { return mCoroutineHandle.promise().get(); }
   decltype(auto) get() && { return std::move(mCoroutineHandle.promise().get()); }
-  decltype(auto) get_non_void_value() & {
-    if constexpr (std::is_void<std::invoke_result_t<&WhenAllTasks::get>>::value) {
+  decltype(auto) non_void_result() & {
+    if constexpr (std::is_void_v<decltype(this->get())>) {
       get();
       return AnyData();
     } else {
       return get();
     }
   }
-  decltype(auto) get_non_void_value() && {
-    if constexpr (std::is_void<std::invoke_result_t<&WhenAllTasks::get>>::value) {
+  decltype(auto) non_void_result() && {
+    if constexpr (std::is_void_v<decltype(this->get())>) {
       get();
       return AnyData();
     } else {
@@ -254,16 +254,16 @@ class WhenAllTasks<T> {
   std::coroutine_handle<promise_type> mCoroutineHandle;
 };
 
-template <typename... Awaitables, typename F = WhenAllAwaitable<Awaitables...>, typename Result = typename awaitable_traits<F>::await_result_t, std::enable_if_t<!std::is_void<Result>::value, int> = 0>
-WhenAllTasks<Result> make_when_all_tasks(Awaitables... awaitables) {
-  WhenAllAwaitable allAwaitable(std::forward<Awaitables>(awaitables)...);
-  co_yield co_await std::forward<WhenAllAwaitable>(allAwaitable)
-}
-template <typename... Awaitables, typename F = WhenAllAwaitable<Awaitables...>, typename Result = typename awaitable_traits<F>::await_result_t, std::enable_if_t<std::is_void<Result>::value, int> = 0>
-WhenAllTasks<void> make_when_all_tasks(Awaitables... awaitables) {
-  WhenAllAwaitable allAwaitable(std::forward<Awaitables>(awaitables)...);
-  co_await std::forward<WhenAllAwaitable>(allAwaitable);
-}
+// template <typename... Awaitables, typename F = WhenAllAwaitable<Awaitables...>, typename Result = typename awaitable_traits<F>::await_result_t, std::enable_if_t<!std::is_void<Result>::value, int> = 0>
+// WhenAllTasks<Result> make_when_all_tasks(Awaitables... awaitables) {
+//   WhenAllAwaitable allAwaitable(std::forward<Awaitables>(awaitables)...);
+//   co_yield co_await std::forward<WhenAllAwaitable>(allAwaitable);
+// }
+// template <typename... Awaitables, typename F = WhenAllAwaitable<Awaitables...>, typename Result = typename awaitable_traits<F>::await_result_t, std::enable_if_t<std::is_void<Result>::value, int> = 0>
+// WhenAllTasks<void> make_when_all_tasks(Awaitables... awaitables) {
+//   WhenAllAwaitable allAwaitable(std::forward<Awaitables>(awaitables)...);
+//   co_await std::forward<WhenAllAwaitable>(allAwaitable);
+// }
 template <typename AwaitableT, typename Result = typename awaitable_traits<AwaitableT>::await_result_t, std::enable_if_t<!std::is_void<Result>::value, int> = 0>
 WhenAllTasks<Result> make_when_all_tasks(AwaitableT&& awaitable) {
   co_yield co_await std::forward<AwaitableT>(awaitable);
@@ -271,6 +271,11 @@ WhenAllTasks<Result> make_when_all_tasks(AwaitableT&& awaitable) {
 template <typename AwaitableT, typename Result = typename awaitable_traits<AwaitableT>::await_result_t, std::enable_if_t<std::is_void<Result>::value, int> = 0>
 WhenAllTasks<void> make_when_all_tasks(AwaitableT&& awaitable) {
   co_await std::forward<AwaitableT>(awaitable);
+}
+template<typename AwaitableT, typename Result = typename awaitable_traits<AwaitableT&>::await_result_t, std::enable_if_t<std::is_void_v<Result>, int> = 0>
+WhenAllTasks<void> make_when_all_task(std::reference_wrapper<AwaitableT> awaitable)
+{
+  co_await awaitable.get();
 }
 
 }  // namespace internal
