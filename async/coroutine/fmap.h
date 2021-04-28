@@ -18,8 +18,8 @@ class FmapAwaiter {
   awaiter_t m_awaiter;
 
  public:
-  FmapAwaiter(Func&& func, Awaitable&& awaitable) noexcept(std::is_nothrow_move_constructible_v<awaiter_t>&& noexcept(detail::get_awaiter(static_cast<Awaitable&&>(awaitable))))
-      : mFunc(static_cast<Func&&>(func)), m_awaiter(detail::get_awaiter(static_cast<Awaitable&&>(awaitable))) {}
+  FmapAwaiter(Func&& func, Awaitable&& awaitable) noexcept(std::is_nothrow_move_constructible_v<awaiter_t>&& noexcept(internal::get_awaiter(static_cast<Awaitable&&>(awaitable))))
+      : mFunc(static_cast<Func&&>(func)), m_awaiter(internal::get_awaiter(static_cast<Awaitable&&>(awaitable))) {}
 
   decltype(auto) await_ready() noexcept(noexcept(static_cast<awaiter_t&&>(m_awaiter).await_ready())) { return static_cast<awaiter_t&&>(m_awaiter).await_ready(); }
 
@@ -41,13 +41,13 @@ class FmapAwaiter {
 };
 
 template <typename Func, typename Awaitable>
-class fmap_awaitable {
+class FmapAwaitable {
   static_assert(!std::is_lvalue_reference_v<Func>);
   static_assert(!std::is_lvalue_reference_v<Awaitable>);
 
  public:
   template <typename FuncArg, typename AwaitableArg, std::enable_if_t<std::is_constructible_v<Func, FuncArg&&> && std::is_constructible_v<Awaitable, AwaitableArg&&>, int> = 0>
-  explicit fmap_awaitable(FuncArg&& func, AwaitableArg&& awaitable) noexcept(std::is_nothrow_constructible_v<Func, FuncArg&&>&& std::is_nothrow_constructible_v<Awaitable, AwaitableArg&&>)
+  explicit FmapAwaitable(FuncArg&& func, AwaitableArg&& awaitable) noexcept(std::is_nothrow_constructible_v<Func, FuncArg&&>&& std::is_nothrow_constructible_v<Awaitable, AwaitableArg&&>)
       : mFunc(static_cast<FuncArg&&>(func)), mAwaitable(static_cast<AwaitableArg&&>(awaitable)) {}
 
   auto operator co_await() const& { return FmapAwaiter<const Func&, const Awaitable&>(mFunc, mAwaitable); }
@@ -70,7 +70,7 @@ struct FmapTransform {
 
 template <typename Func, typename Awaitable, std::enable_if_t<internal::is_awaitable_v<Awaitable>, int> = 0>
 auto Fmap(Func&& func, Awaitable&& awaitable) {
-  return detail::fmap_awaitable<std::remove_cv_t<std::remove_reference_t<Func>>, std::remove_cv_t<std::remove_reference_t<Awaitable>>>(std::forward<Func>(func), std::forward<Awaitable>(awaitable));
+  return internal::FmapAwaitable<std::remove_cv_t<std::remove_reference_t<Func>>, std::remove_cv_t<std::remove_reference_t<Awaitable>>>(std::forward<Func>(func), std::forward<Awaitable>(awaitable));
 }
 
 template <typename Func>

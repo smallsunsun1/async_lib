@@ -5,8 +5,8 @@
 #include <type_traits>
 #include <vector>
 
-#include "async/coroutine/internal/WhenAllReadyAwaitable.h"
-#include "async/coroutine/internal/WhenAllTask.h"
+#include "async/coroutine/internal/when_all_ready_awaitable.h"
+#include "async/coroutine/internal/when_all_task.h"
 #include "async/coroutine/internal/awaiter_traits.h"
 
 namespace sss {
@@ -14,7 +14,7 @@ namespace async {
 
 template <typename... Awaitables, std::enable_if_t<std::conjunction_v<internal::is_awaitable<std::unwrap_reference_t<std::remove_reference_t<Awaitables>>>...>, int> = 0>
 [[nodiscard]] auto WhenAllReady(Awaitables&&... awaitables) {
-  return internal::WhenAllReadyAwaitable<std::tuple<internal::WhenAllTask<typename internal::awaitable_traits<internal::unwrap_reference_t<std::remove_reference_t<Awaitables>>>::await_result_t>...>>(
+  return internal::WhenAllReadyAwaitable<std::tuple<internal::WhenAllTask<typename awaitable_traits<std::unwrap_reference_t<std::remove_reference_t<Awaitables>>>::await_result_t>...>>(
       std::make_tuple(internal::MakeWhenAllTask(std::forward<Awaitables>(awaitables))...));
 }
 

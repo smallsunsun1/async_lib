@@ -26,6 +26,6 @@ int main() {
   CoroutineThreadPool pool(10);
   Task<void> res = DoSimpleWorkOnThreadPool(pool);
   Task<int> res2 = DoSimpleReturnValueOnThreadPool(pool);
-  auto res3 = WhenAll(res, res2);
+  // auto res3 = WhenAll(res, res2);
   return 0;
 }

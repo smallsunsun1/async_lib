@@ -3,9 +3,9 @@
 
 #include <tuple>
 #include <vector>
-#include "async/coroutine/Fmap.h"
+#include "async/coroutine/fmap.h"
 #include "async/coroutine/internal/awaiter_traits.h"
-#include "async/coroutine/WhenAllReady.h"
+#include "async/coroutine/when_all_ready.h"
 #include "async/coroutine/coroutine_traits.h"
 
 namespace sss {
@@ -43,7 +43,7 @@ template<
 
 	template<
 		typename Awaitable,
-		typename Result = typename internal::awaitable_traits<detail::unwrap_reference_t<Awaitable>>::await_result_t,
+		typename Result = typename awaitable_traits<std::unwrap_reference_t<Awaitable>>::await_result_t,
 		std::enable_if_t<!std::is_void_v<Result>, int> = 0>
 	[[nodiscard]]
 	auto WhenAll(std::vector<Awaitable> awaitables)

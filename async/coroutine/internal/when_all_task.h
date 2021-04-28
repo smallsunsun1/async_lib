@@ -6,7 +6,7 @@
 
 #include "async/coroutine/internal/awaiter_traits.h"
 #include "async/coroutine/internal/void_value.h"
-#include "async/coroutine/internal/WhenAllCounter.h"
+#include "async/coroutine/internal/when_all_counter.h"
 
 namespace sss {
 namespace async {
