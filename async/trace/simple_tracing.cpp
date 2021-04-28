@@ -29,10 +29,10 @@ class TimeInfoUtility {
         continue;
       }
       auto endUs = std::chrono::duration_cast<std::chrono::microseconds>(timeInfo.end - kProcessStart);
-      auto durationUs = std::chrono::duration_cast<std::chrono::nanoseconds>(timeInfo.end - timeInfo.start);
+      auto durationUs = std::chrono::duration_cast<std::chrono::microseconds>(timeInfo.end - timeInfo.start);
       std::cout << timeInfo.name << ": "
                 << "start us: " << startUs.count() << " end us : " << endUs.count() << ": "
-                << "duration : " << durationUs.count() << " ns"
+                << "duration : " << durationUs.count() << " us"
                 << "\n";
     }
     std::cout << "Thread Id: " << std::this_thread::get_id() << " ,  "
@@ -64,7 +64,7 @@ class TimeInfoUtility {
 
 namespace internal {
 
-ScopeTimeInfoUtility::~ScopeTimeInfoUtility() {
+void ScopeTimeInfoUtility::ReleaseInfo() {
   auto startUs = std::chrono::duration_cast<std::chrono::microseconds>(mTime.start - kProcessStart);
   if (mTime.start == mTime.end) {
     std::cout << mTime.name << ": " << startUs.count() << "us\n";
@@ -72,10 +72,10 @@ ScopeTimeInfoUtility::~ScopeTimeInfoUtility() {
     auto time = ScopeTimeInfoUtility::Now();
     mTime.end = std::move(time);
     auto endUs = std::chrono::duration_cast<std::chrono::microseconds>(mTime.end - kProcessStart);
-    auto durationUs = std::chrono::duration_cast<std::chrono::nanoseconds>(mTime.end - mTime.start);
+    auto durationUs = std::chrono::duration_cast<std::chrono::microseconds>(mTime.end - mTime.start);
     std::cout << mTime.name << ": "
               << "start us: " << startUs.count() << " end us : " << endUs.count() << ": "
-              << "duration : " << durationUs.count() << " ns\n";
+              << "duration : " << durationUs.count() << " us\n";
     std::cout << "Thread Id: " << std::this_thread::get_id() << "\n";
   }
 }
@@ -108,11 +108,37 @@ Tracing* ScopeTracing::GetTracing() {
 
 void ScopeTracing::PushTracingScope(std::string name) { mTimeInfos.emplace_back(std::move(name), internal::ScopeTimeInfoUtility::Now()); }
 
-void ScopeTracing::PopTracingScope(std::string name) { mTimeInfos.pop_back(); }
+void ScopeTracing::PopTracingScope(std::string name) { 
+  mTimeInfos.back().ReleaseInfo();
+  mTimeInfos.pop_back(); 
+}
 
 void ScopeTracing::RecordTracing(std::string name) {
   auto timeNow = internal::ScopeTimeInfoUtility::Now();
   mTimeInfos.emplace_back(std::move(name), timeNow, timeNow);
+}
+
+absl::Status ScopedTracing::RequestTracing(bool enable) { return absl::OkStatus();}
+
+void ScopedTracing::PushTracingScope(std::string name) {
+  mTimeInfos.emplace_back(std::move(name), internal::ScopeTimeInfoUtility::Now());
+}
+
+void ScopedTracing::PopTracingScope(std::string name) {
+  mTimeInfos.back().ReleaseInfo();
+  mTimeInfos.pop_back();
+}
+
+void ScopedTracing::RecordTracing(std::string name) {
+  auto timeNow = internal::ScopeTimeInfoUtility::Now();
+  mTimeInfos.emplace_back(std::move(name), timeNow, timeNow);
+}
+
+ScopedTracing::~ScopedTracing() {
+  while (!mTimeInfos.empty()) {
+    mTimeInfos.back().ReleaseInfo();
+    mTimeInfos.pop_back();
+  }
 }
 
 }  // namespace async

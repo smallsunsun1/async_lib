@@ -30,7 +30,7 @@ class ScopeTimeInfoUtility {
   ScopeTimeInfoUtility(std::string name, Time now) : mTime{std::move(name), std::move(now)} {}
   ScopeTimeInfoUtility(std::string name, Time start, Time end) : mTime{std::move(name), std::move(start), std::move(end)} {}
   static Time Now() { return std::chrono::steady_clock::now(); }
-  ~ScopeTimeInfoUtility();
+  void ReleaseInfo();
 };
 }  // namespace internal
 
@@ -41,9 +41,21 @@ class ScopeTracing : public Tracing {
   void RecordTracing(std::string name) override;
   void PushTracingScope(std::string name) override;
   void PopTracingScope(std::string name) override;
+  virtual ~ScopeTracing() {}
 
  private:
   absl::InlinedVector<internal::ScopeTimeInfoUtility, 4> mTimeInfos;
+};
+
+class ScopedTracing: public Tracing {
+public:
+  absl::Status RequestTracing(bool enable) override;
+  void RecordTracing(std::string name) override;
+  void PushTracingScope(std::string name) override;
+  void PopTracingScope(std::string name) override;
+  virtual ~ScopedTracing();
+private:
+  std::vector<internal::ScopeTimeInfoUtility> mTimeInfos;
 };
 
 }  // namespace async

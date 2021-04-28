@@ -6,3 +6,4 @@ tools/*
 .vscode
 .clangd
 *.o
+compile_commands.json

@@ -15,5 +15,11 @@ int main() {
   testTrace->PushTracingScope("job2");
   testTrace->PopTracingScope("job2");
   testTrace->PopTracingScope("job1");
+
+  ScopedTracing trace;
+  // trace.PushTracingScope("scope1");
+  trace.PushTracingScope("scope2");
+  trace.PushTracingScope("scope1");
+
   return 0;
 }
