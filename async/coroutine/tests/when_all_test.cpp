@@ -2,9 +2,10 @@
 
 #include "async/coroutine/coroutine_thread_pool.h"
 #include "async/coroutine/coroutine_waitable_task.h"
-#include "async/coroutine/internal/fmap.h"
+#include "async/coroutine/fmap.h"
 #include "async/coroutine/task.h"
 #include "async/coroutine/when_all_ready.h"
+#include "async/coroutine/when_all.h"
 
 using namespace sss;
 using namespace async;

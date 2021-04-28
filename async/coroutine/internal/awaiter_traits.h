@@ -27,6 +27,9 @@ struct is_awaiter<T, std::void_t<decltype(std::declval<T>().await_ready()), decl
     : public std::conjunction<std::is_constructible<bool, decltype(std::declval<T>().await_ready())>,
                               is_valid_await_suspend_return_value<decltype(std::declval<T>().await_suspend(std::coroutine_handle<>()))>> {};
 
+template <typename T>
+using is_awaiter_v = is_awaiter<T>::value;
+
 template <typename T, std::enable_if_t<is_awaiter<T&&>::value, int> = 0>
 T&& get_awaiter_impl(T&& value, AnyData) noexcept {
   return std::forward<T>(value);
@@ -50,6 +53,9 @@ struct is_awaitable : std::false_type {};
 
 template <typename T>
 struct is_awaitable<T, std::void_t<decltype(get_awaiter(std::declval<T>()))>> : public std::true_type {};
+
+template <typename T>
+using is_awaitable_v = is_awaitable<T>::value;
 
 template <typename T>
 struct remove_rvalue_reference {
