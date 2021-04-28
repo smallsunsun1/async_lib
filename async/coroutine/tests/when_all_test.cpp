@@ -1,3 +1,5 @@
+#include "async/coroutine/when_all.h"
+
 #include <iostream>
 
 #include "async/coroutine/coroutine_thread_pool.h"
@@ -5,7 +7,6 @@
 #include "async/coroutine/fmap.h"
 #include "async/coroutine/task.h"
 #include "async/coroutine/when_all_ready.h"
-#include "async/coroutine/when_all.h"
 
 using namespace sss;
 using namespace async;
@@ -26,6 +27,8 @@ int main() {
   CoroutineThreadPool pool(10);
   Task<void> res = DoSimpleWorkOnThreadPool(pool);
   Task<int> res2 = DoSimpleReturnValueOnThreadPool(pool);
-  // auto res3 = WhenAll(res, res2);
+  auto res3 = WhenAll(std::move(res), std::move(res2));
+  auto finalRes = SyncWait(res3);
+  std::cout << std::get<1>(finalRes) << std::endl;
   return 0;
 }

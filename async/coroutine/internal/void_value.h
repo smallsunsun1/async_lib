@@ -7,8 +7,8 @@ namespace internal {
 
 struct void_value {};
 
-}
-}
-}
+}  // namespace internal
+}  // namespace async
+}  // namespace sss
 
-#endif // ASYNC_COROUTINE_INTERNAL_VOID_VALUE_H_
+#endif  // ASYNC_COROUTINE_INTERNAL_VOID_VALUE_H_

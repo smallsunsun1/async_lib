@@ -108,9 +108,9 @@ Tracing* ScopeTracing::GetTracing() {
 
 void ScopeTracing::PushTracingScope(std::string name) { mTimeInfos.emplace_back(std::move(name), internal::ScopeTimeInfoUtility::Now()); }
 
-void ScopeTracing::PopTracingScope(std::string name) { 
+void ScopeTracing::PopTracingScope(std::string name) {
   mTimeInfos.back().ReleaseInfo();
-  mTimeInfos.pop_back(); 
+  mTimeInfos.pop_back();
 }
 
 void ScopeTracing::RecordTracing(std::string name) {
@@ -118,11 +118,9 @@ void ScopeTracing::RecordTracing(std::string name) {
   mTimeInfos.emplace_back(std::move(name), timeNow, timeNow);
 }
 
-absl::Status ScopedTracing::RequestTracing(bool enable) { return absl::OkStatus();}
+absl::Status ScopedTracing::RequestTracing(bool enable) { return absl::OkStatus(); }
 
-void ScopedTracing::PushTracingScope(std::string name) {
-  mTimeInfos.emplace_back(std::move(name), internal::ScopeTimeInfoUtility::Now());
-}
+void ScopedTracing::PushTracingScope(std::string name) { mTimeInfos.emplace_back(std::move(name), internal::ScopeTimeInfoUtility::Now()); }
 
 void ScopedTracing::PopTracingScope(std::string name) {
   mTimeInfos.back().ReleaseInfo();

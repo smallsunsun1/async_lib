@@ -47,14 +47,15 @@ class ScopeTracing : public Tracing {
   absl::InlinedVector<internal::ScopeTimeInfoUtility, 4> mTimeInfos;
 };
 
-class ScopedTracing: public Tracing {
-public:
+class ScopedTracing : public Tracing {
+ public:
   absl::Status RequestTracing(bool enable) override;
   void RecordTracing(std::string name) override;
   void PushTracingScope(std::string name) override;
   void PopTracingScope(std::string name) override;
   virtual ~ScopedTracing();
-private:
+
+ private:
   std::vector<internal::ScopeTimeInfoUtility> mTimeInfos;
 };
 
