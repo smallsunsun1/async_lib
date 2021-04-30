@@ -296,4 +296,4 @@ std::unique_ptr<HostContext> CreateCustomHostContext(int numNonBlockThreads, int
 }  // namespace async
 }  // namespace sss
 
-#endif // ASYNC_CONTEXT_HOST_CONTEXT_H_
+#endif  // ASYNC_CONTEXT_HOST_CONTEXT_H_

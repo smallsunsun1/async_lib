@@ -11,11 +11,9 @@ struct AnyData {
   AnyData(T&&) {}
 };
 
-class BadPromise: public std::exception {
-public:
-  virtual const char* what() const noexcept override {
-    return "Bad Promise";
-  }
+class BadPromise : public std::exception {
+ public:
+  virtual const char* what() const noexcept override { return "Bad Promise"; }
 };
 
 }  // namespace async

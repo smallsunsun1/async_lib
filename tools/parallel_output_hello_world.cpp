@@ -18,6 +18,7 @@ int main() {
         kernel->EmplaceResult<async::Chain>();
     });
     graph->BuildGraph();
+    for (int i = 0; i < 100000; ++i) {
     std::vector<RCReference<AsyncValue>> oriArguments;
     oriArguments.push_back(runContext->MakeAvailableAsyncValueRef<async::Chain>());
     std::vector<RCReference<AsyncValue>> results;
@@ -25,6 +26,7 @@ int main() {
     RunAsyncGraph(graph.get(), oriArguments, results, false);
     RunAsyncGraph(graph.get(), results, results2, false);
     runContext->Await(results2);
+    }
 
 
     // for (int ii = 0; ii < 2; ++ii) {

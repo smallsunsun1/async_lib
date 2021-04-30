@@ -1,13 +1,13 @@
 #ifndef ASYNC_COROUTINE_SHARED_TASK_
 #define ASYNC_COROUTINE_SHARED_TASK_
 
-#include <coroutine>
 #include <atomic>
-#include <exception>
+#include <coroutine>
 #include <cstddef>
+#include <exception>
 
-#include "async/coroutine/internal/awaiter_traits.h"
 #include "async/coroutine/coroutine_traits.h"
+#include "async/coroutine/internal/awaiter_traits.h"
 #include "async/coroutine/internal/data_types.h"
 
 namespace sss {
@@ -18,7 +18,7 @@ class shared_task;
 
 namespace internal {
 struct shared_task_waiter {
-  std::coroutine_handle<> m_continuation;
+  std::coroutine_handle<> mContinuate;
   shared_task_waiter* mNext;
 };
 
@@ -43,13 +43,13 @@ class shared_task_promise_base {
           // Read the mNext pointer before resuming the coroutine
           // since resuming the coroutine may destroy the shared_task_waiter value.
           auto* next = waiter->mNext;
-          waiter->m_continuation.resume();
+          waiter->mContinuate.resume();
           waiter = next;
         }
 
         // Resume last waiter in tail position to allow it to potentially
         // be compiled as a tail-call.
-        waiter->m_continuation.resume();
+        waiter->mContinuate.resume();
       }
     }
 
@@ -229,7 +229,7 @@ class [[nodiscard]] shared_task {
     bool await_ready() const noexcept { return !m_coroutine || m_coroutine.promise().is_ready(); }
 
     bool await_suspend(std::coroutine_handle<> awaiter) noexcept {
-      m_waiter.m_continuation = awaiter;
+      m_waiter.mContinuate = awaiter;
       return m_coroutine.promise().try_await(&m_waiter, m_coroutine);
     }
   };
