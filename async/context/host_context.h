@@ -1,5 +1,5 @@
-#ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_HOST_CONTEXT_
-#define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_HOST_CONTEXT_
+#ifndef ASYNC_CONTEXT_HOST_CONTEXT_H_
+#define ASYNC_CONTEXT_HOST_CONTEXT_H_
 
 #include <functional>
 #include <memory>
@@ -296,4 +296,4 @@ std::unique_ptr<HostContext> CreateCustomHostContext(int numNonBlockThreads, int
 }  // namespace async
 }  // namespace sss
 
-#endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_HOST_CONTEXT_ */
+#endif // ASYNC_CONTEXT_HOST_CONTEXT_H_
