@@ -14,23 +14,23 @@ namespace sss {
 namespace async {
 
 template <typename T>
-class shared_task;
+class SharedTask;
 
 namespace internal {
-struct shared_task_waiter {
+struct SharedTaskWaiter {
   std::coroutine_handle<> mContinuate;
-  shared_task_waiter* mNext;
+  SharedTaskWaiter* mNext;
 };
 
-class shared_task_promise_base {
-  friend struct final_awaiter;
+class SharedTaskPromiseBase {
+  friend struct FinalAwaiter;
 
-  struct final_awaiter {
+  struct FinalAwaiter {
     bool await_ready() const noexcept { return false; }
 
     template <typename Promise>
     void await_suspend(std::coroutine_handle<Promise> h) noexcept {
-      shared_task_promise_base& promise = h.promise();
+      SharedTaskPromiseBase& promise = h.promise();
 
       // Exchange operation needs to be 'release' so that subsequent awaiters have
       // visibility of the result. Also needs to be 'acquire' so we have visibility
@@ -38,10 +38,10 @@ class shared_task_promise_base {
       void* const valueReadyValue = &promise;
       void* waiters = promise.mWaiters.exchange(valueReadyValue, std::memory_order_acq_rel);
       if (waiters != nullptr) {
-        shared_task_waiter* waiter = static_cast<shared_task_waiter*>(waiters);
+        SharedTaskWaiter* waiter = static_cast<SharedTaskWaiter*>(waiters);
         while (waiter->mNext != nullptr) {
           // Read the mNext pointer before resuming the coroutine
-          // since resuming the coroutine may destroy the shared_task_waiter value.
+          // since resuming the coroutine may destroy the SharedTaskWaiter value.
           auto* next = waiter->mNext;
           waiter->mContinuate.resume();
           waiter = next;
@@ -57,10 +57,10 @@ class shared_task_promise_base {
   };
 
  public:
-  shared_task_promise_base() noexcept : mRefCount(1), mWaiters(&this->mWaiters), mException(nullptr) {}
+  SharedTaskPromiseBase() noexcept : mRefCount(1), mWaiters(&this->mWaiters), mException(nullptr) {}
 
   std::suspend_always initial_suspend() noexcept { return {}; }
-  final_awaiter final_suspend() noexcept { return {}; }
+  FinalAwaiter final_suspend() noexcept { return {}; }
 
   void unhandled_exception() noexcept { mException = std::current_exception(); }
 
@@ -69,7 +69,7 @@ class shared_task_promise_base {
     return mWaiters.load(std::memory_order_acquire) == valueReadyValue;
   }
 
-  void add_ref() noexcept { mRefCount.fetch_add(1, std::memory_order_relaxed); }
+  void AddRef() noexcept { mRefCount.fetch_add(1, std::memory_order_relaxed); }
 
   /// Decrement the reference count.
   ///
@@ -77,7 +77,7 @@ class shared_task_promise_base {
   /// true if successfully detached, false if this was the last
   /// reference to the coroutine, in which case the caller must
   /// call destroy() on the coroutine handle.
-  bool try_detach() noexcept { return mRefCount.fetch_sub(1, std::memory_order_acq_rel) != 1; }
+  bool TryDetach() noexcept { return mRefCount.fetch_sub(1, std::memory_order_acq_rel) != 1; }
 
   /// Try to enqueue a waiter to the list of waiters.
   ///
@@ -94,10 +94,10 @@ class shared_task_promise_base {
   /// waiter->m_coroutine will be resumed when the task completes.
   /// false if the coroutine was already completed and the awaiting
   /// coroutine can continue without suspending.
-  bool try_await(shared_task_waiter* waiter, std::coroutine_handle<> coroutine) {
+  bool TryAwait(SharedTaskWaiter* waiter, std::coroutine_handle<> coroutine) {
     void* const valueReadyValue = this;
     void* const notStartedValue = &this->mWaiters;
-    constexpr void* startedNoWaitersValue = static_cast<shared_task_waiter*>(nullptr);
+    constexpr void* startedNoWaitersValue = static_cast<SharedTaskWaiter*>(nullptr);
 
     // NOTE: If the coroutine is not yet started then the first waiter
     // will start the coroutine before enqueuing itself up to the list
@@ -124,7 +124,7 @@ class shared_task_promise_base {
         return false;
       }
 
-      waiter->mNext = static_cast<shared_task_waiter*>(oldWaiters);
+      waiter->mNext = static_cast<SharedTaskWaiter*>(oldWaiters);
     } while (!mWaiters.compare_exchange_weak(oldWaiters, static_cast<void*>(waiter), std::memory_order_release, std::memory_order_acquire));
 
     return true;
@@ -147,7 +147,7 @@ class shared_task_promise_base {
   // - this             - indicates value is ready
   // - &this->mWaiters - indicates coroutine not started
   // - other            - pointer to head item in linked-list of waiters.
-  //                      values are of type 'cppcoro::shared_task_waiter'.
+  //                      values are of type 'cppcoro::SharedTaskWaiter'.
   //                      indicates that the coroutine has been started.
   std::atomic<void*> mWaiters;
 
@@ -155,17 +155,17 @@ class shared_task_promise_base {
 };
 
 template <typename T>
-class shared_task_promise : public shared_task_promise_base {
+class SharedTaskPromise : public SharedTaskPromiseBase {
  public:
-  shared_task_promise() noexcept = default;
+  SharedTaskPromise() noexcept = default;
 
-  ~shared_task_promise() {
+  ~SharedTaskPromise() {
     if (this->is_ready() && !this->completed_with_unhandled_exception()) {
       reinterpret_cast<T*>(&mValueStorage)->~T();
     }
   }
 
-  shared_task<T> get_return_object() noexcept;
+  SharedTask<T> get_return_object() noexcept;
 
   template <typename Value, typename = std::enable_if_t<std::is_convertible_v<Value&&, T>>>
   void return_value(Value&& value) noexcept(std::is_nothrow_constructible_v<T, Value&&>) {
@@ -182,11 +182,11 @@ class shared_task_promise : public shared_task_promise_base {
 };
 
 template <>
-class shared_task_promise<void> : public shared_task_promise_base {
+class SharedTaskPromise<void> : public SharedTaskPromiseBase {
  public:
-  shared_task_promise() noexcept = default;
+  SharedTaskPromise() noexcept = default;
 
-  shared_task<void> get_return_object() noexcept;
+  SharedTask<void> get_return_object() noexcept;
 
   void return_void() noexcept {}
 
@@ -194,11 +194,11 @@ class shared_task_promise<void> : public shared_task_promise_base {
 };
 
 template <typename T>
-class shared_task_promise<T&> : public shared_task_promise_base {
+class SharedTaskPromise<T&> : public SharedTaskPromiseBase {
  public:
-  shared_task_promise() noexcept = default;
+  SharedTaskPromise() noexcept = default;
 
-  shared_task<T&> get_return_object() noexcept;
+  SharedTask<T&> get_return_object() noexcept;
 
   void return_value(T& value) noexcept { m_value = std::addressof(value); }
 
@@ -213,16 +213,16 @@ class shared_task_promise<T&> : public shared_task_promise_base {
 }  // namespace internal
 
 template <typename T = void>
-class [[nodiscard]] shared_task {
+class [[nodiscard]] SharedTask {
  public:
-  using promise_type = internal::shared_task_promise<T>;
+  using promise_type = internal::SharedTaskPromise<T>;
 
   using value_type = T;
 
  private:
   struct awaitable_base {
     std::coroutine_handle<promise_type> m_coroutine;
-    internal::shared_task_waiter m_waiter;
+    internal::SharedTaskWaiter m_waiter;
 
     awaitable_base(std::coroutine_handle<promise_type> coroutine) noexcept : m_coroutine(coroutine) {}
 
@@ -230,30 +230,30 @@ class [[nodiscard]] shared_task {
 
     bool await_suspend(std::coroutine_handle<> awaiter) noexcept {
       m_waiter.mContinuate = awaiter;
-      return m_coroutine.promise().try_await(&m_waiter, m_coroutine);
+      return m_coroutine.promise().TryAwait(&m_waiter, m_coroutine);
     }
   };
 
  public:
-  shared_task() noexcept : m_coroutine(nullptr) {}
+  SharedTask() noexcept : m_coroutine(nullptr) {}
 
-  explicit shared_task(std::coroutine_handle<promise_type> coroutine) : m_coroutine(coroutine) {
+  explicit SharedTask(std::coroutine_handle<promise_type> coroutine) : m_coroutine(coroutine) {
     // Don't increment the ref-count here since it has already been
-    // initialised to 2 (one for shared_task and one for coroutine)
-    // in the shared_task_promise constructor.
+    // initialised to 2 (one for SharedTask and one for coroutine)
+    // in the SharedTaskPromise constructor.
   }
 
-  shared_task(shared_task && other) noexcept : m_coroutine(other.m_coroutine) { other.m_coroutine = nullptr; }
+  SharedTask(SharedTask && other) noexcept : m_coroutine(other.m_coroutine) { other.m_coroutine = nullptr; }
 
-  shared_task(const shared_task& other) noexcept : m_coroutine(other.m_coroutine) {
+  SharedTask(const SharedTask& other) noexcept : m_coroutine(other.m_coroutine) {
     if (m_coroutine) {
-      m_coroutine.promise().add_ref();
+      m_coroutine.promise().AddRef();
     }
   }
 
-  ~shared_task() { destroy(); }
+  ~SharedTask() { destroy(); }
 
-  shared_task& operator=(shared_task&& other) noexcept {
+  SharedTask& operator=(SharedTask&& other) noexcept {
     if (&other != this) {
       destroy();
 
@@ -264,21 +264,21 @@ class [[nodiscard]] shared_task {
     return *this;
   }
 
-  shared_task& operator=(const shared_task& other) noexcept {
+  SharedTask& operator=(const SharedTask& other) noexcept {
     if (m_coroutine != other.m_coroutine) {
       destroy();
 
       m_coroutine = other.m_coroutine;
 
       if (m_coroutine) {
-        m_coroutine.promise().add_ref();
+        m_coroutine.promise().AddRef();
       }
     }
 
     return *this;
   }
 
-  void swap(shared_task & other) noexcept { std::swap(m_coroutine, other.m_coroutine); }
+  void swap(SharedTask & other) noexcept { std::swap(m_coroutine, other.m_coroutine); }
 
   /// \brief
   /// Query if the task result is complete.
@@ -317,11 +317,11 @@ class [[nodiscard]] shared_task {
 
  private:
   template <typename U>
-  friend bool operator==(const shared_task<U>&, const shared_task<U>&) noexcept;
+  friend bool operator==(const SharedTask<U>&, const SharedTask<U>&) noexcept;
 
   void destroy() noexcept {
     if (m_coroutine) {
-      if (!m_coroutine.promise().try_detach()) {
+      if (!m_coroutine.promise().TryDetach()) {
         m_coroutine.destroy();
       }
     }
@@ -331,36 +331,36 @@ class [[nodiscard]] shared_task {
 };
 
 template <typename T>
-bool operator==(const shared_task<T>& lhs, const shared_task<T>& rhs) noexcept {
+bool operator==(const SharedTask<T>& lhs, const SharedTask<T>& rhs) noexcept {
   return lhs.m_coroutine == rhs.m_coroutine;
 }
 
 template <typename T>
-bool operator!=(const shared_task<T>& lhs, const shared_task<T>& rhs) noexcept {
+bool operator!=(const SharedTask<T>& lhs, const SharedTask<T>& rhs) noexcept {
   return !(lhs == rhs);
 }
 
 template <typename T>
-void swap(shared_task<T>& a, shared_task<T>& b) noexcept {
+void swap(SharedTask<T>& a, SharedTask<T>& b) noexcept {
   a.swap(b);
 }
 
 namespace internal {
 template <typename T>
-shared_task<T> shared_task_promise<T>::get_return_object() noexcept {
-  return shared_task<T>{std::coroutine_handle<shared_task_promise>::from_promise(*this)};
+SharedTask<T> SharedTaskPromise<T>::get_return_object() noexcept {
+  return SharedTask<T>{std::coroutine_handle<SharedTaskPromise>::from_promise(*this)};
 }
 
 template <typename T>
-shared_task<T&> shared_task_promise<T&>::get_return_object() noexcept {
-  return shared_task<T&>{std::coroutine_handle<shared_task_promise>::from_promise(*this)};
+SharedTask<T&> SharedTaskPromise<T&>::get_return_object() noexcept {
+  return SharedTask<T&>{std::coroutine_handle<SharedTaskPromise>::from_promise(*this)};
 }
 
-inline shared_task<void> shared_task_promise<void>::get_return_object() noexcept { return shared_task<void>{std::coroutine_handle<shared_task_promise>::from_promise(*this)}; }
+inline SharedTask<void> SharedTaskPromise<void>::get_return_object() noexcept { return SharedTask<void>{std::coroutine_handle<SharedTaskPromise>::from_promise(*this)}; }
 }  // namespace internal
 
 template <typename Awaitable>
-auto make_shared_task(Awaitable awaitable) -> shared_task<internal::remove_rvalue_reference_t<typename awaitable_traits<Awaitable>::await_result_t>> {
+auto MakeSharedTask(Awaitable awaitable) -> SharedTask<internal::remove_rvalue_reference_t<typename awaitable_traits<Awaitable>::await_result_t>> {
   co_return co_await static_cast<Awaitable&&>(awaitable);
 }
 
