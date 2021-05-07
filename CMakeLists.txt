@@ -71,3 +71,16 @@ add_subdirectory(third_party)
 add_subdirectory(async)
 add_subdirectory(tools)
 
+if (USE_CXX_20)
+  set(coroutine_lib async_coroutine)
+else()
+  set(coroutine_lib "")
+endif()
+install(TARGETS async_context async_runtime async_concurrent async_support async_trace ${coroutine_lib}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/async_lib)
+
+
+
