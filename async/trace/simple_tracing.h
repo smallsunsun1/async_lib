@@ -1,7 +1,7 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_TRACE_SIMPLE_TRACING_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_TRACE_SIMPLE_TRACING_
 
-#include "third_party/abseil-cpp/absl/container/inlined_vector.h"
+#include "absl/container/inlined_vector.h"
 #include "tracing.h"
 
 namespace sss {

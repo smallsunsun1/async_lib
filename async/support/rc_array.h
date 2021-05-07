@@ -2,8 +2,8 @@
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_RC_ARRAY_
 
 #include "ref_count.h"
-#include "third_party/abseil-cpp/absl/container/inlined_vector.h"
-#include "third_party/abseil-cpp/absl/types/span.h"
+#include "absl/container/inlined_vector.h"
+#include "absl/types/span.h"
 
 namespace sss {
 namespace async {

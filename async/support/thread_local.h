@@ -7,8 +7,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "third_party/abseil-cpp/absl/functional/function_ref.h"
-#include "third_party/abseil-cpp/absl/types/optional.h"
+#include "absl/functional/function_ref.h"
+#include "absl/types/optional.h"
 
 namespace sss {
 namespace async {

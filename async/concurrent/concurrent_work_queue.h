@@ -5,9 +5,9 @@
 
 #include "async/context/task_function.h"
 #include "async/support/ref_count.h"
-#include "third_party/abseil-cpp/absl/strings/string_view.h"
-#include "third_party/abseil-cpp/absl/types/optional.h"
-#include "third_party/abseil-cpp/absl/types/span.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
+#include "absl/types/span.h"
 
 namespace sss {
 namespace async {

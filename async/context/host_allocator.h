@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "third_party/abseil-cpp/absl/types/span.h"
+#include "absl/types/span.h"
 
 namespace sss {
 namespace async {

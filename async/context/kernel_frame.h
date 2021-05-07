@@ -3,9 +3,9 @@
 
 #include "async/support/string_util.h"
 #include "host_context.h"
-#include "third_party/abseil-cpp/absl/container/inlined_vector.h"
-#include "third_party/abseil-cpp/absl/strings/string_view.h"
-#include "third_party/abseil-cpp/absl/types/span.h"
+#include "absl/container/inlined_vector.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/span.h"
 
 namespace sss {
 namespace async {

@@ -4,9 +4,9 @@
 #include <unordered_map>
 
 #include "async_kernel.h"
-#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
-#include "third_party/abseil-cpp/absl/strings/string_view.h"
-#include "third_party/abseil-cpp/absl/types/optional.h"
+#include "absl/container/flat_hash_map.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 
 namespace sss {
 namespace async {

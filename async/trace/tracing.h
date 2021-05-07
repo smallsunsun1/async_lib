@@ -6,7 +6,7 @@
 #include <mutex>
 #include <string>
 
-#include "third_party/abseil-cpp/absl/status/status.h"
+#include "absl/status/status.h"
 
 namespace sss {
 namespace async {

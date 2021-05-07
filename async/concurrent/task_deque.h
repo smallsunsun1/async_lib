@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "async/context/task_function.h"
-#include "third_party/abseil-cpp/absl/types/optional.h"
+#include "absl/types/optional.h"
 
 namespace sss {
 namespace async {

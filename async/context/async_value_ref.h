@@ -5,7 +5,7 @@
 #include "async_value.h"
 #include "diagnostic.h"
 #include "location.h"
-#include "third_party/abseil-cpp/absl/status/statusor.h"
+#include "absl/status/statusor.h"
 
 namespace sss {
 namespace async {

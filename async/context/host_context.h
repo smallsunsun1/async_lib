@@ -6,9 +6,9 @@
 #include <type_traits>
 
 #include "async_value_ref.h"
-#include "third_party/abseil-cpp/absl/status/status.h"
-#include "third_party/abseil-cpp/absl/status/statusor.h"
-#include "third_party/abseil-cpp/absl/types/span.h"
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "absl/types/span.h"
 
 namespace sss {
 namespace async {

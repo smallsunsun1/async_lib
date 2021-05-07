@@ -5,7 +5,7 @@
 
 #include "async/context/native_function.h"
 #include "function_op.h"
-#include "third_party/abseil-cpp/absl/strings/string_view.h"
+#include "absl/strings/string_view.h"
 
 namespace sss {
 namespace async {

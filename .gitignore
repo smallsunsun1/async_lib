@@ -1,6 +1,4 @@
 third_party
-third_party_libs
-python_tools
 build
 tools/*
 .vscode

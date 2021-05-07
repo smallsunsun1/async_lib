@@ -4,8 +4,8 @@
 
 #include "async/concurrent/concurrent_work_queue.h"
 #include "async_value.h"
-#include "third_party/abseil-cpp/absl/types/optional.h"
-#include "third_party/abseil-cpp/absl/types/span.h"
+#include "absl/types/optional.h"
+#include "absl/types/span.h"
 
 namespace sss {
 namespace async {

@@ -7,7 +7,7 @@
 #include <limits>
 #include <mutex>
 
-#include "third_party/abseil-cpp/absl/types/optional.h"
+#include "absl/types/optional.h"
 
 namespace sss {
 namespace async {

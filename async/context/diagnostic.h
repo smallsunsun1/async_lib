@@ -2,10 +2,10 @@
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_DIAGNOSTIC_
 
 #include "location.h"
-#include "third_party/abseil-cpp/absl/status/status.h"
-#include "third_party/abseil-cpp/absl/strings/str_cat.h"
-#include "third_party/abseil-cpp/absl/strings/string_view.h"
-#include "third_party/abseil-cpp/absl/types/optional.h"
+#include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 
 namespace sss {
 namespace async {
