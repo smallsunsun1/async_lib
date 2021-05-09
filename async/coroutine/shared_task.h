@@ -83,7 +83,7 @@ class SharedTaskPromiseBase {
   ///
   /// \param waiter
   /// Pointer to the state from the waiter object.
-  /// Must have waiter->m_coroutine member populated with the coroutine
+  /// Must have waiter->mCoroutine member populated with the coroutine
   /// handle of the awaiting coroutine.
   ///
   /// \param coroutine
@@ -91,7 +91,7 @@ class SharedTaskPromiseBase {
   ///
   /// \return
   /// true if the waiter was successfully queued, in which case
-  /// waiter->m_coroutine will be resumed when the task completes.
+  /// waiter->mCoroutine will be resumed when the task completes.
   /// false if the coroutine was already completed and the awaiting
   /// coroutine can continue without suspending.
   bool TryAwait(SharedTaskWaiter* waiter, std::coroutine_handle<> coroutine) {
@@ -221,33 +221,33 @@ class [[nodiscard]] SharedTask {
 
  private:
   struct awaitable_base {
-    std::coroutine_handle<promise_type> m_coroutine;
+    std::coroutine_handle<promise_type> mCoroutine;
     internal::SharedTaskWaiter m_waiter;
 
-    awaitable_base(std::coroutine_handle<promise_type> coroutine) noexcept : m_coroutine(coroutine) {}
+    awaitable_base(std::coroutine_handle<promise_type> coroutine) noexcept : mCoroutine(coroutine) {}
 
-    bool await_ready() const noexcept { return !m_coroutine || m_coroutine.promise().is_ready(); }
+    bool await_ready() const noexcept { return !mCoroutine || mCoroutine.promise().is_ready(); }
 
     bool await_suspend(std::coroutine_handle<> awaiter) noexcept {
       m_waiter.mContinuate = awaiter;
-      return m_coroutine.promise().TryAwait(&m_waiter, m_coroutine);
+      return mCoroutine.promise().TryAwait(&m_waiter, mCoroutine);
     }
   };
 
  public:
-  SharedTask() noexcept : m_coroutine(nullptr) {}
+  SharedTask() noexcept : mCoroutine(nullptr) {}
 
-  explicit SharedTask(std::coroutine_handle<promise_type> coroutine) : m_coroutine(coroutine) {
+  explicit SharedTask(std::coroutine_handle<promise_type> coroutine) : mCoroutine(coroutine) {
     // Don't increment the ref-count here since it has already been
     // initialised to 2 (one for SharedTask and one for coroutine)
     // in the SharedTaskPromise constructor.
   }
 
-  SharedTask(SharedTask && other) noexcept : m_coroutine(other.m_coroutine) { other.m_coroutine = nullptr; }
+  SharedTask(SharedTask&& other) noexcept : mCoroutine(other.mCoroutine) { other.mCoroutine = nullptr; }
 
-  SharedTask(const SharedTask& other) noexcept : m_coroutine(other.m_coroutine) {
-    if (m_coroutine) {
-      m_coroutine.promise().AddRef();
+  SharedTask(const SharedTask& other) noexcept : mCoroutine(other.mCoroutine) {
+    if (mCoroutine) {
+      mCoroutine.promise().AddRef();
     }
   }
 
@@ -257,49 +257,49 @@ class [[nodiscard]] SharedTask {
     if (&other != this) {
       destroy();
 
-      m_coroutine = other.m_coroutine;
-      other.m_coroutine = nullptr;
+      mCoroutine = other.mCoroutine;
+      other.mCoroutine = nullptr;
     }
 
     return *this;
   }
 
   SharedTask& operator=(const SharedTask& other) noexcept {
-    if (m_coroutine != other.m_coroutine) {
+    if (mCoroutine != other.mCoroutine) {
       destroy();
 
-      m_coroutine = other.m_coroutine;
+      mCoroutine = other.mCoroutine;
 
-      if (m_coroutine) {
-        m_coroutine.promise().AddRef();
+      if (mCoroutine) {
+        mCoroutine.promise().AddRef();
       }
     }
 
     return *this;
   }
 
-  void swap(SharedTask & other) noexcept { std::swap(m_coroutine, other.m_coroutine); }
+  void swap(SharedTask& other) noexcept { std::swap(mCoroutine, other.mCoroutine); }
 
   /// \brief
   /// Query if the task result is complete.
   ///
   /// Awaiting a task that is ready will not block.
-  bool is_ready() const noexcept { return !m_coroutine || m_coroutine.promise().is_ready(); }
+  bool is_ready() const noexcept { return !mCoroutine || mCoroutine.promise().is_ready(); }
 
   auto operator co_await() const noexcept {
     struct awaitable : awaitable_base {
       using awaitable_base::awaitable_base;
 
       decltype(auto) await_resume() {
-        if (!this->m_coroutine) {
+        if (!this->mCoroutine) {
           throw BadPromise{};
         }
 
-        return this->m_coroutine.promise().result();
+        return this->mCoroutine.promise().result();
       }
     };
 
-    return awaitable{m_coroutine};
+    return awaitable{mCoroutine};
   }
 
   /// \brief
@@ -312,7 +312,7 @@ class [[nodiscard]] SharedTask {
       void await_resume() const noexcept {}
     };
 
-    return awaitable{m_coroutine};
+    return awaitable{mCoroutine};
   }
 
  private:
@@ -320,19 +320,19 @@ class [[nodiscard]] SharedTask {
   friend bool operator==(const SharedTask<U>&, const SharedTask<U>&) noexcept;
 
   void destroy() noexcept {
-    if (m_coroutine) {
-      if (!m_coroutine.promise().TryDetach()) {
-        m_coroutine.destroy();
+    if (mCoroutine) {
+      if (!mCoroutine.promise().TryDetach()) {
+        mCoroutine.destroy();
       }
     }
   }
 
-  std::coroutine_handle<promise_type> m_coroutine;
+  std::coroutine_handle<promise_type> mCoroutine;
 };
 
 template <typename T>
 bool operator==(const SharedTask<T>& lhs, const SharedTask<T>& rhs) noexcept {
-  return lhs.m_coroutine == rhs.m_coroutine;
+  return lhs.mCoroutine == rhs.mCoroutine;
 }
 
 template <typename T>
