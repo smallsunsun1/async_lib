@@ -47,5 +47,5 @@ int main() {
   }
   runContext->Await(results[numIters]);
   auto end = high_resolution_clock::now();
-  std::cout << duration_cast<nanoseconds>(end - start).count();
+  std::cout << duration_cast<nanoseconds>(end - start).count() << std::endl;
 }

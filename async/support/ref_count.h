@@ -29,11 +29,11 @@ class ReferenceCounted {
   // 不能拷贝
   ReferenceCounted(const ReferenceCounted&) = delete;
   ReferenceCounted& operator=(const ReferenceCounted&) = delete;
-  void AddRef() { mRefCounted.fetch_add(1); }
+  void AddRef() { mRefCounted.fetch_add(1, std::memory_order_relaxed); }
   void DropRef() {
-    if (mRefCounted.fetch_sub(1) == 1) static_cast<SubClass*>(this)->Destroy();
+    if (mRefCounted.fetch_sub(1, std::memory_order_acq_rel) == 1) static_cast<SubClass*>(this)->Destroy();
   }
-  bool IsUnique() const { return mRefCounted.load() == 1; }
+  bool IsUnique() const { return mRefCounted.load(std::memory_order_relaxed) == 1; }
 
  protected:
   void Destroy() { delete static_cast<SubClass*>(this); }
