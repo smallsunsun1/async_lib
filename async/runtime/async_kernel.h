@@ -12,8 +12,8 @@ class CommonAsyncKernelFrame;
 class AsyncValue;
 }  // namespace async
 
-// using AsyncKernelFn = void (*)(async::CommonAsyncKernelFrame*);
-using AsyncKernelFn = std::function<void(async::CommonAsyncKernelFrame*)>;
+using AsyncKernelFn = void (*)(async::CommonAsyncKernelFrame*);
+// using AsyncKernelFn = std::function<void(async::CommonAsyncKernelFrame*)>;
 
 struct AsyncValueInfo {
   unsigned mUserCount;  // 有多少用户使用了这个AsyncValue

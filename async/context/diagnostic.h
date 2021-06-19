@@ -1,11 +1,11 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_DIAGNOSTIC_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_DIAGNOSTIC_
 
-#include "location.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#include "location.h"
 
 namespace sss {
 namespace async {

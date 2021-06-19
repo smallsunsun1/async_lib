@@ -2,6 +2,7 @@
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_TYPE_TRAITS_
 
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <type_traits>

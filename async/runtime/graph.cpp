@@ -3,6 +3,7 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <set>
 #include <string>
@@ -11,6 +12,7 @@
 #include "async/context/async_value.h"
 #include "async/context/kernel_frame.h"
 #include "async/context/native_function.h"
+#include "async/runtime/register.h"
 
 namespace sss {
 
@@ -127,8 +129,61 @@ AsyncNode* AsyncGraph::emplace_back(std::vector<std::string> inputNames, std::ve
   mAsyncNodes.push_back(node);
   return node;
 }
-void AsyncGraph::Dump(const std::string& filename) const {}
-void AsyncGraph::Load(const std::string& filename) {}
+void AsyncGraph::Dump(const std::string& filename) const {
+  std::ofstream outFile(filename);
+  for (size_t i = 0, numNodes = mAsyncNodes.size(); i < numNodes; ++i) {
+    for (size_t j = 0, numInputs = mAsyncNodes[i]->GetNumInputs(); j < numInputs; ++j) {
+      outFile << "input: " << mAsyncNodes[i]->GetInputNameAt(j) << "\n";
+    }
+    for (size_t j = 0, numOutputs = mAsyncNodes[i]->GetNumResults(); j < numOutputs; ++j) {
+      outFile << "output: " << mAsyncNodes[i]->GetOutputNameAt(j) << "\n";
+    }
+    outFile << "kernel name: " << mAsyncNodes[i]->mFuncName << "\n";
+    outFile << "is strict fn: " << std::to_string(static_cast<int>(mAsyncNodes[i]->mIsStrictFunc)) << "\n";
+    outFile << "\n";
+  }
+  outFile.close();
+}
+void AsyncGraph::Load(const std::string& filename) {
+  std::ifstream inFile(filename);
+  std::string graphLineInfo;
+  std::vector<std::string> inputNames;
+  std::vector<std::string> outputNames;
+  AsyncKernelFn kernelFn;
+  std::string kernelName;
+  bool isStrictFn = false;
+  while (std::getline(inFile, graphLineInfo)) {
+    if (graphLineInfo != "") {
+      std::vector<std::string> res = StrSplit(graphLineInfo, ": ");
+      assert(res.size() == 2 && "must need 2 info to restore node");
+      if (res[0] == "input") {
+        inputNames.push_back(res[1]);
+      } else if (res[0] == "output") {
+        outputNames.push_back(res[1]);
+      } else if (res[0] == "kernel name") {
+        std::optional<AsyncKernelFn> kernelFunction = GET_KERNEL_FN(res[1]);
+        kernelName = res[1];
+        if (!kernelFunction.has_value()) {
+          std::cerr << "can't find kernel name: " << res[1] << "\n";
+          assert(false);
+        }
+        kernelFn = kernelFunction.value();
+      } else if (res[0] == "is strict fn") {
+        isStrictFn = static_cast<bool>(std::stoi(res[1]));
+      }
+    } else {
+      (void)emplace_back(std::move(inputNames), std::move(outputNames), kernelFn, std::move(kernelName), isStrictFn);
+    }
+  }
+}
+void AsyncGraph::Reset() {
+  mNameAndAsyncIdPair.clear();
+  mUsedByKernlTable.clear();
+  mFunctionInfo.mAsyncValueInfos.clear();
+  mFunctionInfo.mKernelInfos.clear();
+  mAsyncNodes.clear();
+  mIsConstructed = false;
+}
 unsigned AsyncGraph::GetNumOutputs() const {
   unsigned numRes = 0;
   for (const auto& value : mFunctionInfo.mAsyncValueInfos) {

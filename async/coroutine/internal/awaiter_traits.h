@@ -16,6 +16,9 @@ struct is_coroutine_handle : public std::false_type {};
 template <typename T>
 struct is_coroutine_handle<std::coroutine_handle<T>> : public std::true_type {};
 
+template <typename T>
+inline constexpr bool is_coroutine_handle_v = is_coroutine_handle<T>::value;
+
 // 用于判断一个awaitable的strcut的await_suspend函数的返回值是否符合要求
 template <typename T>
 struct is_valid_await_suspend_return_value : std::disjunction<std::is_void<T>, std::is_same<T, bool>, is_coroutine_handle<T>> {};

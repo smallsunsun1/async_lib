@@ -6,10 +6,10 @@
 #include <string>
 #include <thread>
 
-#include "async/context/task_function.h"
-#include "event_count.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#include "async/context/task_function.h"
+#include "event_count.h"
 
 namespace sss {
 namespace async {

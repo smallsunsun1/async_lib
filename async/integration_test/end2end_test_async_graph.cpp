@@ -1,5 +1,6 @@
 #include <chrono>
 #include <cstdio>
+#include <filesystem>
 #include <string>
 #include <thread>
 
@@ -7,11 +8,13 @@
 #include "async/context/host_context.h"
 #include "async/context/kernel_frame.h"
 #include "async/runtime/graph.h"
+#include "async/runtime/register.h"
 #include "async/support/ref_count.h"
 
 using namespace sss;
 using namespace async;
 using namespace std::chrono;
+namespace fs = std::filesystem;
 
 int LargeComputeFn(int num) {
   float res;
@@ -27,12 +30,16 @@ int main() {
   AsyncGraph* memory = runContext->Allocate<AsyncGraph>();
   AsyncGraph* graphOri = new (memory) AsyncGraph(runContext.get());
   RCReference<AsyncGraph> graph = TakeRef(graphOri);
-  graph->emplace_back({}, {"output"}, [](async::CommonAsyncKernelFrame* frame) {});
+  REGISTER_KERNEL_FN(
+      "start", +[](async::CommonAsyncKernelFrame* frame) {});
+  REGISTER_KERNEL_FN(
+      "run", +[](async::CommonAsyncKernelFrame* frame) {
+        LargeComputeFn(frame->GetArgAt<int>(0));
+        frame->EmplaceResult<int>(100);
+      });
+  graph->emplace_back({}, {"output"}, GET_KERNEL_FN("start").value(), "start", true);
   for (int i = 0; i < 100; ++i) {
-    graph->emplace_back({"output"}, {"result" + std::to_string(i)}, [](async::CommonAsyncKernelFrame* frame) {
-      LargeComputeFn(frame->GetArgAt<int>(0));
-      frame->EmplaceResult<int>(100);
-    });
+    graph->emplace_back({"output"}, {"result" + std::to_string(i)}, GET_KERNEL_FN("run").value(), "run", true);
   }
   graph->BuildGraph();
 
@@ -48,4 +55,16 @@ int main() {
   runContext->Await(results[numIters]);
   auto end = high_resolution_clock::now();
   std::cout << duration_cast<nanoseconds>(end - start).count() << std::endl;
+
+  graph->Dump("./graph.txt");
+  graph->Reset();
+  graph->Load("./graph.txt");
+  graph->BuildGraph();
+  std::vector<RCReference<AsyncValue>> input;
+  input.push_back(runContext->MakeAvailableAsyncValueRef<int>(0));
+  std::vector<RCReference<AsyncValue>> output;
+  RunAsyncGraph(graph.get(), input, output, true);
+  std::cout << output[0]->get<int>() << std::endl;
+  fs::remove("./graph.txt");
+  return 0;
 }

@@ -2,10 +2,10 @@
 #include <mutex>
 #include <vector>
 
-#include "async/concurrent/concurrent_work_queue.h"
-#include "async_value.h"
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
+#include "async/concurrent/concurrent_work_queue.h"
+#include "async_value.h"
 
 namespace sss {
 namespace async {

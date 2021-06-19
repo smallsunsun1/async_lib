@@ -1,11 +1,11 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_ASYNC_VALUE_REF_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_ASYNC_VALUE_REF_
 
+#include "absl/status/statusor.h"
 #include "async/support/ref_count.h"
 #include "async_value.h"
 #include "diagnostic.h"
 #include "location.h"
-#include "absl/status/statusor.h"
 
 namespace sss {
 namespace async {

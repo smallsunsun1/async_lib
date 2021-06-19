@@ -1,6 +1,7 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_THREAD_LOCAL_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_THREAD_LOCAL_
 
+#include <atomic>
 #include <cstddef>
 #include <mutex>
 #include <thread>

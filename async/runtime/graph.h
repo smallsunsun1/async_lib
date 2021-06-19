@@ -1,5 +1,5 @@
-#ifndef INFERENCE_MEDICAL_BIOIMAGE_BRAIN_COMMON_GRAPH_GRAPH_
-#define INFERENCE_MEDICAL_BIOIMAGE_BRAIN_COMMON_GRAPH_GRAPH_
+#ifndef ASYNC_RUNTIME_GRAPH_
+#define ASYNC_RUNTIME_GRAPH_
 
 #include <string>
 #include <unordered_map>
@@ -55,6 +55,7 @@ class AsyncGraph : public async::ReferenceCounted<AsyncGraph> {
   ~AsyncGraph();
   void Destroy();
   void BuildGraph();
+  void Reset();
   void Dump(const std::string& filename) const;
   void Load(const std::string& filename);
   async::HostContext* GetContext() { return mpContext; }
@@ -137,4 +138,4 @@ void RunAsyncGraph(AsyncGraph* graph, std::vector<async::RCReference<async::Asyn
 
 }  // namespace sss
 
-#endif /* INFERENCE_MEDICAL_BIOIMAGE_BRAIN_COMMON_GRAPH_GRAPH_ */
+#endif /* ASYNC_RUNTIME_GRAPH_ */

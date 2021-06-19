@@ -12,10 +12,8 @@ set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};third_party_libs")
 
 add_definitions(-DEIGEN_USE_THREADS)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof -fdiagnostics-color=always -march=native -flto")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
 
 ## Check Whether Compiler Is Gcc
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -47,7 +45,7 @@ include(FetchContent)
 set(FETCHCONTENT_QUIET OFF)
 FetchContent_Declare(
     googletest 
-    URL    https://github.com/google/googletest/archive/release-1.10.0.tar.gz
+    URL    https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
 )
 FetchContent_MakeAvailable(googletest)
 
