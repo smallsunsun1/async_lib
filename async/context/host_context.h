@@ -1,5 +1,5 @@
-#ifndef ASYNC_CONTEXT_HOST_CONTEXT_H_
-#define ASYNC_CONTEXT_HOST_CONTEXT_H_
+#ifndef ASYNC_CONTEXT_HOST_CONTEXT_
+#define ASYNC_CONTEXT_HOST_CONTEXT_
 
 #include <functional>
 #include <memory>
@@ -8,7 +8,7 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
-#include "async_value_ref.h"
+#include "async/context/async_value_ref.h"
 
 namespace sss {
 namespace async {
@@ -296,4 +296,4 @@ std::unique_ptr<HostContext> CreateCustomHostContext(int numNonBlockThreads, int
 }  // namespace async
 }  // namespace sss
 
-#endif  // ASYNC_CONTEXT_HOST_CONTEXT_H_
+#endif /* ASYNC_CONTEXT_HOST_CONTEXT_ */

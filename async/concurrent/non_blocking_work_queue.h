@@ -1,9 +1,9 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONCURRENT_NON_BLOCKING_WORK_QUEUE_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONCURRENT_NON_BLOCKING_WORK_QUEUE_
 
+#include "async/concurrent/task_deque.h"
+#include "async/concurrent/work_queue_base.h"
 #include "async/context/task_function.h"
-#include "task_deque.h"
-#include "work_queue_base.h"
 
 namespace sss {
 namespace async {

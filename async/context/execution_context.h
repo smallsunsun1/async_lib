@@ -1,7 +1,7 @@
-#ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_EXECUTION_CONTEXT_
-#define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_EXECUTION_CONTEXT_
+#ifndef ASYNC_CONTEXT_EXECUTION_CONTEXT_
+#define ASYNC_CONTEXT_EXECUTION_CONTEXT_
 
-#include "location.h"
+#include "async/context/location.h"
 
 namespace sss {
 namespace async {
@@ -24,4 +24,4 @@ class ExecutionContext {
 }  // namespace async
 }  // namespace sss
 
-#endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_EXECUTION_CONTEXT_ */
+#endif /* ASYNC_CONTEXT_EXECUTION_CONTEXT_ */

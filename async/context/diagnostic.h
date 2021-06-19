@@ -1,11 +1,11 @@
-#ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_DIAGNOSTIC_
-#define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_DIAGNOSTIC_
+#ifndef ASYNC_CONTEXT_DIAGNOSTIC_
+#define ASYNC_CONTEXT_DIAGNOSTIC_
 
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
-#include "location.h"
+#include "async/context/location.h"
 
 namespace sss {
 namespace async {
@@ -28,4 +28,4 @@ DecodedDiagnostic EmitError(const ExecutionContext& exec_ctx, Args&&... args) {
 }  // namespace async
 }  // namespace sss
 
-#endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_DIAGNOSTIC_ */
+#endif /* ASYNC_CONTEXT_DIAGNOSTIC_ */

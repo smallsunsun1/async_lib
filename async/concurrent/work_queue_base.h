@@ -1,5 +1,5 @@
-#ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONCURRENT_WORK_QUEUE_BASE_
-#define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONCURRENT_WORK_QUEUE_BASE_
+#ifndef ASYNC_CONCURRENT_WORK_QUEUE_BASE_
+#define ASYNC_CONCURRENT_WORK_QUEUE_BASE_
 
 #include <atomic>
 #include <memory>
@@ -8,8 +8,8 @@
 
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#include "async/concurrent/event_count.h"
 #include "async/context/task_function.h"
-#include "event_count.h"
 
 namespace sss {
 namespace async {
@@ -578,4 +578,4 @@ void WorkQueueBase<Derived>::Cancel() {
 }  // namespace async
 }  // namespace sss
 
-#endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONCURRENT_WORK_QUEUE_BASE_ */
+#endif /* ASYNC_CONCURRENT_WORK_QUEUE_BASE_ */

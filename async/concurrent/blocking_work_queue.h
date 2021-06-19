@@ -6,9 +6,9 @@
 #include <queue>
 #include <ratio>
 
+#include "async/concurrent/task_queue.h"
+#include "async/concurrent/work_queue_base.h"
 #include "async/context/task_function.h"
-#include "task_queue.h"
-#include "work_queue_base.h"
 
 namespace sss {
 namespace async {

@@ -1,11 +1,11 @@
-#ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_ASYNC_VALUE_REF_
-#define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_ASYNC_VALUE_REF_
+#ifndef ASYNC_CONTEXT_ASYNC_VALUE_REF_
+#define ASYNC_CONTEXT_ASYNC_VALUE_REF_
 
 #include "absl/status/statusor.h"
+#include "async/context/async_value.h"
+#include "async/context/diagnostic.h"
+#include "async/context/location.h"
 #include "async/support/ref_count.h"
-#include "async_value.h"
-#include "diagnostic.h"
-#include "location.h"
 
 namespace sss {
 namespace async {
@@ -126,4 +126,4 @@ class AsyncValueRef {
 }  // namespace async
 }  // namespace sss
 
-#endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_ASYNC_VALUE_REF_ */
+#endif /* ASYNC_CONTEXT_ASYNC_VALUE_REF_ */

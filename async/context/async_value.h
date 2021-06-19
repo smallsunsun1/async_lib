@@ -1,5 +1,5 @@
-#ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_ASYNC_VALUE_
-#define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_ASYNC_VALUE_
+#ifndef ASYNC_CONTEXT_ASYNC_VALUE_
+#define ASYNC_CONTEXT_ASYNC_VALUE_
 
 #include <atomic>
 #include <cassert>
@@ -7,12 +7,12 @@
 #include <string>
 #include <type_traits>
 
+#include "async/context/diagnostic.h"
+#include "async/context/host_context_ptr.h"
+#include "async/context/location.h"
 #include "async/support/concurrent_vector.h"
 #include "async/support/ref_count.h"
 #include "async/support/unique_function.h"
-#include "diagnostic.h"
-#include "host_context_ptr.h"
-#include "location.h"
 
 namespace sss {
 namespace async {
@@ -667,4 +667,4 @@ void AsyncValue::AndThen(WaiterT&& waiter) {
 }  // namespace async
 }  // namespace sss
 
-#endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_ASYNC_VALUE_ */
+#endif /* ASYNC_CONTEXT_ASYNC_VALUE_ */

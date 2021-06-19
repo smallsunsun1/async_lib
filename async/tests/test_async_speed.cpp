@@ -6,13 +6,13 @@
 #include <utility>      // for move
 #include <vector>       // for vector
 
-#include "../context/host_context.h"        // for CreateSimpleHostContext
-#include "../context/native_function.h"     // for SimpleFunction
 #include "absl/container/inlined_vector.h"  // for InlinedVector
 #include "absl/memory/memory.h"             // for allocator_traits<>::value...
 #include "absl/types/span.h"                // for MakeSpan, MakeConstSpan
 #include "async/context/async_value.h"      // for AsyncValue
 #include "async/context/async_value_ref.h"  // for AsyncValueRef
+#include "async/context/host_context.h"     // for CreateSimpleHostContext
+#include "async/context/native_function.h"  // for SimpleFunction
 #include "async/support/ref_count.h"        // for RCReference, TakeRef, async
 
 using namespace sss;

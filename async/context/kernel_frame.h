@@ -1,11 +1,11 @@
-#ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_KERNEL_FRAME_
-#define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_KERNEL_FRAME_
+#ifndef ASYNC_CONTEXT_KERNEL_FRAME_
+#define ASYNC_CONTEXT_KERNEL_FRAME_
 
 #include "absl/container/inlined_vector.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/span.h"
+#include "async/context/host_context.h"
 #include "async/support/string_util.h"
-#include "host_context.h"
 
 namespace sss {
 namespace async {
@@ -150,4 +150,4 @@ class RAIIKernelFrame : public AsyncKernelFrame {
 }  // namespace async
 }  // namespace sss
 
-#endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_KERNEL_FRAME_ */
+#endif /* ASYNC_CONTEXT_KERNEL_FRAME_ */

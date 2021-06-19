@@ -1,6 +1,6 @@
 #include <thread>
 
-#include "../trace/simple_tracing.h"
+#include "async/trace/simple_tracing.h"
 
 using namespace sss;
 using namespace async;

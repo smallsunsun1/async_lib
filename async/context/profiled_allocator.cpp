@@ -3,7 +3,7 @@
 #include <atomic>
 #include <cstdlib>
 
-#include "host_allocator.h"
+#include "async/context/host_allocator.h"
 
 namespace sss {
 namespace async {

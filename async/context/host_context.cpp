@@ -5,11 +5,11 @@
 #include <thread>
 
 #include "async/concurrent/concurrent_work_queue.h"
+#include "async/context/chain.h"
+#include "async/context/function.h"
+#include "async/context/host_allocator.h"
+#include "async/context/location.h"
 #include "async/support/string_util.h"
-#include "chain.h"
-#include "function.h"
-#include "host_allocator.h"
-#include "location.h"
 
 namespace sss {
 namespace async {

@@ -1,9 +1,9 @@
-#ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_RC_ARRAY_
-#define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_RC_ARRAY_
+#ifndef ASYNC_SUPPORT_RC_ARRAY_
+#define ASYNC_SUPPORT_RC_ARRAY_
 
 #include "absl/container/inlined_vector.h"
 #include "absl/types/span.h"
-#include "ref_count.h"
+#include "async/support/ref_count.h"
 
 namespace sss {
 namespace async {
@@ -56,4 +56,4 @@ class RCArray {
 }  // namespace async
 }  // namespace sss
 
-#endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_RC_ARRAY_ */
+#endif /* ASYNC_SUPPORT_RC_ARRAY_ */
