@@ -19,13 +19,13 @@ int main() {
     });
     graph->BuildGraph();
     for (int i = 0; i < 100000; ++i) {
-    std::vector<RCReference<AsyncValue>> oriArguments;
-    oriArguments.push_back(runContext->MakeAvailableAsyncValueRef<async::Chain>());
-    std::vector<RCReference<AsyncValue>> results;
-    std::vector<RCReference<AsyncValue>> results2;
-    RunAsyncGraph(graph.get(), oriArguments, results, false);
-    RunAsyncGraph(graph.get(), results, results2, false);
-    runContext->Await(results2);
+        std::vector<RCReference<AsyncValue>> oriArguments;
+        oriArguments.push_back(runContext->MakeAvailableAsyncValueRef<async::Chain>());
+        std::vector<RCReference<AsyncValue>> results;
+        std::vector<RCReference<AsyncValue>> results2;
+        RunAsyncGraph(graph.get(), oriArguments, results, false);
+        RunAsyncGraph(graph.get(), results, results2, false);
+        runContext->Await(results2);
     }
 
 

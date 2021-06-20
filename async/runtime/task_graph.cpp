@@ -109,6 +109,7 @@ async::RCReference<TaskGraph> CreateTaskGraph(async::HostContext* context) {
   TaskGraph* memory = context->Allocate<TaskGraph>();
   TaskGraph* graphOri = new (memory) TaskGraph(context);
   async::RCReference<TaskGraph> graph = TakeRef(graphOri);
+  return graph;
 }
 
 }  // namespace sss
