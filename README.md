@@ -13,3 +13,12 @@ Please refer to documents for more detailed explantion.
 Feature Plan:  
 1. Add unified coroutine and function task framework to process jobs.  
 2. Add more utility functions for easy use this library.  
+
+Pre Request:  
+A compiler which support c++17 feature, such as gcc9.x or newer
+
+How to build:  
+mkdir build && cd build   
+cmake -DCMAKE_BUILD_TYPE=Release ..  
+cmake --build . -j\`nproc\`
+
