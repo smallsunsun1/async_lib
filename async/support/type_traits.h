@@ -1,5 +1,5 @@
-#ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_TYPE_TRAITS_
-#define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_TYPE_TRAITS_
+#ifndef ASYNC_SUPPORT_TYPE_TRAITS_
+#define ASYNC_SUPPORT_TYPE_TRAITS_
 
 #include <cassert>
 #include <cstddef>
@@ -10,6 +10,14 @@
 
 namespace sss {
 namespace async {
+
+template <typename T>
+struct remove_cv_ref {
+  using type = std::remove_cv_t<std::remove_reference_t<T>>;
+};
+template <typename T>
+using remove_cv_ref_t = typename remove_cv_ref<T>::type;
+
 template <typename T>
 struct TypeTag {};
 
@@ -189,4 +197,4 @@ struct PointerLikeTypeTraits<PointerIntPair<PointerTy, IntBits, IntType, PtrTrai
 }  // namespace async
 }  // namespace sss
 
-#endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_TYPE_TRAITS_ */
+#endif /* ASYNC_SUPPORT_TYPE_TRAITS_ */

@@ -1,6 +1,3 @@
-if (POLICY CMP0048)
-    cmake_policy(SET CMP0048 NEW)
-endif (POLICY CMP0048)
 project(project_async)
 cmake_minimum_required(VERSION 3.15)
 set(CMAKE_CXX_STANDARD_REQUIRED 17)
@@ -13,7 +10,7 @@ set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};third_party_libs")
 add_definitions(-DEIGEN_USE_THREADS)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof -fdiagnostics-color=always -march=native -flto")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
 
 ## Check Whether Compiler Is Gcc
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -36,8 +33,6 @@ if(USE_CUDA)
 endif()
 if(USE_CXX_20)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -fcoroutines")
-else()
-    set(CMAKE_CXX_FLAGS "-std=c++1z")
 endif()
 
 
@@ -49,22 +44,23 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-# FetchContent_Declare(
-#     gRPC 
-#     GIT_REPOSITORY https://github.com/grpc/grpc
-#     GIT_TAG        v1.35.0
-# )
-# FetchContent_MakeAvailable(gRPC)
+FetchContent_Declare(
+    abseil 
+    URL    https://github.com/abseil/abseil-cpp/archive/refs/tags/20210324.2.tar.gz
+)
+FetchContent_MakeAvailable(abseil)
+FetchContent_Declare(
+    eigen
+    URL    https://gitlab.com/libeigen/eigen/-/archive/3.4/eigen-3.4.tar.gz
+)
 
 enable_testing()
 
-# find_package(OpenCV REQUIRED)
+# include_directories(third_party/eigen3)
+include_directories(${CMAKE_SOURCE_DIR})
+# include_directories(third_party/abseil-cpp)
 
-include_directories(third_party/eigen3)
-include_directories(./)
-include_directories(third_party/abseil-cpp)
-
-link_libraries(pthread)
+find_package(Threads REQUIRED)
 add_subdirectory(third_party)
 add_subdirectory(async)
 add_subdirectory(tools)
@@ -79,6 +75,4 @@ install(TARGETS async_context async_runtime async_concurrent async_support async
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/async_lib)
-
-
 

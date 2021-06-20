@@ -24,6 +24,15 @@ int LargeComputeFn(int num) {
   return res;
 }
 
+void Fn1(async::CommonAsyncKernelFrame* frame) {
+}
+void Fn2(async::CommonAsyncKernelFrame* frame) {
+  LargeComputeFn(frame->GetArgAt<int>(0));
+  frame->EmplaceResult<int>(100);
+}
+
+using KernelFnPtr = void(*)(async::CommonAsyncKernelFrame* frame);
+
 int main() {
   std::cout << "hardware concurrency number! " << std::thread::hardware_concurrency() << "\n";
   auto runContext = CreateCustomHostContext(std::thread::hardware_concurrency(), 1);
@@ -31,12 +40,9 @@ int main() {
   AsyncGraph* graphOri = new (memory) AsyncGraph(runContext.get());
   RCReference<AsyncGraph> graph = TakeRef(graphOri);
   REGISTER_KERNEL_FN(
-      "start", +[](async::CommonAsyncKernelFrame* frame) {});
+      "start", Fn1);
   REGISTER_KERNEL_FN(
-      "run", +[](async::CommonAsyncKernelFrame* frame) {
-        LargeComputeFn(frame->GetArgAt<int>(0));
-        frame->EmplaceResult<int>(100);
-      });
+      "run", Fn2);
   graph->emplace_back({}, {"output"}, GET_KERNEL_FN("start").value(), "start", true);
   for (int i = 0; i < 100; ++i) {
     graph->emplace_back({"output"}, {"result" + std::to_string(i)}, GET_KERNEL_FN("run").value(), "run", true);

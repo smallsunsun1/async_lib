@@ -4,6 +4,7 @@
 #include <atomic>
 #include <functional>
 #include <vector>
+#include "async/support/function_ref.h"
 
 namespace sss {
 
@@ -12,8 +13,9 @@ class CommonAsyncKernelFrame;
 class AsyncValue;
 }  // namespace async
 
-using AsyncKernelFn = void (*)(async::CommonAsyncKernelFrame*);
-// using AsyncKernelFn = std::function<void(async::CommonAsyncKernelFrame*)>;
+// using AsyncKernelFn = void (*)(async::CommonAsyncKernelFrame*);
+// using AsyncKernelFn = async::function_ref<void(async::CommonAsyncKernelFrame*)>;
+using AsyncKernelFn = std::function<void(async::CommonAsyncKernelFrame*)>;
 
 struct AsyncValueInfo {
   unsigned mUserCount;  // 有多少用户使用了这个AsyncValue

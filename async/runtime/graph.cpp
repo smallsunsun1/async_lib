@@ -181,6 +181,11 @@ void AsyncGraph::Reset() {
   mUsedByKernlTable.clear();
   mFunctionInfo.mAsyncValueInfos.clear();
   mFunctionInfo.mKernelInfos.clear();
+  for (auto node : mAsyncNodes) {
+    if (node) {
+      GetContext()->Destruct(node);
+    }
+  }
   mAsyncNodes.clear();
   mIsConstructed = false;
 }
