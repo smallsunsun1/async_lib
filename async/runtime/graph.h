@@ -135,6 +135,7 @@ class GraphExecutor : public async::ReferenceCounted<GraphExecutor> {
 };
 
 void RunAsyncGraph(AsyncGraph* graph, std::vector<async::RCReference<async::AsyncValue>>& arguments, std::vector<async::RCReference<async::AsyncValue>>& results, bool sync = true);
+async::RCReference<AsyncGraph> CreateAsyncGraph(async::HostContext* context);
 
 }  // namespace sss
 

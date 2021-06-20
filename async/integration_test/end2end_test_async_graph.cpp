@@ -36,9 +36,7 @@ using KernelFnPtr = void(*)(async::CommonAsyncKernelFrame* frame);
 int main() {
   std::cout << "hardware concurrency number! " << std::thread::hardware_concurrency() << "\n";
   auto runContext = CreateCustomHostContext(std::thread::hardware_concurrency(), 1);
-  AsyncGraph* memory = runContext->Allocate<AsyncGraph>();
-  AsyncGraph* graphOri = new (memory) AsyncGraph(runContext.get());
-  RCReference<AsyncGraph> graph = TakeRef(graphOri);
+  RCReference<AsyncGraph> graph = CreateAsyncGraph(runContext.get());
   REGISTER_KERNEL_FN(
       "start", Fn1);
   REGISTER_KERNEL_FN(

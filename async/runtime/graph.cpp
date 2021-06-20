@@ -161,7 +161,7 @@ void AsyncGraph::Load(const std::string& filename) {
       } else if (res[0] == "output") {
         outputNames.push_back(res[1]);
       } else if (res[0] == "kernel name") {
-        std::optional<AsyncKernelFn> kernelFunction = GET_KERNEL_FN(res[1]);
+        absl::optional<AsyncKernelFn> kernelFunction = GET_KERNEL_FN(res[1]);
         kernelName = res[1];
         if (!kernelFunction.has_value()) {
           std::cerr << "can't find kernel name: " << res[1] << "\n";
@@ -455,6 +455,13 @@ void RunAsyncGraph(AsyncGraph* graph, std::vector<RCReference<AsyncValue>>& argu
   results.resize(graph->GetNumOutputs());
   GraphExecutor::Execute(exec, absl::MakeConstSpan(argumentsPtr.data(), argumentsPtr.size()), absl::MakeSpan(results.data(), results.size()));
   if (sync) runContext->Await(results);
+}
+
+async::RCReference<AsyncGraph> CreateAsyncGraph(async::HostContext* context) {
+  AsyncGraph* memory = context->Allocate<AsyncGraph>();
+  AsyncGraph* graphOri = new (memory) AsyncGraph(context);
+  RCReference<AsyncGraph> graph = TakeRef(graphOri);
+  return graph;
 }
 
 }  // namespace sss

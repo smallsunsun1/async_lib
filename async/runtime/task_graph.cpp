@@ -1,5 +1,7 @@
 #include "async/runtime/task_graph.h"
 
+#include <thread>
+
 #include "async/context/async_value.h"
 #include "async/context/chain.h"
 #include "async/context/host_context.h"
@@ -101,6 +103,12 @@ void RunTaskGraph(TaskGraph* graph, bool sync) {
   executor->Execute();
   if (sync) executor->Await();
   executor->DropRef();
+}
+
+async::RCReference<TaskGraph> CreateTaskGraph(async::HostContext* context) {
+  TaskGraph* memory = context->Allocate<TaskGraph>();
+  TaskGraph* graphOri = new (memory) TaskGraph(context);
+  async::RCReference<TaskGraph> graph = TakeRef(graphOri);
 }
 
 }  // namespace sss

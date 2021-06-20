@@ -88,6 +88,7 @@ class TaskGraphExecutor : public async::ReferenceCounted<TaskGraphExecutor> {
 };
 
 void RunTaskGraph(TaskGraph* graph, bool sync = true);
+async::RCReference<TaskGraph> CreateTaskGraph(async::HostContext* context);
 
 }  // namespace sss
 
