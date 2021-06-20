@@ -1,5 +1,5 @@
-project(project_async)
 cmake_minimum_required(VERSION 3.15)
+project(project_async VERSION 1.0.0)
 set(CMAKE_CXX_STANDARD_REQUIRED 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -56,12 +56,9 @@ FetchContent_Declare(
 
 enable_testing()
 
-# include_directories(third_party/eigen3)
 include_directories(${CMAKE_SOURCE_DIR})
-# include_directories(third_party/abseil-cpp)
 
 find_package(Threads REQUIRED)
-add_subdirectory(third_party)
 add_subdirectory(async)
 add_subdirectory(tools)
 

@@ -1,5 +1,5 @@
 file(GLOB header_files "*.h")
 file(GLOB object_files "*.cpp")
 add_library(async_concurrent ${LIB_TYPE} ${header_files} ${object_files})
-target_link_libraries(async_concurrent absl::strings absl::optional absl::container absl::hash absl::raw_hash_set)
+target_link_libraries(async_concurrent absl::strings absl::optional absl::hash absl::raw_hash_set absl::inlined_vector)
 set_target_properties(async_concurrent PROPERTIES PUBLIC_HEADER "${header_files}")
