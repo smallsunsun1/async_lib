@@ -78,7 +78,7 @@ void AsyncGraph::Destroy() {
 }
 void AsyncGraph::BuildGraph() {
   assert(mAsyncNodes[0]->GetNumInputs() == 0 && "First Async Node Must Have 0 Arguments!");
-  assert(mAsyncNodes[0]->GetNumResults() != 0 && "First Async Node Must Have >0 Arguments!");
+  assert(mAsyncNodes[0]->GetNumResults() != 0 && "First Async Node Must Have >0 Results!");
   std::map<std::string, int> argCountMap;                            // 记录每个变量名以及其作为Arguments对应的refCount
   std::map<std::string, int> resCountMap;                            // 记录每个变量名以及其作为Results对应的refCount
   std::unordered_map<std::string, unsigned> indexAsyncValueMap;      // 记录每个变量命及其对应的Asyncvalue在整个队列中的Id
