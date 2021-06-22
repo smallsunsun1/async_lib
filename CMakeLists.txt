@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(project_async VERSION 1.0.0)
 set(CMAKE_CXX_STANDARD_REQUIRED 17)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
@@ -37,7 +38,6 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 endif()
 
-
 include(FetchContent)
 set(FETCHCONTENT_QUIET OFF)
 FetchContent_Declare(
@@ -45,16 +45,21 @@ FetchContent_Declare(
     URL    https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
 )
 FetchContent_MakeAvailable(googletest)
+FetchContent_GetProperties(googletest)
+if(NOT googletest_POPULATED)
+  FetchContent_Populate(googletest)
+  add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
+endif()
 
 FetchContent_Declare(
     abseil 
     URL    https://github.com/abseil/abseil-cpp/archive/refs/tags/20210324.2.tar.gz
 )
-FetchContent_MakeAvailable(abseil)
-FetchContent_Declare(
-    eigen
-    URL    https://gitlab.com/libeigen/eigen/-/archive/3.4/eigen-3.4.tar.gz
-)
+FetchContent_GetProperties(abseil)
+if(NOT abseil_POPULATED)
+  FetchContent_Populate(abseil)
+  add_subdirectory(${abseil_SOURCE_DIR} ${abseil_BINARY_DIR})
+endif()
 
 enable_testing()
 
