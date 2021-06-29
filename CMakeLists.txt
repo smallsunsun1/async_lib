@@ -40,11 +40,11 @@ endif()
 
 include(FetchContent)
 set(FETCHCONTENT_QUIET OFF)
+
 FetchContent_Declare(
     googletest 
     URL    https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
 )
-FetchContent_MakeAvailable(googletest)
 FetchContent_GetProperties(googletest)
 if(NOT googletest_POPULATED)
   FetchContent_Populate(googletest)
