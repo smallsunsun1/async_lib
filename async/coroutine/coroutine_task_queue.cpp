@@ -8,7 +8,7 @@ namespace sss {
 namespace async {
 namespace internal {
 
-absl::optional<ScheduleOperation*> CoroutineTaskQueue::PushFront(ScheduleOperation* task) {
+std::optional<ScheduleOperation*> CoroutineTaskQueue::PushFront(ScheduleOperation* task) {
   unsigned front = mFront.load(std::memory_order_relaxed);
   Elem* e;
   for (;;) {
@@ -28,9 +28,9 @@ absl::optional<ScheduleOperation*> CoroutineTaskQueue::PushFront(ScheduleOperati
   }
   e->task = task;
   e->state.store(front + 1, std::memory_order_release);
-  return absl::nullopt;
+  return std::nullopt;
 }
-absl::optional<ScheduleOperation*> CoroutineTaskQueue::PopBack() {
+std::optional<ScheduleOperation*> CoroutineTaskQueue::PopBack() {
   unsigned back = mBack.load(std::memory_order_relaxed);
   Elem* e;
 
@@ -45,7 +45,7 @@ absl::optional<ScheduleOperation*> CoroutineTaskQueue::PopBack() {
     }
 
     // We've reached an empty element.
-    if (diff < 0) return absl::nullopt;
+    if (diff < 0) return std::nullopt;
 
     // Another thread popped a task from element at 'back'.
     if (diff > 0) back = mBack.load(std::memory_order_relaxed);

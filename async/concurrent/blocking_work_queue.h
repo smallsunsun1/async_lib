@@ -40,11 +40,11 @@ class BlockingWorkQueue : public WorkQueueBase<BlockingWorkQueue<ThreadingEnviro
 
   // Enqueues `task` for execution by one of the statically allocated thread.
   // Return task wrapped in optional if all per-thread queues are full.
-  absl::optional<TaskFunction> EnqueueBlockingTask(TaskFunction task);
+  std::optional<TaskFunction> EnqueueBlockingTask(TaskFunction task);
 
   // Runs `task` in one of the dynamically started threads. Returns task
   // wrapped in optional if can't assign it to a worker thread.
-  absl::optional<TaskFunction> RunBlockingTask(TaskFunction task);
+  std::optional<TaskFunction> RunBlockingTask(TaskFunction task);
 
   void Quiesce();
 
@@ -65,8 +65,8 @@ class BlockingWorkQueue : public WorkQueueBase<BlockingWorkQueue<ThreadingEnviro
   using Base::mNumThreads;
   using Base::mThreadData;
 
-  absl::optional<TaskFunction> NextTask(Queue* queue);
-  absl::optional<TaskFunction> Steal(Queue* queue);
+  std::optional<TaskFunction> NextTask(Queue* queue);
+  std::optional<TaskFunction> Steal(Queue* queue);
   bool Empty(Queue* queue);
 
   // If the blocking task does not allow queuing, it is executed in one of the
@@ -76,7 +76,7 @@ class BlockingWorkQueue : public WorkQueueBase<BlockingWorkQueue<ThreadingEnviro
 
   // Waits for the next available task. Returns empty optional if the task was
   // not found.
-  absl::optional<TaskFunction> WaitNextTask(std::unique_lock<std::mutex>* lock);
+  std::optional<TaskFunction> WaitNextTask(std::unique_lock<std::mutex>* lock);
 
   // Maximum number of dynamically started threads.
   const int mMaxNumDynamicThreads;
@@ -117,14 +117,14 @@ BlockingWorkQueue<ThreadingEnvironment>::BlockingWorkQueue(QuiescingState* quies
     : WorkQueueBase<BlockingWorkQueue>(quiescingState, kThreadNamePrefix, numThreads), mMaxNumDynamicThreads(maxNumDynamicThreads), mIdleWaitTime(idleWaitTime) {}
 
 template <typename ThreadingEnvironment>
-absl::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::EnqueueBlockingTask(TaskFunction task) {
+std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::EnqueueBlockingTask(TaskFunction task) {
   // In quiescing mode we count the number of pending tasks, and are allowed to
   // execute tasks in the caller thread.
   const bool isQuiescing = IsQuiescing();
   if (isQuiescing) task = WithPendingTaskCounter(std::move(task));
 
   // If the worker queue is full, we will return `task` to the caller.
-  absl::optional<TaskFunction> inlineTask = {std::move(task)};
+  std::optional<TaskFunction> inlineTask = {std::move(task)};
 
   PerThread* pt = GetPerThread();
   if (pt->parent == this) {
@@ -151,7 +151,7 @@ absl::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::EnqueueBlo
     // potential context switch won't negatively impact system performance.
     if (isQuiescing) {
       (*inlineTask)();
-      return absl::nullopt;
+      return std::nullopt;
     } else {
       return inlineTask;
     }
@@ -167,11 +167,11 @@ absl::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::EnqueueBlo
   // in Schedule.
   if (IsNotifyParkedThreadRequired()) mEventCount.Notify(false);
 
-  return absl::nullopt;
+  return std::nullopt;
 }
 
 template <typename ThreadingEnvironment>
-absl::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::RunBlockingTask(TaskFunction task) {
+std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::RunBlockingTask(TaskFunction task) {
   std::unique_lock<std::mutex> lock(mMutex);
 
   // Attach a PendingTask counter only if we were able to submit the task
@@ -186,7 +186,7 @@ absl::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::RunBlockin
     mIdleTaskQueue.emplace(wrap(std::move(task)));
     mWakeDoWorkCV.notify_one();
 
-    return absl::nullopt;
+    return std::nullopt;
   }
 
   // Cleanup dynamic threads that are already terminated.
@@ -215,7 +215,7 @@ absl::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::RunBlockin
       // Try to get the next task. If one is found, run it. If there is no
       // task to execute, GetNextTask will return None that converts to
       // false.
-      while (absl::optional<TaskFunction> task = WaitNextTask(&lock)) {
+      while (std::optional<TaskFunction> task = WaitNextTask(&lock)) {
         mMutex.unlock();
         // Do not hold the lock while executing and destructing the task.
         (*task)();
@@ -234,7 +234,7 @@ absl::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::RunBlockin
     dynamicThread.first = ThreadingEnvironment::StartThread(std::move(do_work));
     ++mNumDynamicThreads;
 
-    return absl::nullopt;
+    return std::nullopt;
   }
 
   // There are no idle threads and we are at the thread limit. Return task
@@ -243,7 +243,7 @@ absl::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::RunBlockin
 }
 
 template <typename ThreadingEnvironment>
-absl::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::WaitNextTask(std::unique_lock<std::mutex>* lock) {
+std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::WaitNextTask(std::unique_lock<std::mutex>* lock) {
   ++mNumIdleDynamicThreads;
 
   const auto timeout = std::chrono::system_clock::now() + mIdleWaitTime;
@@ -258,7 +258,7 @@ absl::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::WaitNextTa
   }
 
   // Shutdown occurred. Return empty optional.
-  return absl::nullopt;
+  return std::nullopt;
 }
 
 template <typename ThreadingEnvironment>
@@ -287,12 +287,12 @@ void BlockingWorkQueue<ThreadingEnvironment>::Quiesce() {
 }
 
 template <typename ThreadingEnvironment>
-absl::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::NextTask(Queue* queue) {
+std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::NextTask(Queue* queue) {
   return queue->PopBack();
 }
 
 template <typename ThreadingEnvironment>
-absl::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::Steal(Queue* queue) {
+std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::Steal(Queue* queue) {
   return queue->PopBack();
 }
 

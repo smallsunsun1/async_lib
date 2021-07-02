@@ -1,8 +1,9 @@
 #ifndef ASYNC_CONTEXT_KERNEL_FRAME_
 #define ASYNC_CONTEXT_KERNEL_FRAME_
 
+#include <string_view>
+
 #include "absl/container/inlined_vector.h"
-#include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "async/context/host_context.h"
 #include "async/support/string_util.h"
@@ -66,7 +67,7 @@ class AsyncKernelFrame {
     return mpContext->MakeErrorAsyncValueRef(StrCat(std::forward<Args>(args)...));
   }
   // 对错误信息进行广播
-  void PropogateError(absl::string_view errorMsg) {
+  void PropogateError(std::string_view errorMsg) {
     bool setError = false;
     RCReference<ErrorAsyncValue> errorValue = mpContext->MakeErrorAsyncValueRef(errorMsg);
     for (auto& result : GetResults()) {

@@ -87,7 +87,7 @@ class AsyncValueRef {
   // Returns the underlying error, or nullptr if there is none.
   const DecodedDiagnostic* GetErrorIfPresent() const { return mValue->GetErrorIfPresent(); }
 
-  void SetError(absl::string_view message) const { return SetError(DecodedDiagnostic{message}); }
+  void SetError(std::string_view message) const { return SetError(DecodedDiagnostic{message}); }
   void SetError(DecodedDiagnostic diag) const { mValue->SetError(std::move(diag)); }
 
   void SetError(const absl::Status& error) const { mValue->SetError(DecodedDiagnostic(error)); }

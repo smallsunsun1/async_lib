@@ -6,8 +6,7 @@
 #include <cassert>
 #include <limits>
 #include <mutex>
-
-#include "absl/types/optional.h"
+#include <optional>
 
 namespace sss {
 namespace async {
@@ -26,13 +25,13 @@ class CoroutineTaskQueue {
   }
   CoroutineTaskQueue(const CoroutineTaskQueue&) = delete;
   CoroutineTaskQueue& operator=(const CoroutineTaskQueue&) = delete;
-  absl::optional<ScheduleOperation*> PushFront(ScheduleOperation* task);
-  absl::optional<ScheduleOperation*> PopBack();
+  std::optional<ScheduleOperation*> PushFront(ScheduleOperation* task);
+  std::optional<ScheduleOperation*> PopBack();
   unsigned Size() const;
   bool Empty() const { return Size() == 0; }
   void Flush() {
     while (!Empty()) {
-      absl::optional<ScheduleOperation*> task = PopBack();
+      std::optional<ScheduleOperation*> task = PopBack();
       assert(task.has_value());
     }
   }

@@ -56,9 +56,9 @@ class CoroutineThreadPool {
   int GetParallelismLevel() const { return mNumThreads; }
   ScheduleOperation Schedule() noexcept { return ScheduleOperation{this}; }
   void AddTask(ScheduleOperation* task);
-  absl::optional<ScheduleOperation*> NextTask(Queue* queue);
-  absl::optional<ScheduleOperation*> Steal(Queue* queue);
-  absl::optional<ScheduleOperation*> Steal();
+  std::optional<ScheduleOperation*> NextTask(Queue* queue);
+  std::optional<ScheduleOperation*> Steal(Queue* queue);
+  std::optional<ScheduleOperation*> Steal();
 
  private:
   friend class ScheduleOperation;

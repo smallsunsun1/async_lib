@@ -161,7 +161,7 @@ void AsyncGraph::Load(const std::string& filename) {
       } else if (res[0] == "output") {
         outputNames.push_back(res[1]);
       } else if (res[0] == "kernel name") {
-        absl::optional<AsyncKernelFn> kernelFunction = GET_KERNEL_FN(res[1]);
+        std::optional<AsyncKernelFn> kernelFunction = GET_KERNEL_FN(res[1]);
         kernelName = res[1];
         if (!kernelFunction.has_value()) {
           std::cerr << "can't find kernel name: " << res[1] << "\n";

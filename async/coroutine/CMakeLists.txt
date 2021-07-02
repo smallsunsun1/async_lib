@@ -1,7 +1,6 @@
 file(GLOB header_files "*.h")
 file(GLOB object_files "*.cpp")
-add_library(async_coroutine ${LIB_TYPE} ${object_files})
-target_precompile_headers(async_coroutine PRIVATE ${header_files})
+add_library(async_coroutine ${object_files})
 set_target_properties(async_coroutine PROPERTIES PUBLIC_HEADER ${header_files})
 add_executable(coroutine_test tests/coroutine_test.cpp)
 target_link_libraries(coroutine_test async_coroutine)

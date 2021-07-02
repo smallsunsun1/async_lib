@@ -2,8 +2,8 @@
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_RUNTIME_HANDLER_
 
 #include <string>
+#include <string_view>
 
-#include "absl/strings/string_view.h"
 #include "async/context/native_function.h"
 #include "async/runtime/function_op.h"
 
@@ -14,9 +14,9 @@ class BaseRuntime;
 
 class FunctionHandler {
  public:
-  explicit FunctionHandler(absl::string_view name, BaseRuntime* runtime, FunctionHandler* handler) : mName(name), mRuntime(runtime), mFallback(handler) {}
+  explicit FunctionHandler(std::string_view name, BaseRuntime* runtime, FunctionHandler* handler) : mName(name), mRuntime(runtime), mFallback(handler) {}
   FunctionHandler* GetFallBackHandler() { return mFallback; }
-  absl::string_view GetName() const { return mName; }
+  std::string_view GetName() const { return mName; }
   BaseRuntime* GetBaseRuntime() { return mRuntime; }
   absl::StatusOr<SimpleFunction> MakeFunction();
 

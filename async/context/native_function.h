@@ -1,8 +1,9 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_NATIVE_FUNCTION_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_NATIVE_FUNCTION_
 
+#include <string_view>
+
 #include "absl/container/inlined_vector.h"
-#include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "async/context/host_context.h"
 #include "async_value.h"
@@ -15,7 +16,7 @@ using NativeCallable = void (*)(AsyncValue* const* arguments, int numArguments, 
 // 这个类是最常用的简单Function的实现，用于包装一般的回调函数
 class SimpleFunction : public Function {
  public:
-  SimpleFunction(absl::string_view name, NativeCallable callable) : Function(name), mCallable(callable) {}
+  SimpleFunction(std::string_view name, NativeCallable callable) : Function(name), mCallable(callable) {}
   void Execute(absl::Span<AsyncValue* const> arguments, absl::Span<RCReference<AsyncValue>> results, HostContext* host) const override;
   void AddRef() const override {}
   void DropRef() const override {}
@@ -29,7 +30,7 @@ class GeneralFunction : public Function {
  public:
   // 这里使用GeneralCallable 来表示lambda表达式的类别
   using GeneralCallable = T;
-  GeneralFunction(absl::string_view name, GeneralCallable callable) : Function(name), mCallable(std::move(callable)) {}
+  GeneralFunction(std::string_view name, GeneralCallable callable) : Function(name), mCallable(std::move(callable)) {}
   void Execute(absl::Span<AsyncValue* const> arguments, absl::Span<RCReference<AsyncValue>> results, HostContext* host) const override;
   void AddRef() const override {}
   void DropRef() const override {}
@@ -74,7 +75,7 @@ void GeneralFunction<T>::Execute(absl::Span<AsyncValue* const> arguments, absl::
 
 // 工具类，用于生成最终的Function类别
 template <typename GeneralCallable>
-Function* NewFunction(absl::string_view name, GeneralCallable&& callable) {
+Function* NewFunction(std::string_view name, GeneralCallable&& callable) {
   return new GeneralFunction<GeneralCallable>(name, std::forward<GeneralCallable>(callable));
 }
 

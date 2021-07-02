@@ -1,6 +1,5 @@
 set(libs_for_test async_context async_trace async_concurrent async_support gtest_main)
 
-
 add_executable(test_function function_unittest.cpp)
 target_link_libraries(test_function PRIVATE ${libs_for_test})
 add_executable(test_latch latch_unittest.cpp)

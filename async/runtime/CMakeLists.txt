@@ -1,5 +1,5 @@
 file(GLOB header_files "*.h")
 file(GLOB object_files "*.cpp")
-add_library(async_runtime ${LIB_TYPE} ${object_files})
+add_library(async_runtime ${object_files})
 target_link_libraries(async_runtime PUBLIC async_context async_support async_trace async_concurrent)
 set_target_properties(async_runtime PROPERTIES PUBLIC_HEADER "${header_files}")

@@ -6,8 +6,8 @@
 #include <cassert>
 #include <limits>
 #include <mutex>
+#include <optional>
 
-#include "absl/types/optional.h"
 #include "async/context/task_function.h"
 
 namespace sss {
@@ -34,7 +34,7 @@ class TaskQueue {
   //
   // If the queue is full, returns passed in task wrapped in optional, otherwise
   // returns empty optional.
-  absl::optional<TaskFunction> PushFront(TaskFunction task) {
+  std::optional<TaskFunction> PushFront(TaskFunction task) {
     unsigned front = mFront.load(std::memory_order_relaxed);
     Elem* e;
 
@@ -59,13 +59,13 @@ class TaskQueue {
     e->task = std::move(task);
     e->state.store(front + 1, std::memory_order_release);
 
-    return absl::nullopt;
+    return std::nullopt;
   }
 
   // PopBack() removes and returns the last elements in the queue.
   //
   // If the queue is empty returns empty optional.
-  absl::optional<TaskFunction> PopBack() {
+  std::optional<TaskFunction> PopBack() {
     unsigned back = mBack.load(std::memory_order_relaxed);
     Elem* e;
 
@@ -80,7 +80,7 @@ class TaskQueue {
       }
 
       // We've reached an empty element.
-      if (diff < 0) return absl::nullopt;
+      if (diff < 0) return std::nullopt;
 
       // Another thread popped a task from element at 'back'.
       if (diff > 0) back = mBack.load(std::memory_order_relaxed);
@@ -117,7 +117,7 @@ class TaskQueue {
   // Delete all the elements from the queue.
   void Flush() {
     while (!Empty()) {
-      absl::optional<TaskFunction> task = PopBack();
+      std::optional<TaskFunction> task = PopBack();
       assert(task.has_value());
     }
   }

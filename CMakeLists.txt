@@ -1,14 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(project_async VERSION 1.0.0)
 set(CMAKE_CXX_STANDARD_REQUIRED 17)
-set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-
-set(LIB_TYPE "STATIC" CACHE STRING "build library type")
-set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};third_party_libs")
-
-add_definitions(-DEIGEN_USE_THREADS)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof -fdiagnostics-color=always -march=native -flto")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
@@ -33,9 +26,9 @@ if(USE_CUDA)
     include_directories(${CUDA_INCLUDES})
 endif()
 if(USE_CXX_20)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++2a -fcoroutines")
+    set(CMAKE_CXX_STANDARD 20)
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+    set(CMAKE_CXX_STANDARD 17)
 endif()
 
 include(FetchContent)
@@ -63,7 +56,7 @@ endif()
 
 enable_testing()
 
-include_directories(${CMAKE_SOURCE_DIR})
+include_directories(${PROJECT_SOURCE_DIR})
 
 find_package(Threads REQUIRED)
 add_subdirectory(async)

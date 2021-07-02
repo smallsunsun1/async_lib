@@ -22,7 +22,7 @@ class MultiThreadedWorkQueue : public ConcurrentWorkQueue {
   int GetParallelismLevel() const final { return mNumThreads; }
 
   void AddTask(TaskFunction task) final;
-  absl::optional<TaskFunction> AddBlockingTask(TaskFunction task, bool allow_queuing) final;
+  std::optional<TaskFunction> AddBlockingTask(TaskFunction task, bool allow_queuing) final;
   void Quiesce() final;
   void Await(absl::Span<const RCReference<AsyncValue>> values) final;
   bool IsInWorkerThread() const final;
@@ -47,7 +47,7 @@ MultiThreadedWorkQueue::~MultiThreadedWorkQueue() {
 
 void MultiThreadedWorkQueue::AddTask(TaskFunction task) { mNonBlockingWorkQueue.AddTask(std::move(task)); }
 
-absl::optional<TaskFunction> MultiThreadedWorkQueue::AddBlockingTask(TaskFunction task, bool allow_queuing) {
+std::optional<TaskFunction> MultiThreadedWorkQueue::AddBlockingTask(TaskFunction task, bool allow_queuing) {
   if (allow_queuing) {
     return mBlockingWorkQueue.EnqueueBlockingTask(std::move(task));
   } else {

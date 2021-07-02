@@ -1,8 +1,8 @@
 #include <condition_variable>
 #include <mutex>
+#include <optional>
 #include <vector>
 
-#include "absl/types/optional.h"
 #include "absl/types/span.h"
 #include "async/concurrent/concurrent_work_queue.h"
 #include "async/context/async_value.h"
@@ -15,7 +15,7 @@ class SingleThreadedWorkQueue : public ConcurrentWorkQueue {
   SingleThreadedWorkQueue() {}
   std::string name() const override { return "single-threaded"; }
   void AddTask(TaskFunction work) override;
-  absl::optional<TaskFunction> AddBlockingTask(TaskFunction work, bool allow_queuing) override;
+  std::optional<TaskFunction> AddBlockingTask(TaskFunction work, bool allow_queuing) override;
   void Quiesce() override;
   void Await(absl::Span<const RCReference<AsyncValue>> values) override;
   int GetParallelismLevel() const override { return 1; }
@@ -34,14 +34,14 @@ void SingleThreadedWorkQueue::AddTask(TaskFunction work) {
   }
   mCv.notify_all();
 }
-absl::optional<TaskFunction> SingleThreadedWorkQueue::AddBlockingTask(TaskFunction work, bool allow_queuing) {
+std::optional<TaskFunction> SingleThreadedWorkQueue::AddBlockingTask(TaskFunction work, bool allow_queuing) {
   if (!allow_queuing) return {std::move(work)};
   {
     std::lock_guard<std::mutex> l(mMu);
     mWorkItems.push_back(std::move(work));
   }
   mCv.notify_all();
-  return absl::nullopt;
+  return std::nullopt;
 }
 
 void SingleThreadedWorkQueue::Quiesce() {

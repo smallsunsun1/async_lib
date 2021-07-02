@@ -1,7 +1,8 @@
 #include "diagnostic.h"
 
+#include <string_view>
+
 #include "absl/status/status.h"
-#include "absl/strings/string_view.h"
 #include "async/context/execution_context.h"
 #include "async/context/host_context.h"
 #include "async/support/string_util.h"
@@ -17,7 +18,7 @@ std::ostream& operator<<(std::ostream& os, const DecodedDiagnostic& diag) {
   }
   return os << diag.message;
 }
-DecodedDiagnostic EmitError(const ExecutionContext& exec_ctx, absl::string_view message) {
+DecodedDiagnostic EmitError(const ExecutionContext& exec_ctx, std::string_view message) {
   auto decoded_loc = exec_ctx.location().Decode();
   auto diag = DecodedDiagnostic(decoded_loc, message);
   auto* host = exec_ctx.host();
