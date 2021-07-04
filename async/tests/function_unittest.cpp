@@ -20,6 +20,8 @@ using namespace sss;
 using namespace async;
 
 void LargeCompute(AsyncValue* const* inputs, int numArguments, RCReference<AsyncValue>* result, int numResult, HostContext* ctx) {
+  (void)numArguments;
+  (void)numResult;
   float a = inputs[0]->get<float>() + 100;
   result[0] = ctx->EnqueueWork([a]() { return a + 2; });
 }
@@ -29,6 +31,8 @@ class ComputeTest {
   ComputeTest(HostContext* ctx) : mpContext(ctx) {
     mpFunc = TakeRef(NewFunction("ComputeTest::DoLargeCompute", [this](AsyncValue* const* inputs, int numArguments, RCReference<AsyncValue>* result, int numResult, HostContext* ctx) {
       float a = inputs[0]->get<float>();
+      (void)numArguments;
+      (void)numResult;
       result[0] = ctx->EnqueueWork([this, a]() { return this->DoLargeCompute(a); });
     }));
   }
@@ -52,7 +56,7 @@ TEST(ASYNCFUNCTION, V1) {
   auto input1 = context->MakeAvailableAsyncValueRef<float>(2);
   func->Execute(absl::MakeConstSpan({input1.GetAsyncValue()}), absl::MakeSpan(result1.data(), result1.size()), context.get());
   absl::InlinedVector<AsyncValue*, 4> mappedVec;
-  for (int i = 0; i < result1.size(); ++i) {
+  for (size_t i = 0, e = result1.size(); i < e; ++i) {
     mappedVec.push_back(result1[i].get());
   }
   func->Execute(absl::MakeConstSpan(mappedVec.data(), mappedVec.size()), absl::MakeSpan(result2.data(), result2.size()), context.get());

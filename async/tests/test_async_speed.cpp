@@ -19,9 +19,11 @@ using namespace sss;
 using namespace async;
 
 void LargeCompute(AsyncValue* const* inputs, int numArguments, RCReference<AsyncValue>* result, int numResult, HostContext* ctx) {
+  (void)numArguments;
+  (void)numResult;
   auto& vec = inputs[0]->get<std::vector<int>>();
   result[0] = std::move(ctx->EnqueueWork([&vec]() {
-    for (int i = 0; i < vec.size(); ++i) {
+    for (size_t i = 0, e = vec.size(); i < e; ++i) {
       vec[i] += 1;
     }
     return std::move(vec);
@@ -29,7 +31,7 @@ void LargeCompute(AsyncValue* const* inputs, int numArguments, RCReference<Async
 }
 
 int SyncLargeCompute(std::vector<int>& input, std::vector<int>& output) {
-  for (int i = 0; i < input.size(); ++i) {
+  for (size_t i = 0, e = input.size(); i < e; ++i) {
     input[i] += 1;
   }
   output = std::move(input);

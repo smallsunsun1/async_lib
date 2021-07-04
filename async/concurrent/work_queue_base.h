@@ -201,7 +201,7 @@ class WorkQueueBase {
   unsigned NumBlockedThreads() const { return mBlocked.load(); }
   unsigned NumActiveThreads() const { return mNumThreads - mBlocked.load(); }
 
-  const int mNumThreads;
+  const uint32_t mNumThreads;
 
   std::vector<ThreadData> mThreadData;
   std::vector<unsigned> mCoprimes;
@@ -260,7 +260,8 @@ class WorkQueueBase {
 
 inline std::vector<unsigned> ComputeCoprimes(int n) {
   std::vector<unsigned> coprimes;
-  for (unsigned i = 1; i <= n; i++) {
+  unsigned total = static_cast<unsigned>(n);
+  for (unsigned i = 1; i <= total; i++) {
     unsigned a = i;
     unsigned b = n;
     // If GCD(a, b) == 1, then a and b are coprimes.
@@ -287,6 +288,7 @@ WorkQueueBase<Derived>::WorkQueueBase(QuiescingState* quiescing_state, absl::str
       mEventCount(num_threads),
       mDerived(static_cast<Derived&>(*this)) {
   assert(num_threads >= 1);
+  (void)name_prefix;
   for (int i = 0; i < num_threads; i++) {
     mThreadData[i].thread = ThreadingEnvironment::StartThread([this, i]() { WorkerLoop(i); });
   }
@@ -321,10 +323,8 @@ void WorkQueueBase<Derived>::CheckCallerThread(const char* function_name) const 
   assert(pt->parent != this &&
          "Error, should not be called by a work thread "
          "already managed by the queue.");
-  // TFRT_LOG_IF(FATAL, pt->parent == this)
-  //     << "Error at " << __FILE__ << ":" << __LINE__ << ": " << function_name
-  //     << " should not be called by a work thread already managed by the
-  //     queue.";
+  (void)function_name;
+  (void)pt;
 }
 
 template <typename Derived>

@@ -197,6 +197,7 @@ class EventCount {
     assert(waiters < (1u << kCounterBits) - 1);
     assert(!waiter || waiters > 0);
     (void)waiters;
+    (void)waiter;
     (void)signals;
   }
 };

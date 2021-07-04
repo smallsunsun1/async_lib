@@ -11,7 +11,7 @@ set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};third_party_libs")
 add_definitions(-DEIGEN_USE_THREADS)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-invalid-offsetof -fdiagnostics-color=always -march=native -flto")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -Wall -Wextra -Wno-return-type -Wno-maybe-uninitialized")
 
 ## Check Whether Compiler Is Gcc
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

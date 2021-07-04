@@ -75,7 +75,7 @@ void SingleThreadedWorkQueue::Await(absl::Span<const RCReference<AsyncValue>> va
   };
   auto no_items_and_values_remaining = [this, &values_remaining]() -> bool { return values_remaining != 0 && mWorkItems.empty(); };
   std::vector<TaskFunction> local_work_items;
-  int next_work_item_index = 0;
+  size_t next_work_item_index = 0;
   while (has_values()) {
     if (next_work_item_index == local_work_items.size()) {
       local_work_items.clear();

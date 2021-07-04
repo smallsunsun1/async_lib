@@ -433,13 +433,11 @@ class TaskPriorityLockDeque {
   TaskPriorityLockDeque(const TaskPriorityLockDeque&) = delete;
   TaskPriorityLockDeque& operator=(const TaskPriorityLockDeque&) = delete;
   absl::optional<TaskFunction> PushFront(TaskFunction task, TaskPriority priority) {
-    std::lock_guard<std::mutex>  lock(mu_);
+    std::lock_guard<std::mutex> lock(mu_);
     queue_.emplace(priority, std::move(task));
     return absl::nullopt;
   }
-  absl::optional<TaskFunction> PushFront(TaskFunction task) {
-    return PushFront(std::move(task), TaskPriority::kDefault);
-  }
+  absl::optional<TaskFunction> PushFront(TaskFunction task) { return PushFront(std::move(task), TaskPriority::kDefault); }
   absl::optional<TaskFunction> PopFront() {
     if (Empty()) return absl::nullopt;
     absl::optional<TaskFunction> result(std::move(const_cast<Elem&>(queue_.top()).task));

@@ -103,13 +103,13 @@ void AsyncGraph::BuildGraph() {
   }
   mFunctionInfo.mKernelInfos.resize(mAsyncNodes.size());
   // 初始化mUsedByKernlTable
-  for (int i = 0, numNodes = mAsyncNodes.size(); i != numNodes; ++i) {
+  for (size_t i = 0, numNodes = mAsyncNodes.size(); i != numNodes; ++i) {
     AsyncNode* curNode = mAsyncNodes[i];
     // 计算统计每个变量的后续的User kernel对应的Index
     KernelResInfo kernelResInfo;
     // 初始化当前kernel的Result会被哪些KernelId所使用的vector容器
     kernelResInfo.mResultTable.resize(curNode->GetNumResults());
-    for (int j = 0; j < curNode->GetNumResults(); ++j) {
+    for (uint32_t j = 0, e = curNode->GetNumResults(); j < e; ++j) {
       const auto& container = usedCountmap[curNode->GetOutputNameAt(j)];
       kernelResInfo.mResultTable[j] = std::vector<unsigned>(container.begin(), container.end());
       mFunctionInfo.mKernelInfos[indexAsyncNodeIdMap[curNode->GetOutputNameAt(j)]].mArgumentsNotReady.store(indexAsyncNodeMap[curNode->GetOutputNameAt(j)]->GetNumInputs());  // 初始化KernelInfo结果
@@ -234,6 +234,7 @@ void GraphExecutor::InitializeArgumentRegisters(absl::Span<AsyncValue* const> ar
     asyncValueInfos[idx].mValue = value;
   }
 }
+
 void GraphExecutor::InitializeResultRegisters(std::vector<unsigned>* resultReg) {
   for (auto iter : graph->mNameAndAsyncIdPair) {
     // 如果某个AsyncValue不会被后面的结果使用到，那么该AsyncValue是需要被return的
@@ -301,12 +302,11 @@ void GraphExecutor::ProcessArgumentsAsPseudoKernel(std::vector<unsigned>* readyK
   AsyncNode* asyncNode = graph->mAsyncNodes[0];
   assert(asyncNode->GetNumInputs() == 0);
   assert(asyncNode->GetNumResults() != 0);
-  absl::Span<AsyncValueInfo> asyncValueInfoArr = GetAsyncValueInfo();
 
   // 获取当前AsyncFn的第一个输出会被多少人使用
   auto usedBy = GetNextUsedBys(asyncNode, 0);
   DecreaseReadyCountAndPush(usedBy, readyKernelIdxs);
-  for (int resultNumber = 1; resultNumber < asyncNode->GetNumResults(); ++resultNumber) {
+  for (uint32_t resultNumber = 1, e = asyncNode->GetNumResults(); resultNumber < e; ++resultNumber) {
     auto& valueInfo = asyncValueInofs[graph->mNameAndAsyncIdPair[asyncNode->GetOutputNameAt(resultNumber)]];
     if (valueInfo.mUserCount == 0) continue;
     AsyncValue* result = GetAsyncValuePtr(valueInfo);
@@ -358,12 +358,12 @@ void GraphExecutor::ProcessReadyKernel(unsigned kernelId, async::CommonAsyncKern
   AsyncNode* node = graph->mAsyncNodes[kernelId];
   std::vector<unsigned> argumentsIdx;
   argumentsIdx.reserve(node->GetNumInputs());
-  for (int i = 0; i < node->GetNumInputs(); ++i) {
+  for (uint32_t i = 0, e = node->GetNumInputs(); i < e; ++i) {
     argumentsIdx.push_back(graph->mNameAndAsyncIdPair[node->GetInputNameAt(i)]);
   }
   std::vector<unsigned> resultsIndex;
   resultsIndex.reserve(node->GetNumResults());
-  for (int i = 0; i < node->GetNumResults(); ++i) {
+  for (uint32_t i = 0, e = node->GetNumResults(); i < e; ++i) {
     resultsIndex.push_back(graph->mNameAndAsyncIdPair[node->GetOutputNameAt(i)]);
   }
   for (auto regIdx : argumentsIdx) {
@@ -384,7 +384,7 @@ void GraphExecutor::ProcessReadyKernel(unsigned kernelId, async::CommonAsyncKern
   for (auto* arg : kernelFrame->GetArguments()) {
     arg->DropRef();
   }
-  for (int resultNumber = 0; resultNumber < node->GetNumResults(); ++resultNumber) {
+  for (uint32_t resultNumber = 0, e = node->GetNumResults(); resultNumber < e; ++resultNumber) {
     auto& resultInfo = asyncValueInfoArr[resultsIndex[resultNumber]];
     // 确保存储的AsyncValue还未被赋值
     assert(GetAsyncValuePtr(resultInfo) == nullptr || GetAsyncValuePtr(resultInfo)->IsUnresolvedIndirect());
@@ -414,9 +414,9 @@ void GraphExecutor::DebugFn() {
   std::cout << "Check Unsed By Kernel\n";
   for (auto value : graph->mUsedByKernlTable) {
     std::cout << "first: " << value.first << "\n";
-    for (int i = 0; i < value.second.mResultTable.size(); ++i) {
+    for (size_t i = 0, e = value.second.mResultTable.size(); i < e; ++i) {
       std::cout << "index: " << i << "\n";
-      for (int j = 0; j < value.second.mResultTable[i].size(); ++j) {
+      for (size_t j = 0, e2 = value.second.mResultTable[i].size(); j < e2; ++j) {
         std::cout << value.second.mResultTable[i][j] << "\n";
       }
       std::cout << " \n";
@@ -424,15 +424,15 @@ void GraphExecutor::DebugFn() {
   }
   std::cout << "Check Function Info\n";
   std::cout << "Check AsyncValue Infos\n";
-  for (int i = 0; i < mFunctionInfo.mAsyncValueInfos.size(); ++i) {
+  for (size_t i = 0, e = mFunctionInfo.mAsyncValueInfos.size(); i < e; ++i) {
     std::cout << "user count: " << mFunctionInfo.mAsyncValueInfos[i].mUserCount << " value: " << mFunctionInfo.mAsyncValueInfos[i].mValue << "\n";
   }
   std::cout << "Check Kernel Infos\n";
-  for (int i = 0; i < mFunctionInfo.mKernelInfos.size(); ++i) {
+  for (size_t i = 0, e = mFunctionInfo.mKernelInfos.size(); i < e; ++i) {
     std::cout << "KERNEL: " << mFunctionInfo.mKernelInfos[i].mArgumentsNotReady << "\n";
   }
   std::cout << "Check Final Nodes\n";
-  for (int i = 0; i < graph->mAsyncNodes.size(); ++i) {
+  for (size_t i = 0, e = graph->mAsyncNodes.size(); i < e; ++i) {
     std::cout << "Nodes: " << graph->mAsyncNodes[i] << "\n";
   }
 }

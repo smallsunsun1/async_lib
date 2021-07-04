@@ -13,7 +13,10 @@ class MallocAllocator : public HostAllocator {
     size = (size + alignment - 1) / alignment * alignment;
     return AlignedAlloc(alignment, size);
   }
-  void DeallocateBytes(void* ptr, size_t size) override { free(ptr); }
+  void DeallocateBytes(void* ptr, size_t size) override final {
+    (void)size;
+    free(ptr);
+  }
 };
 
 void HostAllocator::VtableAnchor() {}

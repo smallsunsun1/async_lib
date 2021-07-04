@@ -1,5 +1,5 @@
-#ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_LATCH_
-#define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_LATCH_
+#ifndef ASYNC_SUPPORT_LATCH_
+#define ASYNC_SUPPORT_LATCH_
 
 #include <stdint.h>  // for uint64_t
 
@@ -25,16 +25,16 @@ class latch {
   latch& operator=(const latch&) = delete;
 
   // Decrements the counter by `n`.
-  void count_down(std::ptrdiff_t n = 1);
+  void count_down(uint64_t = 1);
   // Increments the counter by `n`
-  void add_count(std::ptrdiff_t n = 1);
+  void add_count(uint64_t n = 1);
 
   // Returns true if the internal counter equals zero.
   bool try_wait() const noexcept;
   // Blocks until the counter reaches zero.
   void wait() const;
   // Decrements the counter and blocks until it reaches zero.
-  void arrive_and_wait(std::ptrdiff_t n = 1);
+  void arrive_and_wait(uint64_t n = 1);
 
  private:
   mutable std::mutex mu_;
@@ -43,12 +43,12 @@ class latch {
   bool notified_;
 };
 
-inline void latch::add_count(std::ptrdiff_t n) {
+inline void latch::add_count(uint64_t n) {
   assert(n >= 0);
   state_.fetch_add(n * 2);
 }
 
-inline void latch::count_down(std::ptrdiff_t n) {
+inline void latch::count_down(uint64_t n) {
   assert(n >= 0);
   uint64_t state = state_.fetch_sub(n * 2);
   assert((state >> 1) >= n);
@@ -70,7 +70,7 @@ inline void latch::wait() const {
   std::unique_lock<std::mutex> lock(mu_);
   cv_.wait(lock, [this]() { return notified_; });
 }
-inline void latch::arrive_and_wait(std::ptrdiff_t n) {
+inline void latch::arrive_and_wait(uint64_t n) {
   count_down(n);
   wait();
 }
@@ -78,4 +78,4 @@ inline void latch::arrive_and_wait(std::ptrdiff_t n) {
 }  // namespace async
 }  // namespace sss
 
-#endif /* INFERENCE_MEDICAL_COMMON_CPP_ASYNC_SUPPORT_LATCH_ */
+#endif /* ASYNC_SUPPORT_LATCH_ */

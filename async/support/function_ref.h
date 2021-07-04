@@ -28,8 +28,8 @@ class function_ref<Ret(Params...)> {
   explicit operator bool() const { return callback; }
 
  private:
-  intptr_t callable;
   Ret (*callback)(intptr_t callee, Params... params) = nullptr;
+  intptr_t callable;
   template <typename Callable>
   static Ret callback_fn(intptr_t callable, Params... params) {
     return (*reinterpret_cast<Callable *>(callable))(std::forward<Params>(params)...);

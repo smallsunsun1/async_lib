@@ -79,6 +79,7 @@ class AsyncKernelFrame {
       }
     }
     assert(setError && "PropogateError Must Set An Error Value");
+    (void)setError;
   }
 
  protected:

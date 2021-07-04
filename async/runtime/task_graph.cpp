@@ -19,7 +19,7 @@ void TaskNode::AddSuccessor(TaskNode* node) {
 }
 void TaskNode::operator()() { mComputeFunc(); }
 void TaskGraph::BuildGraph() {
-  for (int i = 0; i < mTaskNodes.size(); ++i) {
+  for (size_t i = 0, e = mTaskNodes.size(); i < e; ++i) {
     mNodeIndexInfo[mTaskNodes[i].get()] = i;
     mNodeCountInfo[mTaskNodes[i].get()] = mTaskNodes[i]->GetNumDependencies();
   }

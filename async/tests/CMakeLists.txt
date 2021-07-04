@@ -21,6 +21,8 @@ add_executable(test_task_queue task_queue_unittest.cpp)
 target_link_libraries(test_task_queue PRIVATE ${libs_for_test})
 add_executable(test_function_ref function_ref_unittest.cpp)
 target_link_libraries(test_function_ref PRIVATE ${libs_for_test})
+add_executable(test_allocator allocator_unittest.cpp)
+target_link_libraries(test_allocator PRIVATE ${libs_for_test})
 
 
 add_test(NAME function COMMAND test_function)
@@ -32,3 +34,4 @@ add_test(NAME unique_function COMMAND test_unique_function)
 add_test(NAME task_deque COMMAND test_task_deque)
 add_test(NAME task_queue COMMAND test_task_queue)
 add_test(NAME function_ref COMMAND test_function_ref)
+add_test(NAME allocator COMMAND test_allocator)

@@ -69,10 +69,9 @@ class LeakCheckAllocator : public ProfiledAllocator {
     }
   }
 };
-
-std::unique_ptr<HostAllocator> CreateProfiledAllocator(std::unique_ptr<HostAllocator> allocaor) { return std::make_unique<ProfiledAllocator>(std::move(allocaor)); }
-
 }  // namespace
+
+std::unique_ptr<HostAllocator> CreateProfiledAllocator(std::unique_ptr<HostAllocator> allocator) { return std::make_unique<ProfiledAllocator>(std::move(allocator)); }
 
 }  // namespace async
 }  // namespace sss

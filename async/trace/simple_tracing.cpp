@@ -92,12 +92,21 @@ Tracing* SimpleTracing::GetTracing() {
   return res;
 }
 
-absl::Status SimpleTracing::RequestTracing(bool enable) { return absl::OkStatus(); }
+absl::Status SimpleTracing::RequestTracing(bool enable) {
+  (void)enable;
+  return absl::OkStatus();
+}
 void SimpleTracing::RecordTracing(std::string name) { GetTimeInfoUtility().RecordEvent(std::move(name)); }
 void SimpleTracing::PushTracingScope(std::string name) { GetTimeInfoUtility().PushScope(std::move(name)); }
-void SimpleTracing::PopTracingScope(std::string name) { GetTimeInfoUtility().PopScope(); }
+void SimpleTracing::PopTracingScope(std::string name) {
+  (void)name;
+  GetTimeInfoUtility().PopScope();
+}
 
-absl::Status ScopeTracing::RequestTracing(bool enable) { return absl::OkStatus(); }
+absl::Status ScopeTracing::RequestTracing(bool enable) {
+  (void)enable;
+  return absl::OkStatus();
+}
 
 // ScopeTracing Only Use in Function Scope, So different thread must have
 // different Tracing object
@@ -109,6 +118,7 @@ Tracing* ScopeTracing::GetTracing() {
 void ScopeTracing::PushTracingScope(std::string name) { mTimeInfos.emplace_back(std::move(name), internal::ScopeTimeInfoUtility::Now()); }
 
 void ScopeTracing::PopTracingScope(std::string name) {
+  (void)name;
   mTimeInfos.back().ReleaseInfo();
   mTimeInfos.pop_back();
 }
@@ -118,11 +128,15 @@ void ScopeTracing::RecordTracing(std::string name) {
   mTimeInfos.emplace_back(std::move(name), timeNow, timeNow);
 }
 
-absl::Status ScopedTracing::RequestTracing(bool enable) { return absl::OkStatus(); }
+absl::Status ScopedTracing::RequestTracing(bool enable) {
+  (void)enable;
+  return absl::OkStatus();
+}
 
 void ScopedTracing::PushTracingScope(std::string name) { mTimeInfos.emplace_back(std::move(name), internal::ScopeTimeInfoUtility::Now()); }
 
 void ScopedTracing::PopTracingScope(std::string name) {
+  (void)name;
   mTimeInfos.back().ReleaseInfo();
   mTimeInfos.pop_back();
 }

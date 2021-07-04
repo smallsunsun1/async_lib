@@ -24,7 +24,7 @@ class AsyncGraph;
 class AsyncNode {
  public:
   AsyncNode(std::vector<std::string> inputNames, std::vector<std::string> outputNames, AsyncKernelFn fn, const std::string& fname = "", bool isStrictFunc = true)
-      : mInputNames(std::move(inputNames)), mOutputNames(std::move(outputNames)), mFunc(std::move(fn)), mIsStrictFunc(isStrictFunc), mFuncName(fname) {}
+      : mFunc(std::move(fn)), mIsStrictFunc(isStrictFunc), mFuncName(fname), mInputNames(std::move(inputNames)), mOutputNames(std::move(outputNames)) {}
   void operator()(async::CommonAsyncKernelFrame* kernelFrame) { mFunc(kernelFrame); }
   void AddInputs(const std::string& name) { mInputNames.push_back(name); }
   void AddOutputs(const std::string& name) { mOutputNames.push_back(name); }

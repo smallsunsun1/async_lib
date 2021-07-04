@@ -13,7 +13,7 @@ using namespace async;
 using namespace std::chrono;
 
 int LargeComputeFn(int num) {
-  float res;
+  float res = 0;
   for (int i = 0; i < num; ++i) {
     res += (float)i / 10.2;
   }
@@ -29,7 +29,7 @@ int main() {
     TaskNode* node = graph->emplace_back([i]() { std::cout << LargeComputeFn(i) << std::endl; });
     nodes.push_back(node);
   }
-  for (int i = 0; i < nodes.size() - 1; ++i) {
+  for (size_t i = 0, e = nodes.size(); i < e - 1; ++i) {
     nodes[i]->AddSuccessor(nodes[i + 1]);
   }
   graph->BuildGraph();

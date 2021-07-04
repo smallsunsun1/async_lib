@@ -34,7 +34,7 @@ class BlockingWorkQueue : public WorkQueueBase<BlockingWorkQueue<ThreadingEnviro
   using ThreadData = typename Base::ThreadData;
 
  public:
-  explicit BlockingWorkQueue(QuiescingState* quiescingState, int numThreads, int maxNumDynamicThreads = std::numeric_limits<int>::max(),
+  explicit BlockingWorkQueue(QuiescingState* quiescingState, size_t numThreads, size_t maxNumDynamicThreads = std::numeric_limits<size_t>::max(),
                              std::chrono::nanoseconds idleWaitTime = std::chrono::seconds(1));
   ~BlockingWorkQueue() { Quiesce(); }
 
@@ -79,7 +79,7 @@ class BlockingWorkQueue : public WorkQueueBase<BlockingWorkQueue<ThreadingEnviro
   absl::optional<TaskFunction> WaitNextTask(std::unique_lock<std::mutex>* lock);
 
   // Maximum number of dynamically started threads.
-  const int mMaxNumDynamicThreads;
+  const uint64_t mMaxNumDynamicThreads;
 
   // For how long dynamically started thread waits for the next task before
   // stopping.
@@ -91,10 +91,10 @@ class BlockingWorkQueue : public WorkQueueBase<BlockingWorkQueue<ThreadingEnviro
   std::condition_variable mThreadExitedCV;
 
   // Number of started dynamic threads.
-  int mNumDynamicThreads = 0;
+  size_t mNumDynamicThreads = 0;
 
   // Number of dynamic threads waiting for the next task.
-  int mNumIdleDynamicThreads = 0;
+  size_t mNumIdleDynamicThreads = 0;
 
   // This queue is a temporary storage to transfer task ownership to one of the
   // idle threads. It does not keep more tasks than there are idle threads.
@@ -113,7 +113,7 @@ class BlockingWorkQueue : public WorkQueueBase<BlockingWorkQueue<ThreadingEnviro
 };
 
 template <typename ThreadingEnvironment>
-BlockingWorkQueue<ThreadingEnvironment>::BlockingWorkQueue(QuiescingState* quiescingState, int numThreads, int maxNumDynamicThreads, std::chrono::nanoseconds idleWaitTime)
+BlockingWorkQueue<ThreadingEnvironment>::BlockingWorkQueue(QuiescingState* quiescingState, uint64_t numThreads, uint64_t maxNumDynamicThreads, std::chrono::nanoseconds idleWaitTime)
     : WorkQueueBase<BlockingWorkQueue>(quiescingState, kThreadNamePrefix, numThreads), mMaxNumDynamicThreads(maxNumDynamicThreads), mIdleWaitTime(idleWaitTime) {}
 
 template <typename ThreadingEnvironment>
