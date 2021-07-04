@@ -72,6 +72,7 @@ class AsyncGraph : public async::ReferenceCounted<AsyncGraph> {
   FunctionInfo mFunctionInfo;                                       // AsyncValue(use-count),
                                                                     // kernel-info(指示多少Arguments还未Ready)
   std::vector<AsyncNode*> mAsyncNodes;                              // 这里需要保证在GraphExecutor被释放的时候这些Node资源也会被释放
+  std::vector<std::string> mOutputNames;
   bool mIsConstructed = false;
 };
 

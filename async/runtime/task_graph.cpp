@@ -13,21 +13,26 @@ void TaskNode::AddDependency(TaskNode* node) {
   node->mSuccessories.push_back(this);
   mDependencies.push_back(node);
 }
+
 void TaskNode::AddSuccessor(TaskNode* node) {
   mSuccessories.push_back(node);
   node->mDependencies.push_back(this);
 }
+
 void TaskNode::operator()() { mComputeFunc(); }
+
 void TaskGraph::BuildGraph() {
   for (size_t i = 0, e = mTaskNodes.size(); i < e; ++i) {
     mNodeIndexInfo[mTaskNodes[i].get()] = i;
     mNodeCountInfo[mTaskNodes[i].get()] = mTaskNodes[i]->GetNumDependencies();
   }
 }
+
 void TaskGraph::Destroy() {
   this->~TaskGraph();
   GetContext()->Deallocate<TaskGraph>(this);
 }
+
 TaskGraphExecutor::TaskGraphExecutor(TaskGraph* graph) : mGraph(graph) {
   const auto& nodeCountInfo = mGraph->mNodeCountInfo;
   for (const auto& data : nodeCountInfo) {
@@ -37,15 +42,18 @@ TaskGraphExecutor::TaskGraphExecutor(TaskGraph* graph) : mGraph(graph) {
   mTotalTaskCount.store(mGraph->mTaskNodes.size());
   mFinishChain = GetContext()->MakeUnconstructedAsyncValueRef<async::Chain>();
 }
+
 void TaskGraphExecutor::Execute(TaskGraphExecutor* executor) {
   executor->Execute();
   executor->DropRef();
 }
+
 void TaskGraphExecutor::Execute() {
   std::vector<unsigned> readyNodeIdx;
   ProcessStartNodeIndex(&readyNodeIdx);
   ProcessReadyNodeIndexs(&readyNodeIdx);
 }
+
 void TaskGraphExecutor::ProcessStartNodeIndex(std::vector<unsigned>* readyNodeIndex) {
   for (auto& node : mGraph->mTaskNodes) {
     // 这个node可以直接被执行
@@ -54,6 +62,7 @@ void TaskGraphExecutor::ProcessStartNodeIndex(std::vector<unsigned>* readyNodeIn
     }
   }
 }
+
 void TaskGraphExecutor::ProcessReadyNodeIndex(unsigned nodeId, std::vector<unsigned>* readyNodeIdx) {
   TaskNode* node = mGraph->mTaskNodes[nodeId].get();
   (*node)();  // 执行完毕，修改readyNodeIndex
@@ -67,6 +76,7 @@ void TaskGraphExecutor::ProcessReadyNodeIndex(unsigned nodeId, std::vector<unsig
     mFinishChain->emplace<async::Chain>();
   }
 }
+
 void TaskGraphExecutor::ProcessReadyNodeIndexs(std::vector<unsigned>* readyNodeIndex) {
   // 完成队列非空
   while (!readyNodeIndex->empty()) {
@@ -84,6 +94,7 @@ void TaskGraphExecutor::ProcessReadyNodeIndexs(std::vector<unsigned>* readyNodeI
     ProcessReadyNodeIndex(firstNodeId, readyNodeIndex);
   }
 }
+
 void TaskGraphExecutor::Await() {
   async::latch lat(1);
   absl::InlinedVector<async::AsyncValue*, 4> input;
@@ -91,6 +102,7 @@ void TaskGraphExecutor::Await() {
   GetContext()->RunWhenReady(absl::MakeConstSpan(input.data(), input.size()), [&lat]() { lat.count_down(1); });
   lat.wait();
 }
+
 void TaskGraphExecutor::Destroy() {
   this->~TaskGraphExecutor();
   GetContext()->Deallocate<TaskGraphExecutor>(this);
