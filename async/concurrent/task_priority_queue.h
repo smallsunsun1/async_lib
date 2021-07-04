@@ -57,7 +57,7 @@ class TaskPriorityDeque {
   //
   // If the queue is full, returns passed in task wrapped in optional, otherwise
   // returns empty optional.
-  absl::optional<TaskFunction> PushFront(TaskFunction task, TaskPriority priority) {
+  std::optional<TaskFunction> PushFront(TaskFunction task, TaskPriority priority) {
     assert(static_cast<int>(priority) < kNumTaskPriorities);
 
     PointerState front(front_.load(std::memory_order_relaxed));
@@ -66,22 +66,22 @@ class TaskPriorityDeque {
     Elem* e = elem(priority, index);
     uint8_t s = e->state.load(std::memory_order_relaxed);
     if (s != kEmpty || !e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
-      return absl::optional<TaskFunction>(std::move(task));
+      return std::optional<TaskFunction>(std::move(task));
     }
 
     front_.store(front.Inc(priority), std::memory_order_relaxed);
     e->task = std::move(task);
     e->state.store(kReady, std::memory_order_release);
-    return absl::nullopt;
+    return std::nullopt;
   }
 
-  absl::optional<TaskFunction> PushFront(TaskFunction task) { return PushFront(std::move(task), TaskPriority::kDefault); }
+  std::optional<TaskFunction> PushFront(TaskFunction task) { return PushFront(std::move(task), TaskPriority::kDefault); }
 
   // PopFront() iterates through all queues in their priority order and removes
   // and returns the first element from the first non-empty queue.
   //
   // If all queues are empty returns empty optional.
-  absl::optional<TaskFunction> PopFront() {
+  std::optional<TaskFunction> PopFront() {
     PointerState front(front_.load(std::memory_order_relaxed));
 
     for (TaskPriority priority : kTaskPriorities) {
@@ -92,18 +92,18 @@ class TaskPriorityDeque {
 
       if (s != kReady) continue;
       if (!e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
-        return absl::nullopt;
+        return std::nullopt;
       }
 
       TaskFunction task = std::move(e->task);
       e->state.store(kEmpty, std::memory_order_release);
       front_.store(front.WithIndexExt((index - 1) & kIndexMaskExt, priority), std::memory_order_relaxed);
 
-      return absl::optional<TaskFunction>(std::move(task));
+      return std::optional<TaskFunction>(std::move(task));
     }
 
     // No tasks found at any priority level.
-    return absl::nullopt;
+    return std::nullopt;
   }
 
   // PushBack() inserts task `w` at the end of the queue for the specified
@@ -111,7 +111,7 @@ class TaskPriorityDeque {
   //
   // If all queues are full, returns passed in task wrapped in optional,
   // otherwise returns empty optional.
-  absl::optional<TaskFunction> PushBack(TaskFunction task, TaskPriority priority) {
+  std::optional<TaskFunction> PushBack(TaskFunction task, TaskPriority priority) {
     assert(static_cast<int>(priority) < kNumTaskPriorities);
 
     std::lock_guard<std::mutex> lock(mutex_);
@@ -121,23 +121,23 @@ class TaskPriorityDeque {
     Elem* e = elem(priority, (index - 1) & kIndexMask);
     uint8_t s = e->state.load(std::memory_order_relaxed);
     if (s != kEmpty || !e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
-      return absl::optional<TaskFunction>(std::move(task));
+      return std::optional<TaskFunction>(std::move(task));
     }
 
     back_.store(back.WithIndexExt((index - 1) & kIndexMaskExt, priority), std::memory_order_relaxed);
     e->task = std::move(task);
     e->state.store(kReady, std::memory_order_release);
-    return absl::nullopt;
+    return std::nullopt;
   }
 
-  absl::optional<TaskFunction> PushBack(TaskFunction task) { return PushBack(std::move(task), TaskPriority::kDefault); }
+  std::optional<TaskFunction> PushBack(TaskFunction task) { return PushBack(std::move(task), TaskPriority::kDefault); }
 
   // PopBack() iterates through all queues in their priority order and removes
   // and returns the last elements from the first non-empty queue.
   //
   // If all queues are empty returns empty optional.
-  absl::optional<TaskFunction> PopBack() {
-    if (Empty()) return absl::nullopt;
+  std::optional<TaskFunction> PopBack() {
+    if (Empty()) return std::nullopt;
 
     std::lock_guard<std::mutex> lock(mutex_);
     PointerState back(back_.load(std::memory_order_relaxed));
@@ -148,18 +148,18 @@ class TaskPriorityDeque {
 
       if (s != kReady) continue;
       if (!e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
-        return absl::nullopt;
+        return std::nullopt;
       }
 
       TaskFunction task = std::move(e->task);
       e->state.store(kEmpty, std::memory_order_release);
       back_.store(back.Inc(priority), std::memory_order_relaxed);
 
-      return absl::optional<TaskFunction>(std::move(task));
+      return std::optional<TaskFunction>(std::move(task));
     }
 
     // No tasks found at any priority level.
-    return absl::nullopt;
+    return std::nullopt;
   }
 
   // Size returns current queue size (sum of sizes for all priority levels).
@@ -173,7 +173,7 @@ class TaskPriorityDeque {
   // Delete all the elements from the queue.
   void Flush() {
     while (!Empty()) {
-      absl::optional<TaskFunction> task = PopFront();
+      std::optional<TaskFunction> task = PopFront();
       assert(task.hasValue());
     }
   }
@@ -432,15 +432,15 @@ class TaskPriorityLockDeque {
   TaskPriorityLockDeque() = default;
   TaskPriorityLockDeque(const TaskPriorityLockDeque&) = delete;
   TaskPriorityLockDeque& operator=(const TaskPriorityLockDeque&) = delete;
-  absl::optional<TaskFunction> PushFront(TaskFunction task, TaskPriority priority) {
+  std::optional<TaskFunction> PushFront(TaskFunction task, TaskPriority priority) {
     std::lock_guard<std::mutex> lock(mu_);
     queue_.emplace(priority, std::move(task));
-    return absl::nullopt;
+    return std::nullopt;
   }
-  absl::optional<TaskFunction> PushFront(TaskFunction task) { return PushFront(std::move(task), TaskPriority::kDefault); }
-  absl::optional<TaskFunction> PopFront() {
-    if (Empty()) return absl::nullopt;
-    absl::optional<TaskFunction> result(std::move(const_cast<Elem&>(queue_.top()).task));
+  std::optional<TaskFunction> PushFront(TaskFunction task) { return PushFront(std::move(task), TaskPriority::kDefault); }
+  std::optional<TaskFunction> PopFront() {
+    if (Empty()) return std::nullopt;
+    std::optional<TaskFunction> result(std::move(const_cast<Elem&>(queue_.top()).task));
     queue_.pop();
     return result;
   }
@@ -454,7 +454,7 @@ class TaskPriorityLockDeque {
   }
   void Flush() {
     while (!Empty()) {
-      absl::optional<TaskFunction> task = PopFront();
+      std::optional<TaskFunction> task = PopFront();
       assert(task.hasValue());
     }
   }

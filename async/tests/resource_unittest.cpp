@@ -3,11 +3,11 @@
 #include <gtest/gtest-message.h>    // for Message
 #include <gtest/gtest-test-part.h>  // for TestPartResult
 
-#include <memory>  // for unique_ptr
-#include <string>  // for string
+#include <memory>    // for unique_ptr
+#include <optional>  // for optional
+#include <string>    // for string
 
 #include "absl/container/flat_hash_map.h"  // for BitMask
-#include "absl/types/optional.h"           // for optional
 #include "async/support/type_traits.h"     // for async, sss
 #include "gtest/gtest_pred_impl.h"         // for Test, InitGoogleTest, RUN_...
 

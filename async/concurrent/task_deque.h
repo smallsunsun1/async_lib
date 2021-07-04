@@ -6,9 +6,9 @@
 #include <cassert>
 #include <cstdint>
 #include <mutex>
+#include <optional>
 #include <vector>
 
-#include "absl/types/optional.h"
 #include "async/context/task_function.h"
 
 namespace sss {
@@ -35,72 +35,72 @@ class TaskDeque {
   //
   // If the queue is full, returns passed in task wrapped in optional, otherwise
   // returns empty optional.
-  absl::optional<TaskFunction> PushFront(TaskFunction task) {
+  std::optional<TaskFunction> PushFront(TaskFunction task) {
     unsigned front = mFront.load(std::memory_order_relaxed);
     Elem* e = &mArray[front & kMask];
     uint8_t s = e->state.load(std::memory_order_relaxed);
     if (s != kEmpty || !e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
-      return absl::optional<TaskFunction>(std::move(task));
+      return std::optional<TaskFunction>(std::move(task));
     }
     mFront.store(front + kIncrement, std::memory_order_relaxed);
     e->task = std::move(task);
     e->state.store(kReady, std::memory_order_release);
-    return absl::nullopt;
+    return std::nullopt;
   }
 
   // PopFront() removes and returns the first element in the queue.
   //
   // If the queue is empty returns empty optional.
-  absl::optional<TaskFunction> PopFront() {
+  std::optional<TaskFunction> PopFront() {
     unsigned front = mFront.load(std::memory_order_relaxed);
     Elem* e = &mArray[(front - 1) & kMask];
     uint8_t s = e->state.load(std::memory_order_relaxed);
     if (s != kReady || !e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
-      return absl::nullopt;
+      return std::nullopt;
     }
     TaskFunction task = std::move(e->task);
     e->state.store(kEmpty, std::memory_order_release);
     front = ((front - 1) & kMask2) | (front & ~kMask2);
     mFront.store(front, std::memory_order_relaxed);
-    return absl::optional<TaskFunction>(std::move(task));
+    return std::optional<TaskFunction>(std::move(task));
   }
 
   // PushBack() inserts task `w` at the end of the queue.
   //
   // If the queue is full, returns passed in task wrapped in optional, otherwise
   // returns empty optional.
-  absl::optional<TaskFunction> PushBack(TaskFunction task) {
+  std::optional<TaskFunction> PushBack(TaskFunction task) {
     std::lock_guard<std::mutex> lock(mMutex);
     unsigned back = mBack.load(std::memory_order_relaxed);
     Elem* e = &mArray[(back - 1) & kMask];
     uint8_t s = e->state.load(std::memory_order_relaxed);
     if (s != kEmpty || !e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
-      return absl::optional<TaskFunction>(std::move(task));
+      return std::optional<TaskFunction>(std::move(task));
     }
     back = ((back - 1) & kMask2) | (back & ~kMask2);
     mBack.store(back, std::memory_order_relaxed);
     e->task = std::move(task);
     e->state.store(kReady, std::memory_order_release);
-    return absl::nullopt;
+    return std::nullopt;
   }
 
   // PopBack() removes and returns the last elements in the queue.
   //
   // If the queue is empty returns empty optional.
-  absl::optional<TaskFunction> PopBack() {
-    if (Empty()) return absl::nullopt;
+  std::optional<TaskFunction> PopBack() {
+    if (Empty()) return std::nullopt;
 
     std::lock_guard<std::mutex> lock(mMutex);
     unsigned back = mBack.load(std::memory_order_relaxed);
     Elem* e = &mArray[back & kMask];
     uint8_t s = e->state.load(std::memory_order_relaxed);
     if (s != kReady || !e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
-      return absl::nullopt;
+      return std::nullopt;
     }
     TaskFunction task = std::move(e->task);
     e->state.store(kEmpty, std::memory_order_release);
     mBack.store(back + kIncrement, std::memory_order_relaxed);
-    return absl::optional<TaskFunction>(std::move(task));
+    return std::optional<TaskFunction>(std::move(task));
   }
 
   // PopBackHalf removes and returns half last elements in the queue.
@@ -145,7 +145,7 @@ class TaskDeque {
   // Delete all the elements from the queue.
   void Flush() {
     while (!Empty()) {
-      absl::optional<TaskFunction> task = PopFront();
+      std::optional<TaskFunction> task = PopFront();
       assert(task.has_value());
     }
   }

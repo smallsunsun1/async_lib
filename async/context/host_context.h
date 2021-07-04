@@ -57,7 +57,7 @@ class HostContext {
 
   // Constructs an AsyncValue that contains an error message which can be
   // further propagated.
-  RCReference<ErrorAsyncValue> MakeErrorAsyncValueRef(absl::string_view message);
+  RCReference<ErrorAsyncValue> MakeErrorAsyncValueRef(std::string_view message);
 
   std::function<void(const DecodedDiagnostic&)> diag_handler() { return mDiagHandler; }
 
@@ -68,7 +68,7 @@ class HostContext {
   // Cancel the current BEF Execution. This transitions HostContext to the
   // canceled state, which causes all asynchronously executing threads to be
   // canceled when they check the cancellation state (e.g. in BEFExecutor).
-  void CancelExecution(absl::string_view msg);
+  void CancelExecution(std::string_view msg);
 
   // Restart() transitions HostContext from the canceled state to the normal
   // execution state.

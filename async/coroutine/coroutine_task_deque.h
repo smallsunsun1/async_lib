@@ -6,9 +6,8 @@
 #include <cassert>
 #include <limits>
 #include <mutex>
+#include <optional>
 #include <vector>
-
-#include "absl/types/optional.h"
 
 namespace sss {
 namespace async {
@@ -40,16 +39,16 @@ class CoroutineTaskDeque {
   // Can be called by any thread at any time.
   bool Empty() const { return SizeOrNotEmpty<false>() == 0; }
 
-  absl::optional<ScheduleOperation*> PushFront(ScheduleOperation* task);
-  absl::optional<ScheduleOperation*> PopFront();
-  absl::optional<ScheduleOperation*> PushBack(ScheduleOperation* task);
-  absl::optional<ScheduleOperation*> PopBack();
+  std::optional<ScheduleOperation*> PushFront(ScheduleOperation* task);
+  std::optional<ScheduleOperation*> PopFront();
+  std::optional<ScheduleOperation*> PushBack(ScheduleOperation* task);
+  std::optional<ScheduleOperation*> PopBack();
   unsigned PopBackHalf(std::vector<ScheduleOperation*>* result);
 
   // Delete all the elements from the queue.
   void Flush() {
     while (!Empty()) {
-      absl::optional<ScheduleOperation*> task = PopFront();
+      std::optional<ScheduleOperation*> task = PopFront();
       assert(task.has_value());
     }
   }

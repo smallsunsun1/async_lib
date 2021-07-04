@@ -1,11 +1,10 @@
 #ifndef ASYNC_RUNTIME_REGISTER_
 #define ASYNC_RUNTIME_REGISTER_
 
+#include <optional>
+#include <string_view>
 #include <unordered_map>
 
-#include "absl/container/flat_hash_map.h"
-#include "absl/strings/string_view.h"
-#include "absl/types/optional.h"
 #include "async/runtime/async_kernel.h"
 
 namespace sss {
@@ -13,12 +12,12 @@ namespace async {
 
 class KernelFnRegister {
  public:
-  void InsertKernelFn(absl::string_view name, AsyncKernelFn fn);
-  void RemoveKernelFn(absl::string_view name);
-  absl::optional<AsyncKernelFn> GetKernelFn(absl::string_view name);
+  void InsertKernelFn(std::string_view name, AsyncKernelFn fn);
+  void RemoveKernelFn(std::string_view name);
+  std::optional<AsyncKernelFn> GetKernelFn(std::string_view name);
 
  private:
-  absl::flat_hash_map<absl::string_view, AsyncKernelFn> mFuncLibs;
+  std::unordered_map<std::string_view, AsyncKernelFn> mFuncLibs;
 };
 
 inline KernelFnRegister& GetKernelFnRegister() {

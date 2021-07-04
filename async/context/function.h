@@ -1,10 +1,10 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_FUNCTION_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_CONTEXT_FUNCTION_
 
+#include <string_view>
 #include <vector>
 
 #include "absl/container/inlined_vector.h"
-#include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "async/support/ref_count.h"
 
@@ -23,7 +23,7 @@ class Function {
   Function(const Function&) = delete;
   Function& operator=(const Function&) = delete;
 
-  absl::string_view name() const { return mName; }
+  std::string_view name() const { return mName; }
 
   // Execute this function on the specified HostContext, passing the specified
   // arguments. This returns one AsyncValue for each result.
@@ -33,14 +33,14 @@ class Function {
   // storage for a function alive.
   virtual void AddRef() const = 0;
   virtual void DropRef() const = 0;
-  Function(absl::string_view name) : mName(name) {}
+  Function(std::string_view name) : mName(name) {}
 
   Function(Function&& other) = default;
 
  private:
   virtual void VtableAnchor();
   // This is the name of the function, or empty if anonymous.
-  absl::string_view mName;
+  std::string_view mName;
 };
 
 }  // namespace async

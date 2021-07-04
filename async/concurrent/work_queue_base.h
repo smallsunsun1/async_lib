@@ -3,11 +3,11 @@
 
 #include <atomic>
 #include <memory>
+#include <optional>
 #include <string>
+#include <string_view>
 #include <thread>
 
-#include "absl/strings/string_view.h"
-#include "absl/types/optional.h"
 #include "async/concurrent/event_count.h"
 #include "async/context/task_function.h"
 
@@ -99,7 +99,7 @@ class WorkQueueBase {
  public:
   bool IsQuiescing() const { return mQuiescingState->mNumQuiescing.load(std::memory_order_relaxed) > 0; }
   void Quiesce();
-  absl::optional<TaskFunction> Steal();
+  std::optional<TaskFunction> Steal();
   bool AllBlocked() const { return NumBlockedThreads() == mNumThreads; }
   void CheckCallerThread(const char* function_name) const;
   bool IsInWorkerThread() const {
@@ -152,7 +152,7 @@ class WorkQueueBase {
   // will be unparked, however this should be very rare in practice.
   static constexpr int kMinActiveThreadsToStartSpinning = 4;
 
-  explicit WorkQueueBase(QuiescingState* quiescing_state, absl::string_view name_prefix, int num_threads);
+  explicit WorkQueueBase(QuiescingState* quiescing_state, std::string_view name_prefix, int num_threads);
   ~WorkQueueBase();
 
   // Main worker thread loop.
@@ -161,7 +161,7 @@ class WorkQueueBase {
   // WaitForWork() blocks until new work is available (returns true), or if it
   // is time to exit (returns false). Can optionally return a task to execute in
   // `task` (in such case `task.has_value() == true` on return).
-  bool WaitForWork(EventCount::Waiter* waiter, absl::optional<TaskFunction>* task);
+  bool WaitForWork(EventCount::Waiter* waiter, std::optional<TaskFunction>* task);
 
   // StartSpinning() checks if the number of threads in the spin loop is less
   // than the allowed maximum, if so increments the number of spinning threads
@@ -276,7 +276,7 @@ inline std::vector<unsigned> ComputeCoprimes(int n) {
 }
 
 template <typename Derived>
-WorkQueueBase<Derived>::WorkQueueBase(QuiescingState* quiescing_state, absl::string_view name_prefix, int num_threads)
+WorkQueueBase<Derived>::WorkQueueBase(QuiescingState* quiescing_state, std::string_view name_prefix, int num_threads)
     : mNumThreads(num_threads),
       mThreadData(num_threads),
       mCoprimes(ComputeCoprimes(num_threads)),
@@ -333,7 +333,7 @@ void WorkQueueBase<Derived>::Quiesce() {
 
   // Keep stealing tasks until we reach a point when we have nothing to steal
   // and all worker threads are in blocked state.
-  absl::optional<TaskFunction> task = Steal();
+  std::optional<TaskFunction> task = Steal();
 
   while (task.has_value()) {
     // Execute stolen task in the caller thread.
@@ -353,14 +353,14 @@ void WorkQueueBase<Derived>::Quiesce() {
 }
 
 template <typename Derived>
-absl::optional<TaskFunction> WorkQueueBase<Derived>::Steal() {
+std::optional<TaskFunction> WorkQueueBase<Derived>::Steal() {
   PerThread* pt = GetPerThread();
   unsigned r = pt->rng();
   unsigned victim = FastReduce(r, mNumThreads);
   unsigned inc = mCoprimes[FastReduce(r, mCoprimes.size())];
 
   for (unsigned i = 0; i < mNumThreads; i++) {
-    absl::optional<TaskFunction> t = mDerived.Steal(&(mThreadData[victim].queue));
+    std::optional<TaskFunction> t = mDerived.Steal(&(mThreadData[victim].queue));
     if (t.has_value()) return t;
 
     victim += inc;
@@ -368,7 +368,7 @@ absl::optional<TaskFunction> WorkQueueBase<Derived>::Steal() {
       victim -= mNumThreads;
     }
   }
-  return absl::nullopt;
+  return std::nullopt;
 }
 
 template <typename Derived>
@@ -388,7 +388,7 @@ void WorkQueueBase<Derived>::WorkerLoop(int thread_id) {
   const int spin_count = mNumThreads > 0 ? kSpinCount / mNumThreads : 0;
 
   while (!mCancelled) {
-    absl::optional<TaskFunction> t = mDerived.NextTask(q);
+    std::optional<TaskFunction> t = mDerived.NextTask(q);
     if (!t.has_value()) {
       t = Steal();
       if (!t.has_value()) {
@@ -424,7 +424,7 @@ void WorkQueueBase<Derived>::WorkerLoop(int thread_id) {
 }
 
 template <typename Derived>
-bool WorkQueueBase<Derived>::WaitForWork(EventCount::Waiter* waiter, absl::optional<TaskFunction>* task) {
+bool WorkQueueBase<Derived>::WaitForWork(EventCount::Waiter* waiter, std::optional<TaskFunction>* task) {
   assert(!task->has_value());
   // We already did best-effort emptiness check in Steal, so prepare for
   // blocking.

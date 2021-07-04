@@ -4,14 +4,14 @@
 #include <assert.h>  // for assert
 
 #include <memory>
-#include <mutex>  // for mutex
+#include <mutex>        // for mutex
+#include <optional>     // for nul...
+#include <string_view>  // for str...
 #include <unordered_map>
 #include <utility>  // for for...
 
 #include "absl/container/flat_hash_map.h"  // for fla...
-#include "absl/strings/string_view.h"      // for str...
 #include "absl/types/any.h"                // for any...
-#include "absl/types/optional.h"           // for nul...
 #include "async/support/type_traits.h"
 
 namespace sss {
@@ -22,7 +22,7 @@ class ResourceManager {
   ResourceManager(const ResourceManager&) = delete;
   ResourceManager& operator=(const ResourceManager&) = delete;
   template <typename T>
-  T* MustGetResource(absl::string_view name) {
+  T* MustGetResource(std::string_view name) {
     std::lock_guard<std::mutex> lock(mMu);
     auto iter = mResource.find(name);
     assert(iter != mResource.end());
@@ -30,26 +30,26 @@ class ResourceManager {
     return data;
   }
   template <typename T>
-  absl::optional<T*> GetResource(absl::string_view name) {
+  std::optional<T*> GetResource(std::string_view name) {
     std::lock_guard<std::mutex> lock(mMu);
     auto iter = mResource.find(name);
-    if (iter == mResource.end()) return absl::nullopt;
+    if (iter == mResource.end()) return std::nullopt;
     T* data = absl::any_cast<T>(&iter->second);
     return data;
   }
   template <typename T, typename... Args>
-  T* GetOrCreateResource(absl::string_view name, Args&&... args) {
+  T* GetOrCreateResource(std::string_view name, Args&&... args) {
     std::lock_guard<std::mutex> lock(mMu);
     auto res = mResource.try_emplace(name, absl::make_any<T>(std::forward<Args>(args)...));
     return absl::any_cast<T>(&res.first->second);
   }
   template <typename T, typename... Args>
-  T* CreateResource(absl::string_view name, Args&&... args) {
+  T* CreateResource(std::string_view name, Args&&... args) {
     std::lock_guard<std::mutex> lock(mMu);
     auto res = mResource.try_emplace(name, absl::make_any<T>(std::forward<Args>(args)...));
     return absl::any_cast<T>(&res.first->second);
   }
-  void DeleteResource(absl::string_view name) {
+  void DeleteResource(std::string_view name) {
     std::lock_guard<std::mutex> lock(mMu);
     auto iter = mResource.find(name);
     if (iter == mResource.end()) {
@@ -60,7 +60,7 @@ class ResourceManager {
 
  private:
   std::mutex mMu;
-  absl::flat_hash_map<absl::string_view, absl::any> mResource;
+  absl::flat_hash_map<std::string_view, absl::any> mResource;
 };
 
 }  // namespace async

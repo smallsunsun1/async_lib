@@ -66,9 +66,9 @@ RCReference<ErrorAsyncValue> HostContext::MakeErrorAsyncValueRef(DecodedDiagnost
 }
 
 // Create a ConcreteAsyncValue in error state for a specified error message.
-RCReference<ErrorAsyncValue> HostContext::MakeErrorAsyncValueRef(absl::string_view message) { return MakeErrorAsyncValueRef(DecodedDiagnostic(message)); }
+RCReference<ErrorAsyncValue> HostContext::MakeErrorAsyncValueRef(std::string_view message) { return MakeErrorAsyncValueRef(DecodedDiagnostic(message)); }
 
-void HostContext::CancelExecution(absl::string_view msg) {
+void HostContext::CancelExecution(std::string_view msg) {
   // Create an AsyncValue in error state for cancel.
   auto* error_value = MakeErrorAsyncValueRef(msg).release();
 
@@ -115,7 +115,7 @@ void HostContext::EnqueueWork(unique_function<void()> work) { mWorkQueue->AddTas
 
 // Add some work to the workqueue managed by this CPU device.
 bool HostContext::EnqueueBlockingWork(unique_function<void()> work) {
-  absl::optional<TaskFunction> task = mWorkQueue->AddBlockingTask(TaskFunction(std::move(work)), /*allow_queuing=*/true);
+  std::optional<TaskFunction> task = mWorkQueue->AddBlockingTask(TaskFunction(std::move(work)), /*allow_queuing=*/true);
   return !task.has_value();
 }
 

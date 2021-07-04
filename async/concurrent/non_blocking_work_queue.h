@@ -52,8 +52,8 @@ class NonBlockingWorkQueue : public WorkQueueBase<NonBlockingWorkQueue<Threading
   using Base::mNumThreads;
   using Base::mThreadData;
 
-  absl::optional<TaskFunction> NextTask(Queue* queue);
-  absl::optional<TaskFunction> Steal(Queue* queue);
+  std::optional<TaskFunction> NextTask(Queue* queue);
+  std::optional<TaskFunction> Steal(Queue* queue);
   bool Empty(Queue* queue);
 };
 
@@ -66,7 +66,7 @@ void NonBlockingWorkQueue<ThreadingEnvironment>::AddTask(TaskFunction task) {
   if (IsQuiescing()) task = WithPendingTaskCounter(std::move(task));
 
   // If the worker queue is full, we will execute `task` in the current thread.
-  absl::optional<TaskFunction> inlineTask;
+  std::optional<TaskFunction> inlineTask;
 
   // If a caller thread is managed by `this` we push the new task into the front
   // of thread own queue (LIFO execution order). PushFront is completely lock
@@ -113,12 +113,12 @@ void NonBlockingWorkQueue<ThreadingEnvironment>::AddTask(TaskFunction task) {
 }
 
 template <typename ThreadingEnvironment>
-absl::optional<TaskFunction> NonBlockingWorkQueue<ThreadingEnvironment>::NextTask(Queue* queue) {
+std::optional<TaskFunction> NonBlockingWorkQueue<ThreadingEnvironment>::NextTask(Queue* queue) {
   return queue->PopFront();
 }
 
 template <typename ThreadingEnvironment>
-absl::optional<TaskFunction> NonBlockingWorkQueue<ThreadingEnvironment>::Steal(Queue* queue) {
+std::optional<TaskFunction> NonBlockingWorkQueue<ThreadingEnvironment>::Steal(Queue* queue) {
   return queue->PopBack();
 }
 

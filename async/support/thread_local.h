@@ -4,12 +4,12 @@
 #include <atomic>
 #include <cstddef>
 #include <mutex>
+#include <optional>
 #include <thread>
 #include <unordered_map>
 #include <vector>
 
 #include "absl/functional/function_ref.h"
-#include "absl/types/optional.h"
 
 namespace sss {
 namespace async {
@@ -142,7 +142,7 @@ class ThreadLocal {
   // Storage that backs lock-free lookup table `mPtrs`. Entries stored
   // contiguously starting from index 0. Entries stored as optional so that
   // `T` can be non-default-constructible.
-  std::vector<absl::optional<Entry>> mData;
+  std::vector<std::optional<Entry>> mData;
 
   // Atomic pointers to the data stored in `mData`. Used as a lookup table for
   // linear probing hash map (https://en.wikipedia.org/wiki/Linear_probing).

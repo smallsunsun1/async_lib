@@ -17,7 +17,7 @@ using namespace std::chrono;
 namespace fs = std::filesystem;
 
 int LargeComputeFn(int num) {
-  float res;
+  float res = 0.0;
   for (int i = 0; i < num; ++i) {
     res += (float)i / 10.2;
   }
