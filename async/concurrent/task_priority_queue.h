@@ -174,7 +174,7 @@ class TaskPriorityDeque {
   void Flush() {
     while (!Empty()) {
       std::optional<TaskFunction> task = PopFront();
-      assert(task.hasValue());
+      assert(task.has_value());
     }
   }
 
@@ -421,7 +421,7 @@ class TaskPriorityDeque {
     if (size3 > static_cast<int>(kCapacity)) size3 = kCapacity;
 
     int size = size0 + size1 + size2 + size3;
-    assert(size <= kNumTaskPriorities * kCapacity);
+    assert(static_cast<uint32_t>(size) <= kNumTaskPriorities * kCapacity);
 
     return size;
   }
@@ -455,7 +455,7 @@ class TaskPriorityLockDeque {
   void Flush() {
     while (!Empty()) {
       std::optional<TaskFunction> task = PopFront();
-      assert(task.hasValue());
+      assert(task.has_value());
     }
   }
 
