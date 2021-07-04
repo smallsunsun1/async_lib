@@ -38,10 +38,10 @@ int main() {
   RCReference<AsyncGraph> graph = CreateAsyncGraph(runContext.get());
   REGISTER_KERNEL_FN("start", Fn1);
   REGISTER_KERNEL_FN("run", Fn2);
-  graph->emplace_back({}, {"output"}, GET_KERNEL_FN("start").value(), "start", true);
   for (int i = 0; i < 100; ++i) {
     graph->emplace_back({"output"}, {"result" + std::to_string(i)}, GET_KERNEL_FN("run").value(), "run", true);
   }
+  graph->emplace_back({}, {"output"}, GET_KERNEL_FN("start").value(), "start", true);
   graph->BuildGraph();
 
   int numIters = 10;

@@ -77,8 +77,6 @@ void AsyncGraph::Destroy() {
   ctx->Deallocate<AsyncGraph>(this);
 }
 void AsyncGraph::BuildGraph() {
-  assert(mAsyncNodes[0]->GetNumInputs() == 0 && "First Async Node Must Have 0 Arguments!");
-  assert(mAsyncNodes[0]->GetNumResults() != 0 && "First Async Node Must Have >0 Results!");
   std::map<std::string, int> argCountMap;                            // 记录每个变量名以及其作为Arguments对应的refCount
   std::map<std::string, int> resCountMap;                            // 记录每个变量名以及其作为Results对应的refCount
   std::unordered_map<std::string, unsigned> indexAsyncValueMap;      // 记录每个变量命及其对应的Asyncvalue在整个队列中的Id
@@ -224,7 +222,14 @@ std::vector<std::string> AsyncGraph::GetOutputNames() const {
 }
 
 void GraphExecutor::InitializeArgumentRegisters(absl::Span<AsyncValue* const> arguments, absl::Span<AsyncValueInfo> asyncValueInfos) {
-  AsyncNode* startNode = graph->mAsyncNodes[0];
+  AsyncNode* startNode = nullptr;
+  for (size_t i = 0, e = graph->mAsyncNodes.size(); i < e; ++i) {
+    if (graph->mAsyncNodes[i]->GetNumInputs() == 0) {
+      startNode = graph->mAsyncNodes[i];
+      break;
+    }
+  }
+  assert(startNode && "startNode can't be nullptr");
   assert(arguments.size() >= startNode->GetNumResults() && "Arguments Size Must Larger Than StartNode Result");
   for (size_t i = 0; i < startNode->GetNumResults(); ++i) {
     const std::string& name = startNode->GetOutputNameAt(i);
@@ -299,7 +304,14 @@ void GraphExecutor::ProcessArgumentsAsPseudoKernel(std::vector<unsigned>* readyK
   assert(readyKernelIdxs->empty() && "ReadyKernelIdxs Must Be Empty");
   absl::Span<AsyncValueInfo> asyncValueInofs = GetAsyncValueInfo();
   // 这是初始化Arguments数据，初始化的Node的Index为0，我们需要保证第一个Node的输入为空，输出不为空
-  AsyncNode* asyncNode = graph->mAsyncNodes[0];
+  AsyncNode* asyncNode = nullptr;
+  for (size_t i = 0, e = graph->mAsyncNodes.size(); i < e; ++i) {
+    if (graph->mAsyncNodes[i]->GetNumInputs() == 0) {
+      asyncNode = graph->mAsyncNodes[i];
+      break;
+    }
+  }
+  assert(asyncNode && "async node can't be nullptr");
   assert(asyncNode->GetNumInputs() == 0);
   assert(asyncNode->GetNumResults() != 0);
 

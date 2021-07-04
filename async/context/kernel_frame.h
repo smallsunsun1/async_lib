@@ -85,12 +85,12 @@ class AsyncKernelFrame {
 
  protected:
   absl::Span<AsyncValue* const> GetAsyncValues(size_t from, size_t length) const {
-    assert((from + length) <= (mNumArguments + mNumResults) && "from + length Must Less Than Total Asyncvalue Size");
+    assert((from + length) <= static_cast<size_t>(mNumArguments + mNumResults) && "from + length Must Less Than Total Asyncvalue Size");
     if (length == 0) return {};
     return absl::MakeConstSpan(&mAsyncValues[from], length);
   }
   absl::Span<AsyncValue*> GetMutableAsyncValues(size_t from, size_t length) {
-    assert((from + length) <= (mNumArguments + mNumResults) && "from + length Must Less Than Total Asyncvalue Size");
+    assert((from + length) <= static_cast<size_t>(mNumArguments + mNumResults) && "from + length Must Less Than Total Asyncvalue Size");
     if (length == 0) return {};
     return absl::MakeSpan(&mAsyncValues[from], length);
   }
@@ -112,7 +112,7 @@ class CommonAsyncKernelFrame : public AsyncKernelFrame {
     mNumArguments++;
   }
   void SetNumResults(int size) {
-    assert(mNumArguments == mAsyncValues.size() && "NumArguments Must Equal to AsyncValues size");
+    assert(static_cast<size_t>(mNumArguments) == mAsyncValues.size() && "NumArguments Must Equal to AsyncValues size");
     assert(mNumResults == -1 && "SetNumResults Only Can Be Called Once");
     mAsyncValues.resize(mNumArguments + size);
     mNumResults = size;

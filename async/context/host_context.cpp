@@ -180,7 +180,7 @@ class HostContext::SharedContextManager {
   // Returns the shared context instance with the given shared_context_id.
   // Create one if the requested shared context instance does not exist yet.
   SharedContext& GetOrCreateSharedContext(int shared_context_id, SharedContextFactory factory) {
-    assert(shared_context_id < shared_context_instances_.size() && "The requested SharedContext ID exceeds the maximum allowed");
+    assert(static_cast<size_t>(shared_context_id) < shared_context_instances_.size() && "The requested SharedContext ID exceeds the maximum allowed");
 
     auto& item = shared_context_instances_[shared_context_id];
 

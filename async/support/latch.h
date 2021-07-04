@@ -43,13 +43,9 @@ class latch {
   bool notified_;
 };
 
-inline void latch::add_count(uint64_t n) {
-  assert(n >= 0);
-  state_.fetch_add(n * 2);
-}
+inline void latch::add_count(uint64_t n) { state_.fetch_add(n * 2); }
 
 inline void latch::count_down(uint64_t n) {
-  assert(n >= 0);
   uint64_t state = state_.fetch_sub(n * 2);
   assert((state >> 1) >= n);
   if ((state >> 1) == n && (state & 1) == 1) {

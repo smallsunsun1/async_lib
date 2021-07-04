@@ -11,11 +11,11 @@ int main() {
   AsyncGraph* memory = runContext->Allocate<AsyncGraph>();
   AsyncGraph* graphOri = new (memory) AsyncGraph(runContext.get());
   RCReference<AsyncGraph> graph = TakeRef(graphOri);
-  graph->emplace_back({}, {"output"}, [](async::CommonAsyncKernelFrame* kernel) { (void)kernel; });
   graph->emplace_back({"output"}, {"result"}, [](async::CommonAsyncKernelFrame* kernel) {
     std::cout << "run code\n";
     kernel->EmplaceResult<async::Chain>();
   });
+  graph->emplace_back({}, {"output"}, [](async::CommonAsyncKernelFrame* kernel) { (void)kernel; });
   graph->BuildGraph();
   for (int i = 0; i < 100000; ++i) {
     std::vector<RCReference<AsyncValue>> oriArguments;
