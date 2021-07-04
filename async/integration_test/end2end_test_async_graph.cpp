@@ -67,5 +67,8 @@ int main() {
   RunAsyncGraph(graph.get(), input, output, true);
   std::cout << output[0]->get<int>() << std::endl;
   fs::remove("./graph.txt");
+  RCReference<AsyncGraph> subGraph = graph->SubGraph(std::vector<std::string>{"result1", "result2"});
+  subGraph->BuildGraph();
+  subGraph->Dump("./sub_graph.txt");
   return 0;
 }

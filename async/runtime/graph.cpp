@@ -5,8 +5,10 @@
 #include <iostream>
 #include <iterator>
 #include <map>
+#include <queue>
 #include <set>
 #include <string>
+#include <unordered_set>
 
 #include "absl/container/inlined_vector.h"
 #include "async/context/async_value.h"
@@ -20,6 +22,7 @@ using namespace async;
 
 // 一些Helper函数
 AsyncValue* GetAsyncValuePtr(const AsyncValueInfo& info) { return info.mValue.load(std::memory_order_acquire); }
+
 AsyncValue* GetOrCreateAsyncValuePtr(AsyncValueInfo* info, HostContext* ctx) {
   AsyncValue* value = info->mValue.load(std::memory_order_acquire);
   if (value) return value;  // Value已经被创建，直接Return
@@ -35,6 +38,7 @@ AsyncValue* GetOrCreateAsyncValuePtr(AsyncValueInfo* info, HostContext* ctx) {
     return indirectValue;
   }
 }
+
 void SetAsyncValuePtr(AsyncValueInfo* info, RCReference<AsyncValue> result) {
   AsyncValue* exisiting = nullptr;
   auto newValue = result.release();  // newValue 拥有1 reference
@@ -51,6 +55,7 @@ void SetAsyncValuePtr(AsyncValueInfo* info, RCReference<AsyncValue> result) {
     indirectValue->ForwardTo(TakeRef(newValue));
   }
 }
+
 void ProcessNameAndRefCount(const std::string& name, int* startId, std::map<std::string, int>& countMap, std::unordered_map<std::string, unsigned>& indexMap) {
   auto iter = countMap.find(name);
   if (iter != countMap.end()) {
@@ -64,6 +69,7 @@ void ProcessNameAndRefCount(const std::string& name, int* startId, std::map<std:
     (*startId)++;
   }
 }
+
 AsyncGraph::~AsyncGraph() {
   for (auto node : mAsyncNodes) {
     if (node) {
@@ -71,11 +77,42 @@ AsyncGraph::~AsyncGraph() {
     }
   }
 }
+
 void AsyncGraph::Destroy() {
   auto ctx = GetContext();
   this->~AsyncGraph();
   ctx->Deallocate<AsyncGraph>(this);
 }
+
+RCReference<AsyncGraph> AsyncGraph::SubGraph(const std::vector<std::string>& outputNames) {
+  std::unordered_set<const AsyncNode*> traveledNodes;              // record which node has beed traveled
+  std::unordered_map<std::string, const AsyncNode*> nameNodeMap;   // record name and asyncnode map
+  RCReference<AsyncGraph> graph = CreateAsyncGraph(GetContext());  // create return graph
+
+  for (const auto* node : mAsyncNodes) {
+    for (const std::string& outName : node->mOutputNames) {
+      nameNodeMap[outName] = node;
+    }
+  }
+  std::queue<std::string> queuedNames;
+  for (const std::string& name : outputNames) {
+    queuedNames.push(name);
+  }
+  while (!queuedNames.empty()) {
+    const std::string& name = queuedNames.front();
+    const AsyncNode* node = nameNodeMap[name];
+    if (traveledNodes.find(node) == traveledNodes.end()) {
+      traveledNodes.emplace(node);
+      graph->emplace_back(node->mInputNames, node->mOutputNames, node->mFunc, node->mFuncName, node->mIsStrictFunc);
+      for (const std::string& inputName : node->mInputNames) {
+        queuedNames.push(inputName);
+      }
+    }
+    queuedNames.pop();
+  }
+  return graph;
+}
+
 void AsyncGraph::BuildGraph() {
   std::map<std::string, int> argCountMap;                            // 记录每个变量名以及其作为Arguments对应的refCount
   std::map<std::string, int> resCountMap;                            // 记录每个变量名以及其作为Results对应的refCount
@@ -122,11 +159,13 @@ void AsyncGraph::BuildGraph() {
   mNameAndAsyncIdPair = std::move(indexAsyncValueMap);
   mIsConstructed = true;
 }
+
 AsyncNode* AsyncGraph::emplace_back(std::vector<std::string> inputNames, std::vector<std::string> outputNames, AsyncKernelFn fn, const std::string& name, bool isStrictFunc) {
   AsyncNode* node = GetContext()->Construct<AsyncNode>(std::move(inputNames), std::move(outputNames), std::move(fn), name, isStrictFunc);
   mAsyncNodes.push_back(node);
   return node;
 }
+
 void AsyncGraph::Dump(const std::string& filename) const {
   std::ofstream outFile(filename);
   for (size_t i = 0, numNodes = mAsyncNodes.size(); i < numNodes; ++i) {
@@ -142,6 +181,7 @@ void AsyncGraph::Dump(const std::string& filename) const {
   }
   outFile.close();
 }
+
 void AsyncGraph::Load(const std::string& filename) {
   std::ifstream inFile(filename);
   std::string graphLineInfo;
@@ -174,6 +214,7 @@ void AsyncGraph::Load(const std::string& filename) {
     }
   }
 }
+
 void AsyncGraph::Reset() {
   mNameAndAsyncIdPair.clear();
   mUsedByKernlTable.clear();
@@ -187,6 +228,7 @@ void AsyncGraph::Reset() {
   mAsyncNodes.clear();
   mIsConstructed = false;
 }
+
 unsigned AsyncGraph::GetNumOutputs() const {
   unsigned numRes = 0;
   for (const auto& value : mFunctionInfo.mAsyncValueInfos) {
@@ -196,6 +238,7 @@ unsigned AsyncGraph::GetNumOutputs() const {
   }
   return numRes;
 }
+
 std::vector<std::string> AsyncGraph::GetOutputNames() const {
   std::vector<std::string> outputNames;
   std::map<std::string, int> countMap;
@@ -263,6 +306,7 @@ void GraphExecutor::Execute() {
   ProcessArgumentsAsPseudoKernel(&readyKernelIdx);
   ProcessReadyKernels(&readyKernelIdx);
 }
+
 void GraphExecutor::DecreaseReadyCountAndPush(absl::Span<const unsigned> users, std::vector<unsigned>* readyKernelIdxs) {
   // KernelInfo记录了每个Kernel还有多少的Arguments还未Ready
   auto kernelInfo = GetKernelInfo();
@@ -273,6 +317,7 @@ void GraphExecutor::DecreaseReadyCountAndPush(absl::Span<const unsigned> users, 
     }
   }
 }
+
 void GraphExecutor::ProcessUsedByAndSetAsyncValueInfo(absl::Span<const unsigned> users, std::vector<unsigned>* readyKernelIdxs, async::RCReference<async::AsyncValue> result,
                                                       AsyncValueInfo* resultInfo) {
   // 如果当前的result不被任何user所用到，那么直接将其复制到resultInfo
@@ -300,6 +345,7 @@ void GraphExecutor::ProcessUsedByAndSetAsyncValueInfo(absl::Span<const unsigned>
     this->DropRef();                              // 释放当前Executor的引用
   });
 }
+
 void GraphExecutor::ProcessArgumentsAsPseudoKernel(std::vector<unsigned>* readyKernelIdxs) {
   assert(readyKernelIdxs->empty() && "ReadyKernelIdxs Must Be Empty");
   absl::Span<AsyncValueInfo> asyncValueInofs = GetAsyncValueInfo();
@@ -328,6 +374,7 @@ void GraphExecutor::ProcessArgumentsAsPseudoKernel(std::vector<unsigned>* readyK
     ProcessPseudoKernelUsedBys(usedBy, readyKernelIdxs, result);
   }
 }
+
 void GraphExecutor::ProcessPseudoKernelUsedBys(absl::Span<const unsigned> users, std::vector<unsigned>* readyKernelIdx, async::AsyncValue* result) {
   if (users.empty()) return;
   auto state = result->state();
@@ -343,6 +390,7 @@ void GraphExecutor::ProcessPseudoKernelUsedBys(absl::Span<const unsigned> users,
     this->DropRef();
   });
 }
+
 void GraphExecutor::ProcessReadyKernels(std::vector<unsigned>* readyKernelIdx) {
   CommonAsyncKernelFrame kernelFrame(GetContext());
   while (!readyKernelIdx->empty()) {
@@ -363,6 +411,7 @@ void GraphExecutor::ProcessReadyKernels(std::vector<unsigned>* readyKernelIdx) {
     ProcessReadyKernel(firstKernelId, &kernelFrame, readyKernelIdx);
   }
 }
+
 void GraphExecutor::ProcessReadyKernel(unsigned kernelId, async::CommonAsyncKernelFrame* kernelFrame, std::vector<unsigned>* readyKernelIdx) {
   absl::Span<AsyncValueInfo> asyncValueInfoArr = GetAsyncValueInfo();
   AsyncValue* errorArguments = nullptr;
@@ -422,6 +471,7 @@ void GraphExecutor::Execute(GraphExecutor* executor, absl::Span<async::AsyncValu
   }
   executor->DropRef();
 }
+
 void GraphExecutor::DebugFn() {
   std::cout << "Check Unsed By Kernel\n";
   for (auto value : graph->mUsedByKernlTable) {
@@ -448,11 +498,14 @@ void GraphExecutor::DebugFn() {
     std::cout << "Nodes: " << graph->mAsyncNodes[i] << "\n";
   }
 }
+
 absl::Span<const unsigned> GraphExecutor::GetNextUsedBys(AsyncNode* resInfo, int resultNumber) {
   auto& kernelResInfo = graph->mUsedByKernlTable[resInfo].mResultTable[resultNumber];
   return absl::MakeConstSpan(kernelResInfo.data(), kernelResInfo.size());
 }
+
 absl::Span<AsyncValueInfo> GraphExecutor::GetAsyncValueInfo() { return absl::MakeSpan(mFunctionInfo.mAsyncValueInfos.data(), mFunctionInfo.mAsyncValueInfos.size()); }
+
 absl::Span<KernelInfo> GraphExecutor::GetKernelInfo() { return absl::MakeSpan(mFunctionInfo.mKernelInfos.data(), mFunctionInfo.mKernelInfos.size()); }
 
 void RunAsyncGraph(AsyncGraph* graph, std::vector<RCReference<AsyncValue>>& arguments, std::vector<RCReference<AsyncValue>>& results, bool sync) {
