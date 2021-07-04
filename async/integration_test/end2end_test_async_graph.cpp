@@ -39,9 +39,9 @@ int main() {
   REGISTER_KERNEL_FN("start", Fn1);
   REGISTER_KERNEL_FN("run", Fn2);
   for (int i = 0; i < 100; ++i) {
-    graph->emplace_back({"output"}, {"result" + std::to_string(i)}, GET_KERNEL_FN("run").value(), "run", true);
+    graph->emplace({"output"}, {"result" + std::to_string(i)}, GET_KERNEL_FN("run").value(), "run", true);
   }
-  graph->emplace_back({}, {"output"}, GET_KERNEL_FN("start").value(), "start", true);
+  graph->emplace({}, {"output"}, GET_KERNEL_FN("start").value(), "start", true);
   graph->BuildGraph();
 
   int numIters = 10;

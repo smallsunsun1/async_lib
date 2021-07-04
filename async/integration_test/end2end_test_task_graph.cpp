@@ -26,7 +26,7 @@ int main() {
   RCReference<TaskGraph> graph = CreateTaskGraph(runContext.get());
   std::vector<TaskNode*> nodes;
   for (int i = 0; i < 100; ++i) {
-    TaskNode* node = graph->emplace_back([i]() { std::cout << LargeComputeFn(i) << std::endl; });
+    TaskNode* node = graph->emplace([i]() { std::cout << LargeComputeFn(i) << std::endl; });
     nodes.push_back(node);
   }
   for (size_t i = 0, e = nodes.size(); i < e - 1; ++i) {

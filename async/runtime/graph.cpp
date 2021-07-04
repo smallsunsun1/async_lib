@@ -103,7 +103,7 @@ RCReference<AsyncGraph> AsyncGraph::SubGraph(const std::vector<std::string>& out
     const AsyncNode* node = nameNodeMap[name];
     if (traveledNodes.find(node) == traveledNodes.end()) {
       traveledNodes.emplace(node);
-      graph->emplace_back(node->mInputNames, node->mOutputNames, node->mFunc, node->mFuncName, node->mIsStrictFunc);
+      graph->emplace(node->mInputNames, node->mOutputNames, node->mFunc, node->mFuncName, node->mIsStrictFunc);
       for (const std::string& inputName : node->mInputNames) {
         queuedNames.push(inputName);
       }
@@ -181,7 +181,7 @@ void AsyncGraph::BuildGraph() {
   mIsConstructed = true;
 }
 
-AsyncNode* AsyncGraph::emplace_back(std::vector<std::string> inputNames, std::vector<std::string> outputNames, AsyncKernelFn fn, const std::string& name, bool isStrictFunc) {
+AsyncNode* AsyncGraph::emplace(std::vector<std::string> inputNames, std::vector<std::string> outputNames, AsyncKernelFn fn, const std::string& name, bool isStrictFunc) {
   AsyncNode* node = GetContext()->Construct<AsyncNode>(std::move(inputNames), std::move(outputNames), std::move(fn), name, isStrictFunc);
   mAsyncNodes.push_back(node);
   return node;
@@ -231,7 +231,7 @@ void AsyncGraph::Load(const std::string& filename) {
         isStrictFn = static_cast<bool>(std::stoi(res[1]));
       }
     } else {
-      (void)emplace_back(std::move(inputNames), std::move(outputNames), kernelFn, std::move(kernelName), isStrictFn);
+      (void)emplace(std::move(inputNames), std::move(outputNames), kernelFn, std::move(kernelName), isStrictFn);
     }
   }
 }

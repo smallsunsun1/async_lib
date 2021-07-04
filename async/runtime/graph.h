@@ -60,7 +60,7 @@ class AsyncGraph : public async::ReferenceCounted<AsyncGraph> {
   void Load(const std::string& filename);
   async::RCReference<AsyncGraph> SubGraph(const std::vector<std::string>& outputNames);
   async::HostContext* GetContext() { return mpContext; }
-  AsyncNode* emplace_back(std::vector<std::string> inputNames, std::vector<std::string> outputNames, AsyncKernelFn fn, const std::string& name = "", bool isStrictFunc = true);
+  AsyncNode* emplace(std::vector<std::string> inputNames, std::vector<std::string> outputNames, AsyncKernelFn fn, const std::string& name = "", bool isStrictFunc = true);
   unsigned GetNumOutputs() const;
   std::vector<std::string> GetOutputNames() const;
 

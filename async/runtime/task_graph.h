@@ -47,7 +47,7 @@ class TaskGraph : public async::ReferenceCounted<TaskGraph> {
   TaskGraph() = default;
   TaskGraph(async::HostContext* context) : mpContext(context) {}
   template <typename GeneralFunc>
-  TaskNode* emplace_back(GeneralFunc&& f) {
+  TaskNode* emplace(GeneralFunc&& f) {
     TaskNode* node = new TaskNode(std::forward<GeneralFunc>(f));
     mTaskNodes.emplace_back(node);
     return node;
