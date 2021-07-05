@@ -26,8 +26,7 @@ int LargeComputeFn(int num) {
 
 void Fn1(async::CommonAsyncKernelFrame* frame) { (void)frame; }
 void Fn2(async::CommonAsyncKernelFrame* frame) {
-  LargeComputeFn(frame->GetArgAt<int>(0));
-  frame->EmplaceResult<int>(100);
+  frame->EmplaceResult<int>(frame->GetArgAt<int>(0) + 100);
 }
 
 using KernelFnPtr = void (*)(async::CommonAsyncKernelFrame* frame);
@@ -54,6 +53,9 @@ int main() {
     RunAsyncGraph(graph.get(), results[i], results[i + 1], true);
   }
   runContext->Await(results[numIters]);
+  for (const auto& elem: results[numIters]) {
+    std::cout << elem->get<int>() << std::endl;
+  }
   auto end = high_resolution_clock::now();
   std::cout << duration_cast<nanoseconds>(end - start).count() << std::endl;
 

@@ -120,7 +120,6 @@ void AsyncGraph::BuildGraph() {
   std::unordered_map<std::string, std::set<unsigned>> usedCountmap;  // 记录每个变量命会被哪些AsyncNode所使用
   std::unordered_map<std::string, AsyncNode*> indexAsyncNodeMap;     // 记录每个变量命及对应产生该变量result的AsyncNode
   std::unordered_map<std::string, unsigned> indexAsyncNodeIdMap;     // 记录每个变量命及对应产生该变量result的AsyncNode在整个队列中的Id
-  std::map<std::string, int> countMap;                               // 记录每个变量被使用的次数
   int startId = 0;
   int asyncNodeStartId = 0;
   for (int i = 0, numNodes = mAsyncNodes.size(); i != numNodes; ++i) {
@@ -141,19 +140,6 @@ void AsyncGraph::BuildGraph() {
   // 初始化mUsedByKernlTable
   for (size_t i = 0, numNodes = mAsyncNodes.size(); i != numNodes; ++i) {
     AsyncNode* curNode = mAsyncNodes[i];
-    // 计算和更新countMap
-    for (const std::string& name : curNode->GetInputNames()) {
-      if (countMap.find(name) == countMap.end()) {
-        countMap[name] = 0;
-      }
-      countMap[name] += 1;
-    }
-    for (const std::string& name : curNode->GetOutputNames()) {
-      if (countMap.find(name) == countMap.end()) {
-        countMap[name] = 0;
-      }
-      countMap[name] += 1;
-    }
     // 计算统计每个变量的后续的User kernel对应的Index
     KernelResInfo kernelResInfo;
     // 初始化当前kernel的Result会被哪些KernelId所使用的vector容器
@@ -173,9 +159,9 @@ void AsyncGraph::BuildGraph() {
   mNameAndAsyncIdPair = std::move(indexAsyncValueMap);
 
   // 获取输出结果的名称
-  for (const auto& elem : countMap) {
-    if (elem.second == 1) {
-      mOutputNames.push_back(elem.first);
+  for (const auto& iter : mNameAndAsyncIdPair) {
+    if (mFunctionInfo.mAsyncValueInfos[iter.second].mUserCount == 0) {
+      mOutputNames.push_back(iter.first);
     }
   }
   mIsConstructed = true;
@@ -275,7 +261,7 @@ void GraphExecutor::InitializeArgumentRegisters(absl::Span<AsyncValue* const> ar
 }
 
 void GraphExecutor::InitializeResultRegisters(std::vector<unsigned>* resultReg) {
-  for (auto iter : graph->mNameAndAsyncIdPair) {
+  for (const auto& iter : graph->mNameAndAsyncIdPair) {
     // 如果某个AsyncValue不会被后面的结果使用到，那么该AsyncValue是需要被return的
     if (mFunctionInfo.mAsyncValueInfos[iter.second].mUserCount == 0) {
       resultReg->push_back(iter.second);
@@ -508,7 +494,6 @@ void RunAsyncGraph(AsyncGraph* graph, std::vector<RCReference<AsyncValue>>& argu
   for (auto& elem : arguments) {
     argumentsPtr.push_back(elem.get());
   }
-  std::cout << "num outputs : " << graph->GetNumOutputs() << std::endl;
   results.resize(graph->GetNumOutputs());
   GraphExecutor::Execute(exec, absl::MakeConstSpan(argumentsPtr.data(), argumentsPtr.size()), absl::MakeSpan(results.data(), results.size()));
   if (sync) runContext->Await(results);

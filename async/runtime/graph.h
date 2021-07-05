@@ -93,7 +93,6 @@ class GraphExecutor : public async::ReferenceCounted<GraphExecutor> {
     for (size_t i = 0, e = graph->mFunctionInfo.mKernelInfos.size(); i != e; ++i) {
       mFunctionInfo.mKernelInfos.emplace_back(graph->mFunctionInfo.mKernelInfos[i].mArgumentsNotReady.load(std::memory_order_relaxed));
     }
-    // DebugFn();
   }
   ~GraphExecutor();
   // 释放当前的graph
