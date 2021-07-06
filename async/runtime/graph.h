@@ -23,8 +23,8 @@ class AsyncGraph;
 
 class AsyncNode {
  public:
-  AsyncNode(std::vector<std::string> inputNames, std::vector<std::string> outputNames, AsyncKernelFn fn, const std::string& fname = "", bool isStrictFunc = true)
-      : mFunc(std::move(fn)), mIsStrictFunc(isStrictFunc), mFuncName(fname), mInputNames(std::move(inputNames)), mOutputNames(std::move(outputNames)) {}
+  AsyncNode(const std::vector<std::string>& inputNames, const std::vector<std::string>& outputNames, const AsyncKernelFn& fn, const std::string& fname = "")
+      : mFunc(fn), mFuncName(fname), mInputNames(inputNames), mOutputNames(outputNames) {}
   void operator()(async::CommonAsyncKernelFrame* kernelFrame) { mFunc(kernelFrame); }
   void AddInputs(const std::string& name) { mInputNames.push_back(name); }
   void AddOutputs(const std::string& name) { mOutputNames.push_back(name); }
@@ -39,7 +39,6 @@ class AsyncNode {
   friend class GraphExecutor;
   friend class AsyncGraph;
   AsyncKernelFn mFunc;
-  bool mIsStrictFunc = true;  // 实际用于计算的函数
   const std::string mFuncName;
   std::vector<std::string> mInputNames;   // 用于指示当前Node输入变量的Name
   std::vector<std::string> mOutputNames;  // 用于指示当前Node输出变量的Name
@@ -60,7 +59,7 @@ class AsyncGraph : public async::ReferenceCounted<AsyncGraph> {
   void Load(const std::string& filename);
   async::RCReference<AsyncGraph> SubGraph(const std::vector<std::string>& outputNames);
   async::HostContext* GetContext() { return mpContext; }
-  AsyncNode* emplace(std::vector<std::string> inputNames, std::vector<std::string> outputNames, AsyncKernelFn fn, const std::string& name = "", bool isStrictFunc = true);
+  AsyncNode* emplace(const std::vector<std::string>& inputNames, const std::vector<std::string>& outputNames, const AsyncKernelFn& fn, const std::string& name = "");
   unsigned GetNumOutputs() const;
   std::vector<std::string> GetOutputNames() const;
 
@@ -83,8 +82,14 @@ class AsyncGraph : public async::ReferenceCounted<AsyncGraph> {
 class GraphExecutor : public async::ReferenceCounted<GraphExecutor> {
  public:
   GraphExecutor(AsyncGraph* inGraph) : graph(inGraph) {
-    assert(graph->mIsConstructed && "Graph Must Be Constructed");
     graph->AddRef();
+    Reset();
+  }
+  // 需要在内部graph已经被构建时调用
+  void Reset() {
+    assert(graph->mIsConstructed && "Graph Must Be Constructed");
+    mFunctionInfo.mAsyncValueInfos.clear();
+    mFunctionInfo.mKernelInfos.clear();
     mFunctionInfo.mAsyncValueInfos.reserve(graph->mFunctionInfo.mAsyncValueInfos.size());
     for (size_t i = 0, e = graph->mFunctionInfo.mAsyncValueInfos.size(); i != e; ++i) {
       mFunctionInfo.mAsyncValueInfos.emplace_back(graph->mFunctionInfo.mAsyncValueInfos[i].mUserCount);

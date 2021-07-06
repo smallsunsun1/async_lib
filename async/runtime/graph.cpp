@@ -103,7 +103,7 @@ RCReference<AsyncGraph> AsyncGraph::SubGraph(const std::vector<std::string>& out
     const AsyncNode* node = nameNodeMap[name];
     if (traveledNodes.find(node) == traveledNodes.end()) {
       traveledNodes.emplace(node);
-      graph->emplace(node->mInputNames, node->mOutputNames, node->mFunc, node->mFuncName, node->mIsStrictFunc);
+      graph->emplace(node->mInputNames, node->mOutputNames, node->mFunc, node->mFuncName);
       for (const std::string& inputName : node->mInputNames) {
         queuedNames.push(inputName);
       }
@@ -167,8 +167,8 @@ void AsyncGraph::BuildGraph() {
   mIsConstructed = true;
 }
 
-AsyncNode* AsyncGraph::emplace(std::vector<std::string> inputNames, std::vector<std::string> outputNames, AsyncKernelFn fn, const std::string& name, bool isStrictFunc) {
-  AsyncNode* node = GetContext()->Construct<AsyncNode>(std::move(inputNames), std::move(outputNames), std::move(fn), name, isStrictFunc);
+AsyncNode* AsyncGraph::emplace(const std::vector<std::string>& inputNames, const std::vector<std::string>& outputNames, const AsyncKernelFn& fn, const std::string& name) {
+  AsyncNode* node = GetContext()->Construct<AsyncNode>(std::move(inputNames), std::move(outputNames), std::move(fn), name);
   mAsyncNodes.push_back(node);
   return node;
 }
@@ -183,7 +183,6 @@ void AsyncGraph::Dump(const std::string& filename) const {
       outFile << "output: " << mAsyncNodes[i]->GetOutputNameAt(j) << "\n";
     }
     outFile << "kernel name: " << mAsyncNodes[i]->mFuncName << "\n";
-    outFile << "is strict fn: " << std::to_string(static_cast<int>(mAsyncNodes[i]->mIsStrictFunc)) << "\n";
     outFile << "\n";
   }
   outFile.close();
@@ -196,7 +195,6 @@ void AsyncGraph::Load(const std::string& filename) {
   std::vector<std::string> outputNames;
   AsyncKernelFn kernelFn;
   std::string kernelName;
-  bool isStrictFn = false;
   while (std::getline(inFile, graphLineInfo)) {
     if (graphLineInfo != "") {
       std::vector<std::string> res = StrSplit(graphLineInfo, ": ");
@@ -213,11 +211,12 @@ void AsyncGraph::Load(const std::string& filename) {
           assert(false);
         }
         kernelFn = kernelFunction.value();
-      } else if (res[0] == "is strict fn") {
-        isStrictFn = static_cast<bool>(std::stoi(res[1]));
       }
     } else {
-      (void)emplace(std::move(inputNames), std::move(outputNames), kernelFn, std::move(kernelName), isStrictFn);
+      (void)emplace(inputNames, outputNames, kernelFn, kernelName);
+      inputNames.clear();
+      outputNames.clear();
+      kernelName.clear();
     }
   }
 }
@@ -411,7 +410,7 @@ void GraphExecutor::ProcessReadyKernel(unsigned kernelId, async::CommonAsyncKern
     if (value->IsError()) errorArguments = value;
   }
   kernelFrame->SetNumResults(node->GetNumResults());
-  if (errorArguments == nullptr || !node->mIsStrictFunc) {
+  if (errorArguments == nullptr) {
     (*node)(kernelFrame);
   } else {
     for (size_t i = 0, e = kernelFrame->GetNumResults(); i != e; ++i) {
