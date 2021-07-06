@@ -25,7 +25,8 @@ struct WorkQueueTraits<BlockingWorkQueue<ThreadingEnvironmentTy>> {
 };
 
 template <typename ThreadingEnvironment>
-class BlockingWorkQueue : public WorkQueueBase<BlockingWorkQueue<ThreadingEnvironment>> {
+class BlockingWorkQueue
+    : public WorkQueueBase<BlockingWorkQueue<ThreadingEnvironment>> {
   using Base = WorkQueueBase<BlockingWorkQueue<ThreadingEnvironment>>;
 
   using Queue = typename Base::Queue;
@@ -34,8 +35,10 @@ class BlockingWorkQueue : public WorkQueueBase<BlockingWorkQueue<ThreadingEnviro
   using ThreadData = typename Base::ThreadData;
 
  public:
-  explicit BlockingWorkQueue(QuiescingState* quiescingState, size_t numThreads, size_t maxNumDynamicThreads = std::numeric_limits<size_t>::max(),
-                             std::chrono::nanoseconds idleWaitTime = std::chrono::seconds(1));
+  explicit BlockingWorkQueue(
+      QuiescingState *quiescingState, size_t numThreads,
+      size_t maxNumDynamicThreads = std::numeric_limits<size_t>::max(),
+      std::chrono::nanoseconds idleWaitTime = std::chrono::seconds(1));
   ~BlockingWorkQueue() { Quiesce(); }
 
   // Enqueues `task` for execution by one of the statically allocated thread.
@@ -49,8 +52,8 @@ class BlockingWorkQueue : public WorkQueueBase<BlockingWorkQueue<ThreadingEnviro
   void Quiesce();
 
  private:
-  static constexpr char const* kThreadNamePrefix = "async-blocking-queue";
-  static constexpr char const* kDynamicThreadNamePrefix = "async-dynamic-queue";
+  static constexpr char const *kThreadNamePrefix = "async-blocking-queue";
+  static constexpr char const *kDynamicThreadNamePrefix = "async-dynamic-queue";
 
   template <typename WorkQueue>
   friend class WorkQueueBase;
@@ -65,9 +68,9 @@ class BlockingWorkQueue : public WorkQueueBase<BlockingWorkQueue<ThreadingEnviro
   using Base::mNumThreads;
   using Base::mThreadData;
 
-  std::optional<TaskFunction> NextTask(Queue* queue);
-  std::optional<TaskFunction> Steal(Queue* queue);
-  bool Empty(Queue* queue);
+  std::optional<TaskFunction> NextTask(Queue *queue);
+  std::optional<TaskFunction> Steal(Queue *queue);
+  bool Empty(Queue *queue);
 
   // If the blocking task does not allow queuing, it is executed in one of the
   // dynamically spawned threads. These threads have 1-to-1 task-to-thread
@@ -76,7 +79,7 @@ class BlockingWorkQueue : public WorkQueueBase<BlockingWorkQueue<ThreadingEnviro
 
   // Waits for the next available task. Returns empty optional if the task was
   // not found.
-  std::optional<TaskFunction> WaitNextTask(std::unique_lock<std::mutex>* lock);
+  std::optional<TaskFunction> WaitNextTask(std::unique_lock<std::mutex> *lock);
 
   // Maximum number of dynamically started threads.
   const uint64_t mMaxNumDynamicThreads;
@@ -113,11 +116,18 @@ class BlockingWorkQueue : public WorkQueueBase<BlockingWorkQueue<ThreadingEnviro
 };
 
 template <typename ThreadingEnvironment>
-BlockingWorkQueue<ThreadingEnvironment>::BlockingWorkQueue(QuiescingState* quiescingState, uint64_t numThreads, uint64_t maxNumDynamicThreads, std::chrono::nanoseconds idleWaitTime)
-    : WorkQueueBase<BlockingWorkQueue>(quiescingState, kThreadNamePrefix, numThreads), mMaxNumDynamicThreads(maxNumDynamicThreads), mIdleWaitTime(idleWaitTime) {}
+BlockingWorkQueue<ThreadingEnvironment>::BlockingWorkQueue(
+    QuiescingState *quiescingState, uint64_t numThreads,
+    uint64_t maxNumDynamicThreads, std::chrono::nanoseconds idleWaitTime)
+    : WorkQueueBase<BlockingWorkQueue>(quiescingState, kThreadNamePrefix,
+                                       numThreads),
+      mMaxNumDynamicThreads(maxNumDynamicThreads),
+      mIdleWaitTime(idleWaitTime) {}
 
 template <typename ThreadingEnvironment>
-std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::EnqueueBlockingTask(TaskFunction task) {
+std::optional<TaskFunction>
+BlockingWorkQueue<ThreadingEnvironment>::EnqueueBlockingTask(
+    TaskFunction task) {
   // In quiescing mode we count the number of pending tasks, and are allowed to
   // execute tasks in the caller thread.
   const bool isQuiescing = IsQuiescing();
@@ -126,10 +136,10 @@ std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::EnqueueBloc
   // If the worker queue is full, we will return `task` to the caller.
   std::optional<TaskFunction> inlineTask = {std::move(task)};
 
-  PerThread* pt = GetPerThread();
+  PerThread *pt = GetPerThread();
   if (pt->parent == this) {
     // Worker thread of this pool, push onto the thread's queue.
-    Queue& q = mThreadData[pt->thread_id].queue;
+    Queue &q = mThreadData[pt->thread_id].queue;
     inlineTask = q.PushFront(std::move(*inlineTask));
   } else {
     // A random free-standing thread (or worker of another pool).
@@ -171,14 +181,18 @@ std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::EnqueueBloc
 }
 
 template <typename ThreadingEnvironment>
-std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::RunBlockingTask(TaskFunction task) {
+std::optional<TaskFunction>
+BlockingWorkQueue<ThreadingEnvironment>::RunBlockingTask(TaskFunction task) {
   std::unique_lock<std::mutex> lock(mMutex);
 
   // Attach a PendingTask counter only if we were able to submit the task
   // to one of the worker threads. It's unsafe to return the task with
   // a counter to the caller, because we don't know when/if it will be
   // destructed and the counter decremented.
-  auto wrap = [&](TaskFunction task) -> TaskFunction { return IsQuiescing() ? WithPendingTaskCounter(std::move(task)) : std::move(task); };
+  auto wrap = [&](TaskFunction task) -> TaskFunction {
+    return IsQuiescing() ? WithPendingTaskCounter(std::move(task))
+                         : std::move(task);
+  };
 
   // There are idle threads. We enqueue the task to the queue and then notify
   // one of the idle threads.
@@ -190,7 +204,8 @@ std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::RunBlocking
   }
 
   // Cleanup dynamic threads that are already terminated.
-  mDynamicThreads.remove_if([](DynamicThread& thread) -> bool { return thread.second == false; });
+  mDynamicThreads.remove_if(
+      [](DynamicThread &thread) -> bool { return thread.second == false; });
 
   // There are no idle threads and we are not at the thread limit. We
   // start a new thread to run the task.
@@ -200,9 +215,10 @@ std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::RunBlocking
     // NOTE: We rely on std::list pointer stability for passing a reference to
     // the container element to the `do_work` lambda.
     mDynamicThreads.emplace_back();
-    DynamicThread& dynamicThread = mDynamicThreads.back();
+    DynamicThread &dynamicThread = mDynamicThreads.back();
 
-    auto do_work = [this, &dynamicThread, task = wrap(std::move(task))]() mutable {
+    auto do_work = [this, &dynamicThread,
+                    task = wrap(std::move(task))]() mutable {
       task();
       // Reset executed task to call destructor without holding the lock,
       // because it might be expensive. Also we want to call it before
@@ -243,11 +259,15 @@ std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::RunBlocking
 }
 
 template <typename ThreadingEnvironment>
-std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::WaitNextTask(std::unique_lock<std::mutex>* lock) {
+std::optional<TaskFunction>
+BlockingWorkQueue<ThreadingEnvironment>::WaitNextTask(
+    std::unique_lock<std::mutex> *lock) {
   ++mNumIdleDynamicThreads;
 
   const auto timeout = std::chrono::system_clock::now() + mIdleWaitTime;
-  mWakeDoWorkCV.wait_until(*lock, timeout, [this]() { return !mIdleTaskQueue.empty() || mStopWaiting; });
+  mWakeDoWorkCV.wait_until(*lock, timeout, [this]() {
+    return !mIdleTaskQueue.empty() || mStopWaiting;
+  });
   --mNumIdleDynamicThreads;
 
   // Found something in the queue. Return the task.
@@ -287,17 +307,19 @@ void BlockingWorkQueue<ThreadingEnvironment>::Quiesce() {
 }
 
 template <typename ThreadingEnvironment>
-std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::NextTask(Queue* queue) {
+std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::NextTask(
+    Queue *queue) {
   return queue->PopBack();
 }
 
 template <typename ThreadingEnvironment>
-std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::Steal(Queue* queue) {
+std::optional<TaskFunction> BlockingWorkQueue<ThreadingEnvironment>::Steal(
+    Queue *queue) {
   return queue->PopBack();
 }
 
 template <typename ThreadingEnvironment>
-bool BlockingWorkQueue<ThreadingEnvironment>::Empty(Queue* queue) {
+bool BlockingWorkQueue<ThreadingEnvironment>::Empty(Queue *queue) {
   return queue->Empty();
 }
 

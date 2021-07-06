@@ -20,12 +20,13 @@ class KernelFnRegister {
   std::unordered_map<std::string_view, AsyncKernelFn> mFuncLibs;
 };
 
-inline KernelFnRegister& GetKernelFnRegister() {
+inline KernelFnRegister &GetKernelFnRegister() {
   static KernelFnRegister fnRegister;
   return fnRegister;
 }
 
-#define REGISTER_KERNEL_FN(name_, func) GetKernelFnRegister().InsertKernelFn(name_, func)
+#define REGISTER_KERNEL_FN(name_, func) \
+  GetKernelFnRegister().InsertKernelFn(name_, func)
 #define UNREGISTER_KERNEL_FN(name_) GetKernelFnRegister().RemoveKernelFn(name_)
 #define GET_KERNEL_FN(name_) GetKernelFnRegister().GetKernelFn(name_)
 

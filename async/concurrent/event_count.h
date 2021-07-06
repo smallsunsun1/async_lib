@@ -14,17 +14,20 @@ class EventCount {
  public:
   struct Waiter;
 
-  explicit EventCount(unsigned num_waiters) : mState(kStackMask), mWaiters(num_waiters) { assert(num_waiters < (1u << kCounterBits) - 1); }
+  explicit EventCount(unsigned num_waiters)
+      : mState(kStackMask), mWaiters(num_waiters) {
+    assert(num_waiters < (1u << kCounterBits) - 1);
+  }
 
-  EventCount(const EventCount&) = delete;
-  void operator=(const EventCount&) = delete;
+  EventCount(const EventCount &) = delete;
+  void operator=(const EventCount &) = delete;
 
   ~EventCount() {
     // Ensure there are no waiters.
     assert(mState.load() == kStackMask);
   }
 
-  Waiter* waiter(unsigned index) { return &mWaiters[index]; }
+  Waiter *waiter(unsigned index) { return &mWaiters[index]; }
 
   // Prewait prepares for waiting.
   // After calling Prewait, the thread must re-check the wait predicate
@@ -35,12 +38,14 @@ class EventCount {
       CheckState(state);
       uint64_t newstate = state + kWaiterInc;
       CheckState(newstate);
-      if (mState.compare_exchange_weak(state, newstate, std::memory_order_seq_cst)) return;
+      if (mState.compare_exchange_weak(state, newstate,
+                                       std::memory_order_seq_cst))
+        return;
     }
   }
 
   // CommitWait commits waiting after Prewait.
-  void CommitWait(Waiter* w) {
+  void CommitWait(Waiter *w) {
     assert((w->epoch & ~kEpochMask) == 0);
     w->state = Waiter::kNotSignaled;
     const uint64_t me = (w - &mWaiters[0]) | w->epoch;
@@ -54,10 +59,12 @@ class EventCount {
       } else {
         // Remove this thread from pre-wait counter and add to the waiter stack.
         newstate = ((state & kWaiterMask) - kWaiterInc) | me;
-        w->next.store(state & (kStackMask | kEpochMask), std::memory_order_relaxed);
+        w->next.store(state & (kStackMask | kEpochMask),
+                      std::memory_order_relaxed);
       }
       CheckState(newstate);
-      if (mState.compare_exchange_weak(state, newstate, std::memory_order_acq_rel)) {
+      if (mState.compare_exchange_weak(state, newstate,
+                                       std::memory_order_acq_rel)) {
         if ((state & kSignalMask) == 0) {
           w->epoch += kEpochInc;
           Park(w);
@@ -77,9 +84,13 @@ class EventCount {
       // so we should not consume a signal unconditionaly.
       // Only if number of waiters is equal to number of signals,
       // we know that the thread was notified and we must take away the signal.
-      if (((state & kWaiterMask) >> kWaiterShift) == ((state & kSignalMask) >> kSignalShift)) newstate -= kSignalInc;
+      if (((state & kWaiterMask) >> kWaiterShift) ==
+          ((state & kSignalMask) >> kSignalShift))
+        newstate -= kSignalInc;
       CheckState(newstate);
-      if (mState.compare_exchange_weak(state, newstate, std::memory_order_acq_rel)) return;
+      if (mState.compare_exchange_weak(state, newstate,
+                                       std::memory_order_acq_rel))
+        return;
     }
   }
 
@@ -97,21 +108,24 @@ class EventCount {
       uint64_t newstate;
       if (notify_all) {
         // Empty wait stack and set signal to number of pre-wait threads.
-        newstate = (state & kWaiterMask) | (waiters << kSignalShift) | kStackMask;
+        newstate =
+            (state & kWaiterMask) | (waiters << kSignalShift) | kStackMask;
       } else if (signals < waiters) {
         // There is a thread in pre-wait state, unblock it.
         newstate = state + kSignalInc;
       } else {
         // Pop a waiter from list and unpark it.
-        Waiter* w = &mWaiters[state & kStackMask];
+        Waiter *w = &mWaiters[state & kStackMask];
         uint64_t next = w->next.load(std::memory_order_relaxed);
         newstate = (state & (kWaiterMask | kSignalMask)) | next;
       }
       CheckState(newstate);
-      if (mState.compare_exchange_weak(state, newstate, std::memory_order_acq_rel)) {
-        if (!notify_all && (signals < waiters)) return;  // unblocked pre-wait thread
+      if (mState.compare_exchange_weak(state, newstate,
+                                       std::memory_order_acq_rel)) {
+        if (!notify_all && (signals < waiters))
+          return;  // unblocked pre-wait thread
         if ((state & kStackMask) == kStackMask) return;
-        Waiter* w = &mWaiters[state & kStackMask];
+        Waiter *w = &mWaiters[state & kStackMask];
         if (!notify_all) w->next.store(kStackMask, std::memory_order_relaxed);
         Unpark(w);
         return;
@@ -160,13 +174,14 @@ class EventCount {
 
   static constexpr uint64_t kEpochShift = 3 * kCounterBits;
   static constexpr uint64_t kEpochBits = 64 - kEpochShift;
-  static constexpr uint64_t kEpochMask = ((1ull << kEpochBits) - 1) << kEpochShift;
+  static constexpr uint64_t kEpochMask = ((1ull << kEpochBits) - 1)
+                                         << kEpochShift;
   static constexpr uint64_t kEpochInc = 1ull << kEpochShift;
 
   std::atomic<uint64_t> mState;
   std::vector<Waiter> mWaiters;
 
-  void Park(Waiter* w) {
+  void Park(Waiter *w) {
     std::unique_lock<std::mutex> lock(w->mu);
     while (w->state != Waiter::kSignaled) {
       w->state = Waiter::kWaiting;
@@ -174,8 +189,8 @@ class EventCount {
     }
   }
 
-  void Unpark(Waiter* w) {
-    for (Waiter* next; w; w = next) {
+  void Unpark(Waiter *w) {
+    for (Waiter *next; w; w = next) {
       uint64_t wnext = w->next.load(std::memory_order_relaxed) & kStackMask;
       next = wnext == kStackMask ? nullptr : &mWaiters[wnext];
       unsigned state;

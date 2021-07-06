@@ -8,12 +8,12 @@ namespace async {
 struct AnyData {
   AnyData() {}
   template <typename T>
-  AnyData(T&&) {}
+  AnyData(T &&) {}
 };
 
 class BadPromise : public std::exception {
  public:
-  virtual const char* what() const noexcept override { return "Bad Promise"; }
+  virtual const char *what() const noexcept override { return "Bad Promise"; }
 };
 
 }  // namespace async

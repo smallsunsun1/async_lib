@@ -8,15 +8,17 @@ namespace sss {
 namespace async {
 namespace internal {
 
-std::optional<ScheduleOperation*> CoroutineTaskQueue::PushFront(ScheduleOperation* task) {
+std::optional<ScheduleOperation *> CoroutineTaskQueue::PushFront(
+    ScheduleOperation *task) {
   unsigned front = mFront.load(std::memory_order_relaxed);
-  Elem* e;
+  Elem *e;
   for (;;) {
     e = &mArray[front & kMask];
     unsigned state = e->state.load(std::memory_order_acquire);
     int64_t diff = static_cast<int64_t>(state) - static_cast<int64_t>(front);
     // Try to acquire an ownership of element at `front`.
-    if (diff == 0 && mFront.compare_exchange_strong(front, front + 1, std::memory_order_relaxed)) {
+    if (diff == 0 && mFront.compare_exchange_strong(
+                         front, front + 1, std::memory_order_relaxed)) {
       break;
     }
 
@@ -30,9 +32,9 @@ std::optional<ScheduleOperation*> CoroutineTaskQueue::PushFront(ScheduleOperatio
   e->state.store(front + 1, std::memory_order_release);
   return std::nullopt;
 }
-std::optional<ScheduleOperation*> CoroutineTaskQueue::PopBack() {
+std::optional<ScheduleOperation *> CoroutineTaskQueue::PopBack() {
   unsigned back = mBack.load(std::memory_order_relaxed);
-  Elem* e;
+  Elem *e;
 
   for (;;) {
     e = &mArray[back & kMask];
@@ -40,7 +42,8 @@ std::optional<ScheduleOperation*> CoroutineTaskQueue::PopBack() {
     int64_t diff = static_cast<int64_t>(state) - static_cast<int64_t>(back + 1);
 
     // Element at `back` is ready, try to acquire its ownership.
-    if (diff == 0 && mBack.compare_exchange_strong(back, back + 1, std::memory_order_relaxed)) {
+    if (diff == 0 && mBack.compare_exchange_strong(back, back + 1,
+                                                   std::memory_order_relaxed)) {
       break;
     }
 
@@ -51,7 +54,7 @@ std::optional<ScheduleOperation*> CoroutineTaskQueue::PopBack() {
     if (diff > 0) back = mBack.load(std::memory_order_relaxed);
   }
 
-  ScheduleOperation* task = e->task;
+  ScheduleOperation *task = e->task;
   e->state.store(back + kCapacity, std::memory_order_release);
   return {task};
 }

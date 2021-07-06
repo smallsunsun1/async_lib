@@ -10,21 +10,23 @@ class HostContext;
 class HostContextPtr {
  public:
   // Implicitly convert HostContext* to HostContextPtr.
-  HostContextPtr(HostContext* host);  // NOLINT
+  HostContextPtr(HostContext *host);  // NOLINT
   HostContextPtr() = default;
 
-  HostContext* operator->() const { return get(); }
+  HostContext *operator->() const { return get(); }
 
-  HostContext& operator*() const { return *get(); }
+  HostContext &operator*() const { return *get(); }
 
-  HostContext* get() const;
+  HostContext *get() const;
 
   explicit operator bool() const { return mIndex == kDummyIndex; }
 
  private:
   friend class HostContext;
 
-  explicit HostContextPtr(int index) : mIndex{static_cast<uint8_t>(index)} { assert(index < kDummyIndex); }
+  explicit HostContextPtr(int index) : mIndex{static_cast<uint8_t>(index)} {
+    assert(index < kDummyIndex);
+  }
   uint8_t index() const { return mIndex; }
 
   static constexpr uint8_t kDummyIndex = 255;

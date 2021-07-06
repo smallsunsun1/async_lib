@@ -9,12 +9,12 @@
 
 namespace sss {
 
-void TaskNode::AddDependency(TaskNode* node) {
+void TaskNode::AddDependency(TaskNode *node) {
   node->mSuccessories.push_back(this);
   mDependencies.push_back(node);
 }
 
-void TaskNode::AddSuccessor(TaskNode* node) {
+void TaskNode::AddSuccessor(TaskNode *node) {
   mSuccessories.push_back(node);
   node->mDependencies.push_back(this);
 }
@@ -33,9 +33,9 @@ void TaskGraph::Destroy() {
   GetContext()->Deallocate<TaskGraph>(this);
 }
 
-TaskGraphExecutor::TaskGraphExecutor(TaskGraph* graph) : mGraph(graph) {
-  const auto& nodeCountInfo = mGraph->mNodeCountInfo;
-  for (const auto& data : nodeCountInfo) {
+TaskGraphExecutor::TaskGraphExecutor(TaskGraph *graph) : mGraph(graph) {
+  const auto &nodeCountInfo = mGraph->mNodeCountInfo;
+  for (const auto &data : nodeCountInfo) {
     mNodeCountInfo[data.first].store(data.second);
   }
   mGraph->AddRef();
@@ -43,7 +43,7 @@ TaskGraphExecutor::TaskGraphExecutor(TaskGraph* graph) : mGraph(graph) {
   mFinishChain = GetContext()->MakeUnconstructedAsyncValueRef<async::Chain>();
 }
 
-void TaskGraphExecutor::Execute(TaskGraphExecutor* executor) {
+void TaskGraphExecutor::Execute(TaskGraphExecutor *executor) {
   executor->Execute();
   executor->DropRef();
 }
@@ -54,8 +54,9 @@ void TaskGraphExecutor::Execute() {
   ProcessReadyNodeIndexs(&readyNodeIdx);
 }
 
-void TaskGraphExecutor::ProcessStartNodeIndex(std::vector<unsigned>* readyNodeIndex) {
-  for (auto& node : mGraph->mTaskNodes) {
+void TaskGraphExecutor::ProcessStartNodeIndex(
+    std::vector<unsigned> *readyNodeIndex) {
+  for (auto &node : mGraph->mTaskNodes) {
     // 这个node可以直接被执行
     if (node->GetNumDependencies() == 0) {
       readyNodeIndex->push_back(mGraph->mNodeIndexInfo[node.get()]);
@@ -63,11 +64,12 @@ void TaskGraphExecutor::ProcessStartNodeIndex(std::vector<unsigned>* readyNodeIn
   }
 }
 
-void TaskGraphExecutor::ProcessReadyNodeIndex(unsigned nodeId, std::vector<unsigned>* readyNodeIdx) {
-  TaskNode* node = mGraph->mTaskNodes[nodeId].get();
+void TaskGraphExecutor::ProcessReadyNodeIndex(
+    unsigned nodeId, std::vector<unsigned> *readyNodeIdx) {
+  TaskNode *node = mGraph->mTaskNodes[nodeId].get();
   (*node)();  // 执行完毕，修改readyNodeIndex
   int count = mTotalTaskCount.fetch_sub(1);
-  for (auto* successor : node->mSuccessories) {
+  for (auto *successor : node->mSuccessories) {
     if (mNodeCountInfo[successor].fetch_sub(1) == 1) {
       readyNodeIdx->push_back(mGraph->mNodeIndexInfo[successor]);
     }
@@ -77,10 +79,12 @@ void TaskGraphExecutor::ProcessReadyNodeIndex(unsigned nodeId, std::vector<unsig
   }
 }
 
-void TaskGraphExecutor::ProcessReadyNodeIndexs(std::vector<unsigned>* readyNodeIndex) {
+void TaskGraphExecutor::ProcessReadyNodeIndexs(
+    std::vector<unsigned> *readyNodeIndex) {
   // 完成队列非空
   while (!readyNodeIndex->empty()) {
-    for (auto iter = std::next(readyNodeIndex->begin(), 1); iter != readyNodeIndex->end(); ++iter) {
+    for (auto iter = std::next(readyNodeIndex->begin(), 1);
+         iter != readyNodeIndex->end(); ++iter) {
       unsigned kernelId = *iter;
       AddRef();
       GetContext()->EnqueueWork([this, kernelId]() {
@@ -97,9 +101,10 @@ void TaskGraphExecutor::ProcessReadyNodeIndexs(std::vector<unsigned>* readyNodeI
 
 void TaskGraphExecutor::Await() {
   async::latch lat(1);
-  std::vector<async::AsyncValue*> input;
+  std::vector<async::AsyncValue *> input;
   input.push_back(mFinishChain.get());
-  GetContext()->RunWhenReady(absl::MakeConstSpan(input.data(), input.size()), [&lat]() { lat.count_down(1); });
+  GetContext()->RunWhenReady(absl::MakeConstSpan(input.data(), input.size()),
+                             [&lat]() { lat.count_down(1); });
   lat.wait();
 }
 
@@ -108,18 +113,18 @@ void TaskGraphExecutor::Destroy() {
   GetContext()->Deallocate<TaskGraphExecutor>(this);
 }
 
-void RunTaskGraph(TaskGraph* graph, bool sync) {
-  async::HostContext* context = graph->GetContext();
-  TaskGraphExecutor* memory = context->Allocate<TaskGraphExecutor>();
-  TaskGraphExecutor* executor = new (memory) TaskGraphExecutor(graph);
+void RunTaskGraph(TaskGraph *graph, bool sync) {
+  async::HostContext *context = graph->GetContext();
+  TaskGraphExecutor *memory = context->Allocate<TaskGraphExecutor>();
+  TaskGraphExecutor *executor = new (memory) TaskGraphExecutor(graph);
   executor->Execute();
   if (sync) executor->Await();
   executor->DropRef();
 }
 
-async::RCReference<TaskGraph> CreateTaskGraph(async::HostContext* context) {
-  TaskGraph* memory = context->Allocate<TaskGraph>();
-  TaskGraph* graphOri = new (memory) TaskGraph(context);
+async::RCReference<TaskGraph> CreateTaskGraph(async::HostContext *context) {
+  TaskGraph *memory = context->Allocate<TaskGraph>();
+  TaskGraph *graphOri = new (memory) TaskGraph(context);
   async::RCReference<TaskGraph> graph = TakeRef(graphOri);
   return graph;
 }

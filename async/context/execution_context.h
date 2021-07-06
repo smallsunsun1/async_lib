@@ -9,16 +9,16 @@ class HostContext;
 
 class ExecutionContext {
  public:
-  explicit ExecutionContext(HostContext* host) : mHost{host} {}
+  explicit ExecutionContext(HostContext *host) : mHost{host} {}
 
   Location location() const { return mLocation; }
-  HostContext* host() const { return mHost; }
+  HostContext *host() const { return mHost; }
 
   void set_location(Location location) { mLocation = location; }
 
  private:
   Location mLocation;
-  HostContext* mHost = nullptr;
+  HostContext *mHost = nullptr;
 };
 
 }  // namespace async

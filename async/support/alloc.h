@@ -5,7 +5,7 @@
 
 namespace sss {
 namespace async {
-void* AlignedAlloc(size_t alignment, size_t size);
+void *AlignedAlloc(size_t alignment, size_t size);
 
 }
 }  // namespace sss

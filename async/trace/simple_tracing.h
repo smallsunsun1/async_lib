@@ -8,7 +8,7 @@ namespace async {
 
 class SimpleTracing : public Tracing {
  public:
-  static Tracing* GetTracing();
+  static Tracing *GetTracing();
   absl::Status RequestTracing(bool enable) override;
   void RecordTracing(std::string name) override;
   void PushTracingScope(std::string name) override;
@@ -26,8 +26,10 @@ class ScopeTimeInfoUtility {
   TimeInfo mTime;
 
  public:
-  ScopeTimeInfoUtility(std::string name, Time now) : mTime{std::move(name), std::move(now), Time()} {}
-  ScopeTimeInfoUtility(std::string name, Time start, Time end) : mTime{std::move(name), std::move(start), std::move(end)} {}
+  ScopeTimeInfoUtility(std::string name, Time now)
+      : mTime{std::move(name), std::move(now), Time()} {}
+  ScopeTimeInfoUtility(std::string name, Time start, Time end)
+      : mTime{std::move(name), std::move(start), std::move(end)} {}
   static Time Now() { return std::chrono::steady_clock::now(); }
   void ReleaseInfo();
 };
@@ -35,7 +37,7 @@ class ScopeTimeInfoUtility {
 
 class ScopeTracing : public Tracing {
  public:
-  static Tracing* GetTracing();
+  static Tracing *GetTracing();
   absl::Status RequestTracing(bool enable) override;
   void RecordTracing(std::string name) override;
   void PushTracingScope(std::string name) override;

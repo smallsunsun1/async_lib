@@ -6,7 +6,7 @@ using namespace sss;
 using namespace async;
 
 int main() {
-  Tracing* testTrace = SimpleTracing::GetTracing();
+  Tracing *testTrace = SimpleTracing::GetTracing();
   testTrace->PushTracingScope("sss");
   std::this_thread::sleep_for(std::chrono::seconds(1));
   testTrace->PopTracingScope("sss");

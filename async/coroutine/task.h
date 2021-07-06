@@ -19,7 +19,8 @@ class BasePromise {
   struct Awaitable {
     bool await_ready() noexcept { return false; }
     template <typename PromiseT>
-    std::coroutine_handle<> await_suspend(std::coroutine_handle<PromiseT> handle) noexcept {
+    std::coroutine_handle<> await_suspend(
+        std::coroutine_handle<PromiseT> handle) noexcept {
       return handle.promise().mContinuation;
     }
     void await_resume() noexcept {}
@@ -29,7 +30,9 @@ class BasePromise {
   BasePromise() noexcept {}
   auto initial_suspend() noexcept { return std::suspend_always{}; }
   auto final_suspend() noexcept { return Awaitable{}; }
-  void SetContinuation(std::coroutine_handle<> continuation) noexcept { mContinuation = continuation; }
+  void SetContinuation(std::coroutine_handle<> continuation) noexcept {
+    mContinuation = continuation;
+  }
 
  private:
   std::coroutine_handle<> mContinuation;
@@ -52,22 +55,25 @@ class TaskPromise : public BasePromise {
   }
   Task<T> get_return_object() noexcept;
   void unhandled_exception() noexcept {
-    new (static_cast<void*>(std::addressof(mException))) std::exception_ptr(std::current_exception());
+    new (static_cast<void *>(std::addressof(mException)))
+        std::exception_ptr(std::current_exception());
     mResultType = ResultType::kException;
   }
-  template <typename U, std::enable_if_t<std::is_convertible<U, T>::value, int> N = 0>
-  void return_value(U&& value) noexcept {
-    new (static_cast<void*>(std::addressof(mValue))) T(std::forward<U>(value));
+  template <typename U,
+            std::enable_if_t<std::is_convertible<U, T>::value, int> N = 0>
+  void return_value(U &&value) noexcept {
+    new (static_cast<void *>(std::addressof(mValue))) T(std::forward<U>(value));
     mResultType = ResultType::kAvaliable;
   }
-  T& get() & {
+  T &get() & {
     if (mResultType == ResultType::kException) {
       std::rethrow_exception(mException);
     }
     assert(mResultType == ResultType::kAvaliable);
     return mValue;
   }
-  using return_value_type = std::conditional_t<std::is_arithmetic<T>::value, T, T&&>;
+  using return_value_type =
+      std::conditional_t<std::is_arithmetic<T>::value, T, T &&>;
   return_value_type get() && {
     if (mResultType == ResultType::kException) {
       std::rethrow_exception(mException);
@@ -101,13 +107,13 @@ class TaskPromise<void> : public BasePromise {
   std::exception_ptr mException;
 };
 template <typename T>
-class TaskPromise<T&> : public BasePromise {
+class TaskPromise<T &> : public BasePromise {
  public:
   TaskPromise() = default;
-  Task<T&> get_return_object() noexcept;
-  void return_value(T& value) noexcept { mValue = std::addressof(&value); }
+  Task<T &> get_return_object() noexcept;
+  void return_value(T &value) noexcept { mValue = std::addressof(&value); }
   void unhandled_exception() { mException = std::current_exception(); }
-  T& get() {
+  T &get() {
     if (mException) {
       std::rethrow_exception(mException);
     }
@@ -115,7 +121,7 @@ class TaskPromise<T&> : public BasePromise {
   }
 
  private:
-  T* mValue;
+  T *mValue;
   std::exception_ptr mException;
 };
 }  // namespace internal
@@ -125,16 +131,17 @@ class Task {
   using promise_type = internal::TaskPromise<T>;
   using value_type = T;
   Task() noexcept : mCoroutine(nullptr) {}
-  explicit Task(std::coroutine_handle<promise_type> coroutine) : mCoroutine(coroutine) {}
-  Task(Task&& t) noexcept : mCoroutine(t.mCoroutine) { t.mCoroutine = nullptr; }
-  Task(const Task&) = delete;
-  Task& operator=(const Task&) = delete;
+  explicit Task(std::coroutine_handle<promise_type> coroutine)
+      : mCoroutine(coroutine) {}
+  Task(Task &&t) noexcept : mCoroutine(t.mCoroutine) { t.mCoroutine = nullptr; }
+  Task(const Task &) = delete;
+  Task &operator=(const Task &) = delete;
   ~Task() {
     if (mCoroutine) {
       mCoroutine.destroy();
     }
   }
-  Task& operator=(Task&& other) noexcept {
+  Task &operator=(Task &&other) noexcept {
     if (std::addressof(other) != this) {
       if (mCoroutine) {
         mCoroutine.destroy();
@@ -145,7 +152,7 @@ class Task {
     return *this;
   }
   bool is_ready() const noexcept { return !mCoroutine || mCoroutine.done(); }
-  auto operator co_await() const& noexcept {
+  auto operator co_await() const &noexcept {
     struct Awaitable : AwaitableBase {
       using AwaitableBase::AwaitableBase;
       decltype(auto) await_resume() {
@@ -157,7 +164,7 @@ class Task {
     };
     return Awaitable{mCoroutine};
   }
-  auto operator co_await() const&& noexcept {
+  auto operator co_await() const &&noexcept {
     struct Awaitable : AwaitableBase {
       using AwaitableBase::AwaitableBase;
       decltype(auto) await_resume() {
@@ -180,9 +187,13 @@ class Task {
  private:
   struct AwaitableBase {
     std::coroutine_handle<promise_type> mCoroutine;
-    AwaitableBase(std::coroutine_handle<promise_type> coroutine) noexcept : mCoroutine(coroutine) {}
-    bool await_ready() const noexcept { return !mCoroutine || mCoroutine.done(); }
-    std::coroutine_handle<> await_suspend(std::coroutine_handle<> awaitingCoroutine) noexcept {
+    AwaitableBase(std::coroutine_handle<promise_type> coroutine) noexcept
+        : mCoroutine(coroutine) {}
+    bool await_ready() const noexcept {
+      return !mCoroutine || mCoroutine.done();
+    }
+    std::coroutine_handle<> await_suspend(
+        std::coroutine_handle<> awaitingCoroutine) noexcept {
       mCoroutine.promise().SetContinuation(awaitingCoroutine);
       return mCoroutine;
     }
@@ -196,10 +207,12 @@ template <typename T>
 Task<T> TaskPromise<T>::get_return_object() noexcept {
   return Task<T>{std::coroutine_handle<TaskPromise>::from_promise(*this)};
 }
-inline Task<void> TaskPromise<void>::get_return_object() noexcept { return Task<void>{std::coroutine_handle<TaskPromise>::from_promise(*this)}; }
+inline Task<void> TaskPromise<void>::get_return_object() noexcept {
+  return Task<void>{std::coroutine_handle<TaskPromise>::from_promise(*this)};
+}
 template <typename T>
-Task<T&> TaskPromise<T&>::get_return_object() noexcept {
-  return Task<T&>{std::coroutine_handle<TaskPromise>::from_promise(*this)};
+Task<T &> TaskPromise<T &>::get_return_object() noexcept {
+  return Task<T &>{std::coroutine_handle<TaskPromise>::from_promise(*this)};
 }
 }  // namespace internal
 

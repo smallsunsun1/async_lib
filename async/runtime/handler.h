@@ -14,16 +14,18 @@ class BaseRuntime;
 
 class FunctionHandler {
  public:
-  explicit FunctionHandler(std::string_view name, BaseRuntime* runtime, FunctionHandler* handler) : mName(name), mRuntime(runtime), mFallback(handler) {}
-  FunctionHandler* GetFallBackHandler() { return mFallback; }
+  explicit FunctionHandler(std::string_view name, BaseRuntime *runtime,
+                           FunctionHandler *handler)
+      : mName(name), mRuntime(runtime), mFallback(handler) {}
+  FunctionHandler *GetFallBackHandler() { return mFallback; }
   std::string_view GetName() const { return mName; }
-  BaseRuntime* GetBaseRuntime() { return mRuntime; }
+  BaseRuntime *GetBaseRuntime() { return mRuntime; }
   absl::StatusOr<SimpleFunction> MakeFunction();
 
  private:
   const std::string mName;
-  BaseRuntime* mRuntime;
-  FunctionHandler* mFallback;
+  BaseRuntime *mRuntime;
+  FunctionHandler *mFallback;
 };
 
 }  // namespace async

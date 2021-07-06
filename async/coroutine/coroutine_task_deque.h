@@ -18,16 +18,19 @@ class CoroutineTaskDeque {
  public:
   static constexpr unsigned kCapacity = 1024;
 
-  static_assert((kCapacity > 2) && (kCapacity <= (64u << 10u)), "CoroutineTaskDeque capacity must be in [4, 65536] range");
-  static_assert((kCapacity & (kCapacity - 1)) == 0, "CoroutineTaskDeque capacity must be a power of two for fast masking");
+  static_assert((kCapacity > 2) && (kCapacity <= (64u << 10u)),
+                "CoroutineTaskDeque capacity must be in [4, 65536] range");
+  static_assert(
+      (kCapacity & (kCapacity - 1)) == 0,
+      "CoroutineTaskDeque capacity must be a power of two for fast masking");
 
   CoroutineTaskDeque() : mFront(0), mBack(0) {
     for (unsigned i = 0; i < kCapacity; i++) {
       mArray[i].state.store(kEmpty, std::memory_order_relaxed);
     }
   }
-  CoroutineTaskDeque(const CoroutineTaskDeque&) = delete;
-  void operator=(const CoroutineTaskDeque&) = delete;
+  CoroutineTaskDeque(const CoroutineTaskDeque &) = delete;
+  void operator=(const CoroutineTaskDeque &) = delete;
 
   ~CoroutineTaskDeque() { assert(Size() == 0); }
 
@@ -39,16 +42,16 @@ class CoroutineTaskDeque {
   // Can be called by any thread at any time.
   bool Empty() const { return SizeOrNotEmpty<false>() == 0; }
 
-  std::optional<ScheduleOperation*> PushFront(ScheduleOperation* task);
-  std::optional<ScheduleOperation*> PopFront();
-  std::optional<ScheduleOperation*> PushBack(ScheduleOperation* task);
-  std::optional<ScheduleOperation*> PopBack();
-  unsigned PopBackHalf(std::vector<ScheduleOperation*>* result);
+  std::optional<ScheduleOperation *> PushFront(ScheduleOperation *task);
+  std::optional<ScheduleOperation *> PopFront();
+  std::optional<ScheduleOperation *> PushBack(ScheduleOperation *task);
+  std::optional<ScheduleOperation *> PopBack();
+  unsigned PopBackHalf(std::vector<ScheduleOperation *> *result);
 
   // Delete all the elements from the queue.
   void Flush() {
     while (!Empty()) {
-      std::optional<ScheduleOperation*> task = PopFront();
+      std::optional<ScheduleOperation *> task = PopFront();
       assert(task.has_value());
     }
   }
@@ -65,7 +68,7 @@ class CoroutineTaskDeque {
   enum : uint8_t { kEmpty = 0, kBusy = 1, kReady = 2 };
   struct Elem {
     std::atomic<uint8_t> state;
-    ScheduleOperation* task;
+    ScheduleOperation *task;
   };
 
   // Low log(kCapacity) + 1 bits in mFront and mBack contain rolling index of

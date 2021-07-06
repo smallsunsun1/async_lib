@@ -25,7 +25,9 @@ class WhenAllTaskPromise final {
 
   WhenAllTaskPromise() noexcept {}
 
-  auto get_return_object() noexcept { return coroutine_handle_t::from_promise(*this); }
+  auto get_return_object() noexcept {
+    return coroutine_handle_t::from_promise(*this);
+  }
 
   std::suspend_always initial_suspend() noexcept { return {}; }
 
@@ -34,7 +36,9 @@ class WhenAllTaskPromise final {
      public:
       bool await_ready() const noexcept { return false; }
 
-      void await_suspend(coroutine_handle_t coro) const noexcept { coro.promise().mCounter->notify_awaitable_completed(); }
+      void await_suspend(coroutine_handle_t coro) const noexcept {
+        coro.promise().mCounter->notify_awaitable_completed();
+      }
 
       void await_resume() const noexcept {}
     };
@@ -42,7 +46,9 @@ class WhenAllTaskPromise final {
     return completion_notifier{};
   }
 
-  void unhandled_exception() noexcept { mExceptionPtr = std::current_exception(); }
+  void unhandled_exception() noexcept {
+    mExceptionPtr = std::current_exception();
+  }
 
   void return_void() noexcept {
     // We should have either suspended at co_yield point or
@@ -51,22 +57,22 @@ class WhenAllTaskPromise final {
     assert(false);
   }
 
-  auto yield_value(Result&& result) noexcept {
+  auto yield_value(Result &&result) noexcept {
     m_result = std::addressof(result);
     return final_suspend();
   }
 
-  void start(WhenAllCounter& counter) noexcept {
+  void start(WhenAllCounter &counter) noexcept {
     mCounter = &counter;
     coroutine_handle_t::from_promise(*this).resume();
   }
 
-  Result& result() & {
+  Result &result() & {
     rethrow_if_exception();
     return *m_result;
   }
 
-  Result&& result() && {
+  Result &&result() && {
     rethrow_if_exception();
     return std::forward<Result>(*m_result);
   }
@@ -78,7 +84,7 @@ class WhenAllTaskPromise final {
     }
   }
 
-  WhenAllCounter* mCounter;
+  WhenAllCounter *mCounter;
   std::exception_ptr mExceptionPtr;
   std::add_pointer_t<Result> m_result;
 };
@@ -90,7 +96,9 @@ class WhenAllTaskPromise<void> final {
 
   WhenAllTaskPromise() noexcept {}
 
-  auto get_return_object() noexcept { return coroutine_handle_t::from_promise(*this); }
+  auto get_return_object() noexcept {
+    return coroutine_handle_t::from_promise(*this);
+  }
 
   std::suspend_always initial_suspend() noexcept { return {}; }
 
@@ -99,7 +107,9 @@ class WhenAllTaskPromise<void> final {
      public:
       bool await_ready() const noexcept { return false; }
 
-      void await_suspend(coroutine_handle_t coro) const noexcept { coro.promise().mCounter->notify_awaitable_completed(); }
+      void await_suspend(coroutine_handle_t coro) const noexcept {
+        coro.promise().mCounter->notify_awaitable_completed();
+      }
 
       void await_resume() const noexcept {}
     };
@@ -107,11 +117,13 @@ class WhenAllTaskPromise<void> final {
     return completion_notifier{};
   }
 
-  void unhandled_exception() noexcept { mExceptionPtr = std::current_exception(); }
+  void unhandled_exception() noexcept {
+    mExceptionPtr = std::current_exception();
+  }
 
   void return_void() noexcept {}
 
-  void start(WhenAllCounter& counter) noexcept {
+  void start(WhenAllCounter &counter) noexcept {
     mCounter = &counter;
     coroutine_handle_t::from_promise(*this).resume();
   }
@@ -123,7 +135,7 @@ class WhenAllTaskPromise<void> final {
   }
 
  private:
-  WhenAllCounter* mCounter;
+  WhenAllCounter *mCounter;
   std::exception_ptr mExceptionPtr;
 };
 
@@ -136,18 +148,21 @@ class WhenAllTask final {
 
   WhenAllTask(coroutine_handle_t coroutine) noexcept : mCoroutine(coroutine) {}
 
-  WhenAllTask(WhenAllTask&& other) noexcept : mCoroutine(std::exchange(other.mCoroutine, coroutine_handle_t{})) {}
+  WhenAllTask(WhenAllTask &&other) noexcept
+      : mCoroutine(std::exchange(other.mCoroutine, coroutine_handle_t{})) {}
 
   ~WhenAllTask() {
     if (mCoroutine) mCoroutine.destroy();
   }
 
-  WhenAllTask(const WhenAllTask&) = delete;
-  WhenAllTask& operator=(const WhenAllTask&) = delete;
+  WhenAllTask(const WhenAllTask &) = delete;
+  WhenAllTask &operator=(const WhenAllTask &) = delete;
 
   decltype(auto) result() & { return mCoroutine.promise().result(); }
 
-  decltype(auto) result() && { return std::move(mCoroutine.promise()).result(); }
+  decltype(auto) result() && {
+    return std::move(mCoroutine.promise()).result();
+  }
 
   decltype(auto) non_void_result() & {
     if constexpr (std::is_void_v<decltype(this->result())>) {
@@ -171,27 +186,42 @@ class WhenAllTask final {
   template <typename TaskContainer>
   friend class WhenAllReadyAwaitable;
 
-  void start(WhenAllCounter& counter) noexcept { mCoroutine.promise().start(counter); }
+  void start(WhenAllCounter &counter) noexcept {
+    mCoroutine.promise().start(counter);
+  }
 
   coroutine_handle_t mCoroutine;
 };
 
-template <typename Awaitable, typename Result = typename awaitable_traits<Awaitable&&>::await_result_t, std::enable_if_t<!std::is_void_v<Result>, int> = 0>
+template <
+    typename Awaitable,
+    typename Result = typename awaitable_traits<Awaitable &&>::await_result_t,
+    std::enable_if_t<!std::is_void_v<Result>, int> = 0>
 WhenAllTask<Result> MakeWhenAllTask(Awaitable awaitable) {
-  co_yield co_await static_cast<Awaitable&&>(awaitable);
+  co_yield co_await static_cast<Awaitable &&>(awaitable);
 }
 
-template <typename Awaitable, typename Result = typename awaitable_traits<Awaitable&&>::await_result_t, std::enable_if_t<std::is_void_v<Result>, int> = 0>
+template <
+    typename Awaitable,
+    typename Result = typename awaitable_traits<Awaitable &&>::await_result_t,
+    std::enable_if_t<std::is_void_v<Result>, int> = 0>
 WhenAllTask<void> MakeWhenAllTask(Awaitable awaitable) {
-  co_await static_cast<Awaitable&&>(awaitable);
+  co_await static_cast<Awaitable &&>(awaitable);
 }
 
-template <typename Awaitable, typename Result = typename awaitable_traits<Awaitable&>::await_result_t, std::enable_if_t<!std::is_void_v<Result>, int> = 0>
-WhenAllTask<Result> MakeWhenAllTask(std::reference_wrapper<Awaitable> awaitable) {
+template <
+    typename Awaitable,
+    typename Result = typename awaitable_traits<Awaitable &>::await_result_t,
+    std::enable_if_t<!std::is_void_v<Result>, int> = 0>
+WhenAllTask<Result> MakeWhenAllTask(
+    std::reference_wrapper<Awaitable> awaitable) {
   co_yield co_await awaitable.get();
 }
 
-template <typename Awaitable, typename Result = typename awaitable_traits<Awaitable&>::await_result_t, std::enable_if_t<std::is_void_v<Result>, int> = 0>
+template <
+    typename Awaitable,
+    typename Result = typename awaitable_traits<Awaitable &>::await_result_t,
+    std::enable_if_t<std::is_void_v<Result>, int> = 0>
 WhenAllTask<void> MakeWhenAllTask(std::reference_wrapper<Awaitable> awaitable) {
   co_await awaitable.get();
 }

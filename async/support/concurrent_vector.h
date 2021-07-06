@@ -16,17 +16,17 @@ class ConcurrentVector {
     // which should be more than enough for any reasonable use case.
     mAllAllocatedElements.reserve(65);
     mAllAllocatedElements.emplace_back();
-    auto& v = mAllAllocatedElements.back();
+    auto &v = mAllAllocatedElements.back();
     v.reserve(std::max(static_cast<size_t>(1), initial_capacity));
   }
 
-  T& operator[](size_t index) {
+  T &operator[](size_t index) {
     auto state = State::Decode(mState.load(std::memory_order_acquire));
     assert(index < state.size);
     return mAllAllocatedElements[state.mLastAllocated][index];
   }
 
-  const T& operator[](size_t index) const {
+  const T &operator[](size_t index) const {
     auto state = State::Decode(mState.load(std::memory_order_acquire));
     assert(index < state.size);
     return mAllAllocatedElements[state.mLastAllocated][index];
@@ -35,7 +35,9 @@ class ConcurrentVector {
   // Return the number of elements currently valid in this vector.  The vector
   // only grows, so this is conservative w.r.t. the execution of the current
   // thread.
-  size_t size() const { return State::Decode(mState.load(std::memory_order_relaxed)).size; }
+  size_t size() const {
+    return State::Decode(mState.load(std::memory_order_relaxed)).size;
+  }
 
   // Insert a new element at the end. If the current buffer is full, we allocate
   // a new buffer with twice as much capacity and copy the items in the
@@ -43,10 +45,10 @@ class ConcurrentVector {
   //
   // Returns the index of the newly inserted item.
   template <typename... Args>
-  size_t emplace_back(Args&&... args) {
+  size_t emplace_back(Args &&...args) {
     std::lock_guard<std::mutex> lock(mMutex);
 
-    auto& last = mAllAllocatedElements.back();
+    auto &last = mAllAllocatedElements.back();
 
     if (last.size() < last.capacity()) {
       // There is still room in the current vector without reallocation. Just
@@ -65,8 +67,8 @@ class ConcurrentVector {
     // from the previous vector, and set elements_ to point to the data of the
     // new vector.
     mAllAllocatedElements.emplace_back();
-    auto& newLast = mAllAllocatedElements.back();
-    auto& prev = *(mAllAllocatedElements.rbegin() + 1);
+    auto &newLast = mAllAllocatedElements.back();
+    auto &prev = *(mAllAllocatedElements.rbegin() + 1);
     newLast.reserve(prev.capacity() * 2);
     assert(prev.size() == prev.capacity());
 

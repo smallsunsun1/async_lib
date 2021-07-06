@@ -19,7 +19,8 @@ class ConcurrentWorkQueue {
 
  protected:
   virtual void AddTask(TaskFunction work) = 0;
-  virtual std::optional<TaskFunction> AddBlockingTask(TaskFunction work, bool allowQueuing) = 0;
+  virtual std::optional<TaskFunction> AddBlockingTask(TaskFunction work,
+                                                      bool allowQueuing) = 0;
   virtual void Await(absl::Span<const RCReference<AsyncValue>> values) = 0;
   virtual void Quiesce() = 0;
   virtual int GetParallelismLevel() const = 0;
@@ -28,12 +29,14 @@ class ConcurrentWorkQueue {
 
  private:
   friend class HostContext;
-  ConcurrentWorkQueue(const ConcurrentWorkQueue&) = delete;
-  ConcurrentWorkQueue& operator=(const ConcurrentWorkQueue&) = delete;
+  ConcurrentWorkQueue(const ConcurrentWorkQueue &) = delete;
+  ConcurrentWorkQueue &operator=(const ConcurrentWorkQueue &) = delete;
 };
 std::unique_ptr<ConcurrentWorkQueue> CreateSingleThreadedWorkQueue();
-std::unique_ptr<ConcurrentWorkQueue> CreateMultiThreadedWorkQueue(int num_threads, int num_blocking_threads);
-using WorkQueueFactory = unique_function<std::unique_ptr<ConcurrentWorkQueue>(std::string_view arg)>;
+std::unique_ptr<ConcurrentWorkQueue> CreateMultiThreadedWorkQueue(
+    int num_threads, int num_blocking_threads);
+using WorkQueueFactory =
+    unique_function<std::unique_ptr<ConcurrentWorkQueue>(std::string_view arg)>;
 std::unique_ptr<ConcurrentWorkQueue> CreateWorkQueue(std::string_view config);
 
 }  // namespace async

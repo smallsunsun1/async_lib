@@ -15,7 +15,8 @@ class SingleThreadedWorkQueue : public ConcurrentWorkQueue {
   SingleThreadedWorkQueue() {}
   std::string name() const override { return "single-threaded"; }
   void AddTask(TaskFunction work) override;
-  std::optional<TaskFunction> AddBlockingTask(TaskFunction work, bool allow_queuing) override;
+  std::optional<TaskFunction> AddBlockingTask(TaskFunction work,
+                                              bool allow_queuing) override;
   void Quiesce() override;
   void Await(absl::Span<const RCReference<AsyncValue>> values) override;
   int GetParallelismLevel() const override { return 1; }
@@ -34,7 +35,8 @@ void SingleThreadedWorkQueue::AddTask(TaskFunction work) {
   }
   mCv.notify_all();
 }
-std::optional<TaskFunction> SingleThreadedWorkQueue::AddBlockingTask(TaskFunction work, bool allow_queuing) {
+std::optional<TaskFunction> SingleThreadedWorkQueue::AddBlockingTask(
+    TaskFunction work, bool allow_queuing) {
   if (!allow_queuing) return {std::move(work)};
   {
     std::lock_guard<std::mutex> l(mMu);
@@ -52,15 +54,16 @@ void SingleThreadedWorkQueue::Quiesce() {
       if (mWorkItems.empty()) break;
       std::swap(local_work_items, mWorkItems);
     }
-    for (auto& item : local_work_items) {
+    for (auto &item : local_work_items) {
       item();
     }
     local_work_items.clear();
   }
 }
-void SingleThreadedWorkQueue::Await(absl::Span<const RCReference<AsyncValue>> values) {
+void SingleThreadedWorkQueue::Await(
+    absl::Span<const RCReference<AsyncValue>> values) {
   int values_remaining = values.size();
-  for (auto& value : values) {
+  for (auto &value : values) {
     value->AndThen([this, &values_remaining]() mutable {
       {
         std::lock_guard<std::mutex> l(mMu);
@@ -73,7 +76,9 @@ void SingleThreadedWorkQueue::Await(absl::Span<const RCReference<AsyncValue>> va
     std::lock_guard<std::mutex> l(mMu);
     return values_remaining != 0;
   };
-  auto no_items_and_values_remaining = [this, &values_remaining]() -> bool { return values_remaining != 0 && mWorkItems.empty(); };
+  auto no_items_and_values_remaining = [this, &values_remaining]() -> bool {
+    return values_remaining != 0 && mWorkItems.empty();
+  };
   std::vector<TaskFunction> local_work_items;
   size_t next_work_item_index = 0;
   while (has_values()) {
@@ -94,11 +99,16 @@ void SingleThreadedWorkQueue::Await(absl::Span<const RCReference<AsyncValue>> va
   }
   if (next_work_item_index != local_work_items.size()) {
     std::lock_guard<std::mutex> l(mMu);
-    mWorkItems.insert(mWorkItems.begin(), std::make_move_iterator(local_work_items.begin() + next_work_item_index), std::make_move_iterator(local_work_items.end()));
+    mWorkItems.insert(mWorkItems.begin(),
+                      std::make_move_iterator(local_work_items.begin() +
+                                              next_work_item_index),
+                      std::make_move_iterator(local_work_items.end()));
   }
 }
 
-std::unique_ptr<ConcurrentWorkQueue> CreateSingleThreadedWorkQueue() { return std::make_unique<SingleThreadedWorkQueue>(); }
+std::unique_ptr<ConcurrentWorkQueue> CreateSingleThreadedWorkQueue() {
+  return std::make_unique<SingleThreadedWorkQueue>();
+}
 
 }  // namespace async
 }  // namespace sss

@@ -10,23 +10,26 @@ namespace async {
 
 template <typename Executor>
 struct SchedulerTransform {
-  SchedulerTransform(Executor& exec) noexcept : mExec(&exec) {}
-  Executor& mExec;
+  SchedulerTransform(Executor &exec) noexcept : mExec(&exec) {}
+  Executor &mExec;
 };
 
 template <typename Executor>
-SchedulerTransform<Executor> ScheduleOn(Executor& exec) {
+SchedulerTransform<Executor> ScheduleOn(Executor &exec) {
   return SchedulerTransform<Executor>(exec);
 }
 
 template <typename Awaitable, typename Scheduler>
-auto ScheduleOn(Scheduler& scheduler, Awaitable&& awaitable) -> Task<internal::remove_rvalue_reference_t<typename awaitable_traits<Awaitable>::await_result_t>> {
+auto ScheduleOn(Scheduler &scheduler, Awaitable &&awaitable)
+    -> Task<internal::remove_rvalue_reference_t<
+        typename awaitable_traits<Awaitable>::await_result_t>> {
   co_await scheduler.Schedule();
   co_return co_await std::forward<Awaitable>(awaitable);
 }
 
 template <typename Awaitable, typename Executor>
-decltype(auto) operator|(Awaitable&& awaitable, SchedulerTransform<Executor>& scheduler) {
+decltype(auto) operator|(Awaitable &&awaitable,
+                         SchedulerTransform<Executor> &scheduler) {
   return ScheduleOn(scheduler.mExec, std::forward<Awaitable>(awaitable));
 }
 

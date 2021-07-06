@@ -7,9 +7,8 @@
 #include <optional>  // for optional
 #include <string>    // for string
 
-#include "absl/container/flat_hash_map.h"  // for BitMask
-#include "async/support/type_traits.h"     // for async, sss
-#include "gtest/gtest_pred_impl.h"         // for Test, InitGoogleTest, RUN_...
+#include "async/support/type_traits.h"  // for async, sss
+#include "gtest/gtest_pred_impl.h"      // for Test, InitGoogleTest, RUN_...
 
 using namespace sss;
 using namespace async;
@@ -27,7 +26,7 @@ TEST(RESOURCE, V1) {
   EXPECT_EQ(s2, std::string{"sss"});
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

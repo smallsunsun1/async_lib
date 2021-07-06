@@ -28,11 +28,12 @@ template <typename T>
 class TensorBatchTask : public BatchTask {
  public:
   TensorBatchTask() = default;
-  template <typename... Args, std::enable_if_t<std::is_constructible<T, Args...>::value, int> = 0>
-  TensorBatchTask(Args&&... args) : mData(std::forward<Args>(args)...) {}
+  template <typename... Args,
+            std::enable_if_t<std::is_constructible<T, Args...>::value, int> = 0>
+  TensorBatchTask(Args &&...args) : mData(std::forward<Args>(args)...) {}
   TensorBatchTask(std::unique_ptr<T> data) : mData(std::move(data)) {}
-  TensorBatchTask& operator=(const TensorBatchTask&) = delete;
-  TensorBatchTask(const TensorBatchTask&) = delete;
+  TensorBatchTask &operator=(const TensorBatchTask &) = delete;
+  TensorBatchTask(const TensorBatchTask &) = delete;
   ~TensorBatchTask() = default;
   size_t Size() const override { return 1; }
 
@@ -42,8 +43,8 @@ class TensorBatchTask : public BatchTask {
 template <typename TaskType>
 class Batch {
  public:
-  Batch(const Batch&) = delete;
-  Batch& operator=(const Batch&) = delete;
+  Batch(const Batch &) = delete;
+  Batch &operator=(const Batch &) = delete;
   Batch() = default;
   void AddTask(std::unique_ptr<TaskType> task) {
     std::lock_guard<std::mutex> lock(mMu);
@@ -63,11 +64,11 @@ class Batch {
     std::lock_guard<std::mutex> lock(mMu);
     return mTasks.empty();
   }
-  const TaskType& Task(int i) const {
+  const TaskType &Task(int i) const {
     std::lock_guard<std::mutex> lock(mMu);
     return *mTasks[i];
   }
-  TaskType* MutableTask(int i) {
+  TaskType *MutableTask(int i) {
     std::lock_guard<std::mutex> lock(mMu);
     return mTasks[i].get();
   }
@@ -105,8 +106,13 @@ template <typename TaskType>
 class StreamBatchScheduler : public BatchScheduler<TaskType> {
  public:
   template <typename F>
-  StreamBatchScheduler(F&& f, int maxBatchSize, int numBatchesInProcess, int maxTaskSize, HostContext* ctx)
-      : mProcessBatchCallback(std::forward<F>(f)), mMaxBatchSize(maxBatchSize), mNumBatchedInProgress(numBatchesInProcess), mMaxTaskSize(maxTaskSize), mCtx(ctx) {}
+  StreamBatchScheduler(F &&f, int maxBatchSize, int numBatchesInProcess,
+                       int maxTaskSize, HostContext *ctx)
+      : mProcessBatchCallback(std::forward<F>(f)),
+        mMaxBatchSize(maxBatchSize),
+        mNumBatchedInProgress(numBatchesInProcess),
+        mMaxTaskSize(maxTaskSize),
+        mCtx(ctx) {}
   ~StreamBatchScheduler() {
     std::lock_guard<std::mutex> lock(mMu);
     if (mOpenBatch != nullptr) {
@@ -132,7 +138,10 @@ class StreamBatchScheduler : public BatchScheduler<TaskType> {
     }
     return true;
   }
-  bool TaskFitsInBatch(const TaskType* task, const Batch<TaskType*> batch) const { return batch.Size() + task->Size() <= mMaxBatchSize; }
+  bool TaskFitsInBatch(const TaskType *task,
+                       const Batch<TaskType *> batch) const {
+    return batch.Size() + task->Size() <= mMaxBatchSize;
+  }
 
  private:
   void StartNewBatch() {
@@ -140,10 +149,11 @@ class StreamBatchScheduler : public BatchScheduler<TaskType> {
       mOpenBatch->Close();
       mOpenBatch = nullptr;
     }
-    Batch<TaskType>* newOpenBatch = new Batch<TaskType>;
+    Batch<TaskType> *newOpenBatch = new Batch<TaskType>;
     ++mNumBatchedInProgress;
     mCtx->EnqueueBlockingWork([this, newOpenBatch]() {
-      this->mProcessBatchCallback(std::unique_ptr<Batch<TaskType>>(newOpenBatch));
+      this->mProcessBatchCallback(
+          std::unique_ptr<Batch<TaskType>>(newOpenBatch));
       {
         std::lock_guard<std::mutex> lock(this->mMu);
         --this->mNumBatchedInProgress;
@@ -159,8 +169,8 @@ class StreamBatchScheduler : public BatchScheduler<TaskType> {
   int mOpenBatchNum = 0;
   int mNumBatchedInProgress = 0;
   int mMaxTaskSize = 0;
-  Batch<TaskType>* mOpenBatch = nullptr;
-  HostContext* mCtx;
+  Batch<TaskType> *mOpenBatch = nullptr;
+  HostContext *mCtx;
 };
 
 }  // namespace async

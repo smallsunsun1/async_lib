@@ -11,7 +11,8 @@ namespace async {
 namespace internal {
 class WhenAllCounter {
  public:
-  WhenAllCounter(size_t count) noexcept : m_count(count + 1), mAwaitingCoroutine(nullptr) {}
+  WhenAllCounter(size_t count) noexcept
+      : m_count(count + 1), mAwaitingCoroutine(nullptr) {}
 
   bool is_ready() const noexcept {
     // We consider this complete if we're asking whether it's ready

@@ -8,17 +8,18 @@ namespace async {
 
 class TaskFunction {
  public:
-  explicit TaskFunction(unique_function<void()> work) : mFunc(std::move(work)) {}
-  TaskFunction(TaskFunction&&) = default;
+  explicit TaskFunction(unique_function<void()> work)
+      : mFunc(std::move(work)) {}
+  TaskFunction(TaskFunction &&) = default;
   TaskFunction() = default;
   void operator()() { mFunc(); }
-  TaskFunction& operator=(TaskFunction&& f) = default;
+  TaskFunction &operator=(TaskFunction &&f) = default;
   void reset() { mFunc = nullptr; }
   explicit operator bool() const { return static_cast<bool>(mFunc); }
 
  private:
-  TaskFunction(const TaskFunction&) = delete;
-  TaskFunction& operator=(const TaskFunction&) = delete;
+  TaskFunction(const TaskFunction &) = delete;
+  TaskFunction &operator=(const TaskFunction &) = delete;
   unique_function<void()> mFunc;
 };
 

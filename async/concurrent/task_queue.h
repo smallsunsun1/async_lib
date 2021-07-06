@@ -18,15 +18,17 @@ class TaskQueue {
  public:
   static constexpr unsigned kCapacity = 1024;
 
-  static_assert((kCapacity > 2) && (kCapacity <= (64u << 10u)), "TaskQueue capacity must be in [4, 65536] range");
-  static_assert((kCapacity & (kCapacity - 1)) == 0, "TaskQueue capacity must be a power of two for fast masking");
+  static_assert((kCapacity > 2) && (kCapacity <= (64u << 10u)),
+                "TaskQueue capacity must be in [4, 65536] range");
+  static_assert((kCapacity & (kCapacity - 1)) == 0,
+                "TaskQueue capacity must be a power of two for fast masking");
 
   TaskQueue() : mFront(0), mBack(0) {
     for (unsigned i = 0; i < kCapacity; ++i) mArray[i].state.store(i);
   }
 
-  TaskQueue(const TaskQueue&) = delete;
-  void operator=(const TaskQueue&) = delete;
+  TaskQueue(const TaskQueue &) = delete;
+  void operator=(const TaskQueue &) = delete;
 
   ~TaskQueue() { assert(Empty()); }
 
@@ -36,7 +38,7 @@ class TaskQueue {
   // returns empty optional.
   std::optional<TaskFunction> PushFront(TaskFunction task) {
     unsigned front = mFront.load(std::memory_order_relaxed);
-    Elem* e;
+    Elem *e;
 
     for (;;) {
       e = &mArray[front & kMask];
@@ -44,7 +46,8 @@ class TaskQueue {
       int64_t diff = static_cast<int64_t>(state) - static_cast<int64_t>(front);
 
       // Try to acquire an ownership of element at `front`.
-      if (diff == 0 && mFront.compare_exchange_strong(front, front + 1, std::memory_order_relaxed)) {
+      if (diff == 0 && mFront.compare_exchange_strong(
+                           front, front + 1, std::memory_order_relaxed)) {
         break;
       }
 
@@ -67,15 +70,17 @@ class TaskQueue {
   // If the queue is empty returns empty optional.
   std::optional<TaskFunction> PopBack() {
     unsigned back = mBack.load(std::memory_order_relaxed);
-    Elem* e;
+    Elem *e;
 
     for (;;) {
       e = &mArray[back & kMask];
       unsigned state = e->state.load(std::memory_order_acquire);
-      int64_t diff = static_cast<int64_t>(state) - static_cast<int64_t>(back + 1);
+      int64_t diff =
+          static_cast<int64_t>(state) - static_cast<int64_t>(back + 1);
 
       // Element at `back` is ready, try to acquire its ownership.
-      if (diff == 0 && mBack.compare_exchange_strong(back, back + 1, std::memory_order_relaxed)) {
+      if (diff == 0 && mBack.compare_exchange_strong(
+                           back, back + 1, std::memory_order_relaxed)) {
         break;
       }
 

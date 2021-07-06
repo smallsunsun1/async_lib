@@ -18,14 +18,18 @@ class Device {
     return mDeviceId;
   }
   DeviceType getDeviceType() const { return mType; }
-  bool operator==(const Device& other) const { return mDeviceId == other.mDeviceId && mType == other.mType; }
-  bool operator!=(const Device& other) const { return !(*this == other); }
+  bool operator==(const Device &other) const {
+    return mDeviceId == other.mDeviceId && mType == other.mType;
+  }
+  bool operator!=(const Device &other) const { return !(*this == other); }
 
  private:
   static_assert(std::is_same<CUdevice, int>::value, "");
   int mDeviceId = 0;                    // 默认使用0号设备
   DeviceType mType = DeviceType::None;  // 未知设备
-  friend std::ostream& operator<<(std::ostream& os, Device device) { os << "deviceId: " << device.mDeviceId << " deviceType: " << device; }
+  friend std::ostream &operator<<(std::ostream &os, Device device) {
+    os << "deviceId: " << device.mDeviceId << " deviceType: " << device;
+  }
 };
 
 template <typename CudaT, typename HipT>
@@ -33,7 +37,7 @@ class Resource {
  public:
   Resource() = default;
   Resource(std::nullptr_t, DeviceType dType) : mPair(nullptr, dType) {}
-  explicit Resource(void* ptr) : mPair(ptr, DeviceType::None) {}
+  explicit Resource(void *ptr) : mPair(ptr, DeviceType::None) {}
   Resource(CudaT ptr) : mPair(ptr, DeviceType::CUDA) {}
   Resource(HipT ptr) : mPair(ptr, DeviceType::None) {}
   DeviceType getDeviceType() const { return mPair.getInt(); }
@@ -43,15 +47,23 @@ class Resource {
     // 这里需要添加T类型所对应的DeviceType的assert断言
     return static_cast<CudaT>(mPair.getPointer());
   }
-  bool operator==(std::nullptr_t) const { return mPair.getPointer() == nullptr; }
-  bool operator!=(std::nullptr_t) const { return mPair.getPointer() != nullptr; }
-  bool operator==(const Resource& other) const { return mPair == other.mPair; }
-  bool operator!=(const Resource& other) const { return mPair != other.mPair; }
-  size_t hash() const noexcept { return std::hash<void*>()(mPair.getOpaqueValue()); }
+  bool operator==(std::nullptr_t) const {
+    return mPair.getPointer() == nullptr;
+  }
+  bool operator!=(std::nullptr_t) const {
+    return mPair.getPointer() != nullptr;
+  }
+  bool operator==(const Resource &other) const { return mPair == other.mPair; }
+  bool operator!=(const Resource &other) const { return mPair != other.mPair; }
+  size_t hash() const noexcept {
+    return std::hash<void *>()(mPair.getOpaqueValue());
+  }
 
  private:
-  llvm::PointerIntPair<void*, 2, DeviceType> mPair;
-  friend std::ostream& operator<<(std::ostream& os, const Resource& resource) { os << resource.mPair.getPointer() << ": " << resource.getDeviceType(); }
+  llvm::PointerIntPair<void *, 2, DeviceType> mPair;
+  friend std::ostream &operator<<(std::ostream &os, const Resource &resource) {
+    os << resource.mPair.getPointer() << ": " << resource.getDeviceType();
+  }
 };
 
 // 当前仅有Cuda设备支持

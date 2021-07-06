@@ -1,13 +1,12 @@
 #ifndef ASYNC_CONCURRENT_TASK_PRIORITY_QUEUE_
 #define ASYNC_CONCURRENT_TASK_PRIORITY_QUEUE_
 
-#include <absl/types/optional.h>
-
 #include <array>
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <mutex>
+#include <optional>
 #include <queue>
 
 #include "async/context/task_function.h"
@@ -15,30 +14,43 @@
 namespace sss {
 namespace async {
 
-enum class TaskPriority : int8_t { kCritical = 0, kHigh = 1, kDefault = 2, kLow = 3 };
+enum class TaskPriority : int8_t {
+  kCritical = 0,
+  kHigh = 1,
+  kDefault = 2,
+  kLow = 3
+};
 
 class TaskPriorityDeque {
   static constexpr uint64_t kCounterBits = 10;  // capacity = 1024
 
   static constexpr int kNumTaskPriorities = 4;
 
-  static constexpr std::array<TaskPriority, kNumTaskPriorities> kTaskPriorities = {
-      TaskPriority::kCritical,
-      TaskPriority::kHigh,
-      TaskPriority::kDefault,
-      TaskPriority::kLow,
+  static constexpr std::array<TaskPriority, kNumTaskPriorities>
+      kTaskPriorities = {
+          TaskPriority::kCritical,
+          TaskPriority::kHigh,
+          TaskPriority::kDefault,
+          TaskPriority::kLow,
   };
 
-  static_assert(static_cast<int>(kTaskPriorities[0]) == 0, "Unexpected TaskPriority value");
-  static_assert(static_cast<int>(kTaskPriorities[1]) == 1, "Unexpected TaskPriority value");
-  static_assert(static_cast<int>(kTaskPriorities[2]) == 2, "Unexpected TaskPriority value");
-  static_assert(static_cast<int>(kTaskPriorities[3]) == 3, "Unexpected TaskPriority value");
+  static_assert(static_cast<int>(kTaskPriorities[0]) == 0,
+                "Unexpected TaskPriority value");
+  static_assert(static_cast<int>(kTaskPriorities[1]) == 1,
+                "Unexpected TaskPriority value");
+  static_assert(static_cast<int>(kTaskPriorities[2]) == 2,
+                "Unexpected TaskPriority value");
+  static_assert(static_cast<int>(kTaskPriorities[3]) == 3,
+                "Unexpected TaskPriority value");
 
  public:
   static constexpr uint64_t kCapacity = (1ull << kCounterBits);
 
-  static_assert((kCapacity > 2) && (kCapacity <= (1u << 10u)), "TaskPriorityDeque capacity must be in [4, 1024] range");
-  static_assert((kCapacity & (kCapacity - 1)) == 0, "TaskPriorityDeque capacity must be a power of two for fast masking");
+  static_assert((kCapacity > 2) && (kCapacity <= (1u << 10u)),
+                "TaskPriorityDeque capacity must be in [4, 1024] range");
+  static_assert(
+      (kCapacity & (kCapacity - 1)) == 0,
+      "TaskPriorityDeque capacity must be a power of two for fast masking");
 
   TaskPriorityDeque() : front_(0), back_(0) {
     for (TaskPriority priority : kTaskPriorities) {
@@ -47,8 +59,8 @@ class TaskPriorityDeque {
       }
     }
   }
-  TaskPriorityDeque(const TaskPriorityDeque&) = delete;
-  void operator=(const TaskPriorityDeque&) = delete;
+  TaskPriorityDeque(const TaskPriorityDeque &) = delete;
+  void operator=(const TaskPriorityDeque &) = delete;
 
   ~TaskPriorityDeque() { assert(Size() == 0); }
 
@@ -57,15 +69,17 @@ class TaskPriorityDeque {
   //
   // If the queue is full, returns passed in task wrapped in optional, otherwise
   // returns empty optional.
-  std::optional<TaskFunction> PushFront(TaskFunction task, TaskPriority priority) {
+  std::optional<TaskFunction> PushFront(TaskFunction task,
+                                        TaskPriority priority) {
     assert(static_cast<int>(priority) < kNumTaskPriorities);
 
     PointerState front(front_.load(std::memory_order_relaxed));
     uint64_t index = front.Index(priority);
 
-    Elem* e = elem(priority, index);
+    Elem *e = elem(priority, index);
     uint8_t s = e->state.load(std::memory_order_relaxed);
-    if (s != kEmpty || !e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
+    if (s != kEmpty || !e->state.compare_exchange_strong(
+                           s, kBusy, std::memory_order_acquire)) {
       return std::optional<TaskFunction>(std::move(task));
     }
 
@@ -75,7 +89,9 @@ class TaskPriorityDeque {
     return std::nullopt;
   }
 
-  std::optional<TaskFunction> PushFront(TaskFunction task) { return PushFront(std::move(task), TaskPriority::kDefault); }
+  std::optional<TaskFunction> PushFront(TaskFunction task) {
+    return PushFront(std::move(task), TaskPriority::kDefault);
+  }
 
   // PopFront() iterates through all queues in their priority order and removes
   // and returns the first element from the first non-empty queue.
@@ -87,17 +103,19 @@ class TaskPriorityDeque {
     for (TaskPriority priority : kTaskPriorities) {
       uint64_t index = front.IndexExt(priority);
 
-      Elem* e = elem(priority, (index - 1) & kIndexMask);
+      Elem *e = elem(priority, (index - 1) & kIndexMask);
       uint8_t s = e->state.load(std::memory_order_relaxed);
 
       if (s != kReady) continue;
-      if (!e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
+      if (!e->state.compare_exchange_strong(s, kBusy,
+                                            std::memory_order_acquire)) {
         return std::nullopt;
       }
 
       TaskFunction task = std::move(e->task);
       e->state.store(kEmpty, std::memory_order_release);
-      front_.store(front.WithIndexExt((index - 1) & kIndexMaskExt, priority), std::memory_order_relaxed);
+      front_.store(front.WithIndexExt((index - 1) & kIndexMaskExt, priority),
+                   std::memory_order_relaxed);
 
       return std::optional<TaskFunction>(std::move(task));
     }
@@ -111,26 +129,31 @@ class TaskPriorityDeque {
   //
   // If all queues are full, returns passed in task wrapped in optional,
   // otherwise returns empty optional.
-  std::optional<TaskFunction> PushBack(TaskFunction task, TaskPriority priority) {
+  std::optional<TaskFunction> PushBack(TaskFunction task,
+                                       TaskPriority priority) {
     assert(static_cast<int>(priority) < kNumTaskPriorities);
 
     std::lock_guard<std::mutex> lock(mutex_);
     PointerState back(back_.load(std::memory_order_relaxed));
     uint64_t index = back.IndexExt(priority);
 
-    Elem* e = elem(priority, (index - 1) & kIndexMask);
+    Elem *e = elem(priority, (index - 1) & kIndexMask);
     uint8_t s = e->state.load(std::memory_order_relaxed);
-    if (s != kEmpty || !e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
+    if (s != kEmpty || !e->state.compare_exchange_strong(
+                           s, kBusy, std::memory_order_acquire)) {
       return std::optional<TaskFunction>(std::move(task));
     }
 
-    back_.store(back.WithIndexExt((index - 1) & kIndexMaskExt, priority), std::memory_order_relaxed);
+    back_.store(back.WithIndexExt((index - 1) & kIndexMaskExt, priority),
+                std::memory_order_relaxed);
     e->task = std::move(task);
     e->state.store(kReady, std::memory_order_release);
     return std::nullopt;
   }
 
-  std::optional<TaskFunction> PushBack(TaskFunction task) { return PushBack(std::move(task), TaskPriority::kDefault); }
+  std::optional<TaskFunction> PushBack(TaskFunction task) {
+    return PushBack(std::move(task), TaskPriority::kDefault);
+  }
 
   // PopBack() iterates through all queues in their priority order and removes
   // and returns the last elements from the first non-empty queue.
@@ -143,11 +166,12 @@ class TaskPriorityDeque {
     PointerState back(back_.load(std::memory_order_relaxed));
 
     for (TaskPriority priority : kTaskPriorities) {
-      Elem* e = elem(priority, back.Index(priority));
+      Elem *e = elem(priority, back.Index(priority));
       uint8_t s = e->state.load(std::memory_order_relaxed);
 
       if (s != kReady) continue;
-      if (!e->state.compare_exchange_strong(s, kBusy, std::memory_order_acquire)) {
+      if (!e->state.compare_exchange_strong(s, kBusy,
+                                            std::memory_order_acquire)) {
         return std::nullopt;
       }
 
@@ -225,17 +249,20 @@ class TaskPriorityDeque {
   };
 
   // Mask for extracting all indices at once.
-  static constexpr uint64_t kIndicesBits = (kCounterBits + 1) * kNumTaskPriorities;
+  static constexpr uint64_t kIndicesBits =
+      (kCounterBits + 1) * kNumTaskPriorities;
   static constexpr uint64_t kIndicesMask = (1ull << kIndicesBits) - 1;
 
   // The remaining bits contain modification counter that is incremented on Push
   // operations. This allows us to obtain consistent snapshot of front/back for
   // Size operation using the modification counters.
   static constexpr uint64_t kModificationCounterBits = 64 - kIndicesBits;
-  static_assert(kModificationCounterBits >= 20, "Not enough bits for the modification counter");
+  static_assert(kModificationCounterBits >= 20,
+                "Not enough bits for the modification counter");
 
   // Mask for extracting modification counter from lower bits.
-  static constexpr uint64_t kModificationCounterMask = (1ull << kModificationCounterBits) - 1;
+  static constexpr uint64_t kModificationCounterMask =
+      (1ull << kModificationCounterBits) - 1;
 
   // PointerState helps to read and modify the indices state for different
   // priority levels encoded in the front and back atomics.
@@ -355,7 +382,7 @@ class TaskPriorityDeque {
 
   // Get a pointer to the task queue storage element for the given priority and
   // offset.
-  Elem* elem(TaskPriority priority, size_t offset) {
+  Elem *elem(TaskPriority priority, size_t offset) {
     assert(static_cast<int>(priority) < kNumTaskPriorities);
     assert(offset < kCapacity);
     return &array_[static_cast<int>(priority) * kCapacity + offset];
@@ -391,10 +418,14 @@ class TaskPriorityDeque {
     }
   }
 
-  unsigned CalculateSize(uint64_t front, uint64_t back) const { return CalculateSize(PointerState(front), PointerState(back)); }
+  unsigned CalculateSize(uint64_t front, uint64_t back) const {
+    return CalculateSize(PointerState(front), PointerState(back));
+  }
 
   unsigned CalculateSize(PointerState front, PointerState back) const {
-    auto queue_size = [&](TaskPriority priority) -> int { return front.IndexExt(priority) - back.IndexExt(priority); };
+    auto queue_size = [&](TaskPriority priority) -> int {
+      return front.IndexExt(priority) - back.IndexExt(priority);
+    };
 
     int size0 = queue_size(TaskPriority::kCritical);
     int size1 = queue_size(TaskPriority::kHigh);
@@ -430,17 +461,21 @@ class TaskPriorityDeque {
 class TaskPriorityLockDeque {
  public:
   TaskPriorityLockDeque() = default;
-  TaskPriorityLockDeque(const TaskPriorityLockDeque&) = delete;
-  TaskPriorityLockDeque& operator=(const TaskPriorityLockDeque&) = delete;
-  std::optional<TaskFunction> PushFront(TaskFunction task, TaskPriority priority) {
+  TaskPriorityLockDeque(const TaskPriorityLockDeque &) = delete;
+  TaskPriorityLockDeque &operator=(const TaskPriorityLockDeque &) = delete;
+  std::optional<TaskFunction> PushFront(TaskFunction task,
+                                        TaskPriority priority) {
     std::lock_guard<std::mutex> lock(mu_);
     queue_.emplace(priority, std::move(task));
     return std::nullopt;
   }
-  std::optional<TaskFunction> PushFront(TaskFunction task) { return PushFront(std::move(task), TaskPriority::kDefault); }
+  std::optional<TaskFunction> PushFront(TaskFunction task) {
+    return PushFront(std::move(task), TaskPriority::kDefault);
+  }
   std::optional<TaskFunction> PopFront() {
     if (Empty()) return std::nullopt;
-    std::optional<TaskFunction> result(std::move(const_cast<Elem&>(queue_.top()).task));
+    std::optional<TaskFunction> result(
+        std::move(const_cast<Elem &>(queue_.top()).task));
     queue_.pop();
     return result;
   }
@@ -463,7 +498,7 @@ class TaskPriorityLockDeque {
   struct Elem {
     uint8_t state;
     TaskFunction task;
-    bool operator<(const Elem& other) { return state < other.state; }
+    bool operator<(const Elem &other) { return state < other.state; }
   };
   mutable std::mutex mu_;
   std::priority_queue<Elem> queue_;

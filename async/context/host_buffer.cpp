@@ -5,14 +5,19 @@
 namespace sss {
 namespace async {
 
-RCReference<HostBuffer> HostBuffer::CreateUninitialized(size_t size, size_t alignment, HostAllocator* allocator) {
+RCReference<HostBuffer> HostBuffer::CreateUninitialized(
+    size_t size, size_t alignment, HostAllocator *allocator) {
   assert(alignof(std::max_align_t) >= alignment && "Invalid alignment");
   (void)alignment;
-  auto* buf = allocator->AllocateBytes(sizeof(HostBuffer) + size, alignof(HostBuffer));
+  auto *buf =
+      allocator->AllocateBytes(sizeof(HostBuffer) + size, alignof(HostBuffer));
   if (!buf) return {};
   return TakeRef(new (buf) HostBuffer(size, allocator));
 }
-RCReference<HostBuffer> HostBuffer::CreateFromExternal(void* ptr, size_t size, Deallocator deallocator) { return TakeRef(new HostBuffer(ptr, size, std::move(deallocator))); }
+RCReference<HostBuffer> HostBuffer::CreateFromExternal(
+    void *ptr, size_t size, Deallocator deallocator) {
+  return TakeRef(new HostBuffer(ptr, size, std::move(deallocator)));
+}
 HostBuffer::~HostBuffer() {
   if (!mIsLined) {
     mOutOfLine.deallocator(mOutOfLine.ptr, mSize);

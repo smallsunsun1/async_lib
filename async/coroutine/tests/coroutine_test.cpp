@@ -6,12 +6,12 @@
 
 #include "async/coroutine/task.h"
 
-auto switch_to_new_thread(std::jthread& out) {
+auto switch_to_new_thread(std::jthread &out) {
   struct awaitable {
-    std::jthread* p_out;
+    std::jthread *p_out;
     bool await_ready() { return false; }
     void await_suspend(std::coroutine_handle<> h) {
-      std::jthread& out = *p_out;
+      std::jthread &out = *p_out;
       if (out.joinable()) assert(false && "out thread can't be joinable!");
       out = std::jthread([h] { h.resume(); });
       // Potential undefined behavior: accessing potentially destroyed *this
@@ -33,11 +33,13 @@ struct task {
   };
 };
 
-task resuming_on_new_thread(std::jthread& out) {
-  std::cout << "Coroutine started on thread: " << std::this_thread::get_id() << '\n';
+task resuming_on_new_thread(std::jthread &out) {
+  std::cout << "Coroutine started on thread: " << std::this_thread::get_id()
+            << '\n';
   co_await switch_to_new_thread(out);
   // awaiter destroyed here
-  std::cout << "Coroutine resumed on thread: " << std::this_thread::get_id() << '\n';
+  std::cout << "Coroutine resumed on thread: " << std::this_thread::get_id()
+            << '\n';
 }
 
 struct TestAwaitable {

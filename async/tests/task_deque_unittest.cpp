@@ -21,13 +21,18 @@ TEST(TaskQueueTool, EnPopqueueTest) {
   std::vector<std::thread> totalThreads;
   std::vector<std::thread> totalPopThreads;
   auto startEn1 = high_resolution_clock::now();
-  int numCores = std::min(std::thread::hardware_concurrency(), static_cast<unsigned int>(20));
+  int numCores = std::min(std::thread::hardware_concurrency(),
+                          static_cast<unsigned int>(20));
   int numIterations = 200;
   for (int i = 0; i < numCores; ++i) {
     totalThreads.emplace_back([&mLockFreeQueue, numIterations]() {
       for (int j = 0; j < numIterations; ++j) {
-        unique_function<void()> f = []() { std::cout << "hello world!" << std::endl; };
-        unique_function<void()> ff = []() { std::cout << "hello world!" << std::endl; };
+        unique_function<void()> f = []() {
+          std::cout << "hello world!" << std::endl;
+        };
+        unique_function<void()> ff = []() {
+          std::cout << "hello world!" << std::endl;
+        };
         mLockFreeQueue.PushFront(TaskFunction(std::move(f)));
         // mLockFreeQueue.PushBack(TaskFunction(std::move(ff)));
       }
@@ -41,10 +46,10 @@ TEST(TaskQueueTool, EnPopqueueTest) {
       }
     });
   }
-  for (auto& refThread : totalThreads) {
+  for (auto &refThread : totalThreads) {
     refThread.join();
   }
-  for (auto& refThread : totalPopThreads) {
+  for (auto &refThread : totalPopThreads) {
     refThread.join();
   }
   auto endEn1 = high_resolution_clock::now();
@@ -56,8 +61,12 @@ TEST(TaskQueueTool, EnPopqueueTest) {
   for (int i = 0; i < numCores; ++i) {
     totalThreads.emplace_back([&mLockQueue, numIterations]() {
       for (int j = 0; j < numIterations; ++j) {
-        unique_function<void()> f = []() { std::cout << "hello world!" << std::endl; };
-        unique_function<void()> ff = []() { std::cout << "hello world!" << std::endl; };
+        unique_function<void()> f = []() {
+          std::cout << "hello world!" << std::endl;
+        };
+        unique_function<void()> ff = []() {
+          std::cout << "hello world!" << std::endl;
+        };
         std::lock_guard<std::mutex> lock(globalMutex);
         mLockQueue.push_front(TaskFunction(std::move(f)));
         // mLockQueue.push_back(TaskFunction(std::move(ff)));
@@ -74,10 +83,10 @@ TEST(TaskQueueTool, EnPopqueueTest) {
       }
     });
   }
-  for (auto& refThread : totalThreads) {
+  for (auto &refThread : totalThreads) {
     refThread.join();
   }
-  for (auto& refThread : totalPopThreads) {
+  for (auto &refThread : totalPopThreads) {
     refThread.join();
   }
   auto endEn2 = high_resolution_clock::now();
@@ -89,7 +98,7 @@ TEST(TaskQueueTool, EnPopqueueTest) {
   EXPECT_GE(duration2, duration);
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

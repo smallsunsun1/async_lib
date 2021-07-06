@@ -18,7 +18,9 @@
 using namespace sss;
 using namespace async;
 
-void LargeCompute(AsyncValue* const* inputs, int numArguments, RCReference<AsyncValue>* result, int numResult, HostContext* ctx) {
+void LargeCompute(AsyncValue *const *inputs, int numArguments,
+                  RCReference<AsyncValue> *result, int numResult,
+                  HostContext *ctx) {
   (void)numArguments;
   (void)numResult;
   float a = inputs[0]->get<float>() + 100;
@@ -27,25 +29,35 @@ void LargeCompute(AsyncValue* const* inputs, int numArguments, RCReference<Async
 
 class ComputeTest {
  public:
-  ComputeTest(HostContext* ctx) : mpContext(ctx) {
-    mpFunc = TakeRef(NewFunction("ComputeTest::DoLargeCompute", [this](AsyncValue* const* inputs, int numArguments, RCReference<AsyncValue>* result, int numResult, HostContext* ctx) {
-      float a = inputs[0]->get<float>();
-      (void)numArguments;
-      (void)numResult;
-      result[0] = ctx->EnqueueWork([this, a]() { return this->DoLargeCompute(a); });
-    }));
+  ComputeTest(HostContext *ctx) : mpContext(ctx) {
+    mpFunc =
+        TakeRef(NewFunction("ComputeTest::DoLargeCompute",
+                            [this](AsyncValue *const *inputs, int numArguments,
+                                   RCReference<AsyncValue> *result,
+                                   int numResult, HostContext *ctx) {
+                              float a = inputs[0]->get<float>();
+                              (void)numArguments;
+                              (void)numResult;
+                              result[0] = ctx->EnqueueWork([this, a]() {
+                                return this->DoLargeCompute(a);
+                              });
+                            }));
   }
-  void ExecuteCompute(absl::Span<AsyncValue* const> arguments, absl::Span<RCReference<AsyncValue>> results) const { mpFunc->Execute(arguments, results, mpContext); }
+  void ExecuteCompute(absl::Span<AsyncValue *const> arguments,
+                      absl::Span<RCReference<AsyncValue>> results) const {
+    mpFunc->Execute(arguments, results, mpContext);
+  }
   float DoLargeCompute(float a) const { return a + 102; }
 
  private:
-  HostContext* mpContext;
+  HostContext *mpContext;
   RCReference<const Function> mpFunc;
 };
 
 TEST(ASYNCFUNCTION, V1) {
   auto context = CreateSimpleHostContext();
-  RCReference<const SimpleFunction> func = TakeRef(new SimpleFunction("LargeCompute", LargeCompute));
+  RCReference<const SimpleFunction> func =
+      TakeRef(new SimpleFunction("LargeCompute", LargeCompute));
   std::vector<RCReference<AsyncValue>> result1;
   std::vector<RCReference<AsyncValue>> result2;
   std::vector<RCReference<AsyncValue>> result3;
@@ -53,19 +65,23 @@ TEST(ASYNCFUNCTION, V1) {
   result2.resize(1);
   result3.resize(1);
   auto input1 = context->MakeAvailableAsyncValueRef<float>(2);
-  func->Execute(absl::MakeConstSpan({input1.GetAsyncValue()}), absl::MakeSpan(result1.data(), result1.size()), context.get());
-  std::vector<AsyncValue*> mappedVec;
+  func->Execute(absl::MakeConstSpan({input1.GetAsyncValue()}),
+                absl::MakeSpan(result1.data(), result1.size()), context.get());
+  std::vector<AsyncValue *> mappedVec;
   for (size_t i = 0, e = result1.size(); i < e; ++i) {
     mappedVec.push_back(result1[i].get());
   }
-  func->Execute(absl::MakeConstSpan(mappedVec.data(), mappedVec.size()), absl::MakeSpan(result2.data(), result2.size()), context.get());
+  func->Execute(absl::MakeConstSpan(mappedVec.data(), mappedVec.size()),
+                absl::MakeSpan(result2.data(), result2.size()), context.get());
   context->Await(result2);
   auto value1 = result2[0]->get<float>();
   // assert(result2[0]->get<float>() == 206 && "result must be 206, some error
   // happened!");
   EXPECT_EQ(value1, 206);
   ComputeTest compute(context.get());
-  compute.ExecuteCompute(absl::MakeConstSpan(mappedVec.data(), mappedVec.size()), absl::MakeSpan(result3.data(), result3.size()));
+  compute.ExecuteCompute(
+      absl::MakeConstSpan(mappedVec.data(), mappedVec.size()),
+      absl::MakeSpan(result3.data(), result3.size()));
   context->Await(result3);
   auto value2 = result3[0]->get<float>();
   EXPECT_EQ(value2, 206);
@@ -73,7 +89,7 @@ TEST(ASYNCFUNCTION, V1) {
   // happened!"); std::cout << "Test Passed!" << std::endl;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

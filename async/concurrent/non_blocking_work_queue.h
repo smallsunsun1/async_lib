@@ -20,7 +20,8 @@ struct WorkQueueTraits<NonBlockingWorkQueue<ThreadingEnvironmentTy>> {
 };
 
 template <typename ThreadingEnvironment>
-class NonBlockingWorkQueue : public WorkQueueBase<NonBlockingWorkQueue<ThreadingEnvironment>> {
+class NonBlockingWorkQueue
+    : public WorkQueueBase<NonBlockingWorkQueue<ThreadingEnvironment>> {
   using Base = WorkQueueBase<NonBlockingWorkQueue<ThreadingEnvironment>>;
 
   using Queue = typename Base::Queue;
@@ -29,7 +30,7 @@ class NonBlockingWorkQueue : public WorkQueueBase<NonBlockingWorkQueue<Threading
   using ThreadData = typename Base::ThreadData;
 
  public:
-  explicit NonBlockingWorkQueue(QuiescingState* quiescingState, int numThreads);
+  explicit NonBlockingWorkQueue(QuiescingState *quiescingState, int numThreads);
   ~NonBlockingWorkQueue() = default;
 
   void AddTask(TaskFunction task);
@@ -37,7 +38,7 @@ class NonBlockingWorkQueue : public WorkQueueBase<NonBlockingWorkQueue<Threading
   using Base::Steal;
 
  private:
-  static constexpr char const* kThreadNamePrefix = "async-non-blocking-queue";
+  static constexpr char const *kThreadNamePrefix = "async-non-blocking-queue";
 
   template <typename WorkQueue>
   friend class WorkQueueBase;
@@ -52,13 +53,16 @@ class NonBlockingWorkQueue : public WorkQueueBase<NonBlockingWorkQueue<Threading
   using Base::mNumThreads;
   using Base::mThreadData;
 
-  std::optional<TaskFunction> NextTask(Queue* queue);
-  std::optional<TaskFunction> Steal(Queue* queue);
-  bool Empty(Queue* queue);
+  std::optional<TaskFunction> NextTask(Queue *queue);
+  std::optional<TaskFunction> Steal(Queue *queue);
+  bool Empty(Queue *queue);
 };
 
 template <typename ThreadingEnvironment>
-NonBlockingWorkQueue<ThreadingEnvironment>::NonBlockingWorkQueue(QuiescingState* quiescingState, int numThreads) : WorkQueueBase<NonBlockingWorkQueue>(quiescingState, kThreadNamePrefix, numThreads) {}
+NonBlockingWorkQueue<ThreadingEnvironment>::NonBlockingWorkQueue(
+    QuiescingState *quiescingState, int numThreads)
+    : WorkQueueBase<NonBlockingWorkQueue>(quiescingState, kThreadNamePrefix,
+                                          numThreads) {}
 
 template <typename ThreadingEnvironment>
 void NonBlockingWorkQueue<ThreadingEnvironment>::AddTask(TaskFunction task) {
@@ -85,16 +89,16 @@ void NonBlockingWorkQueue<ThreadingEnvironment>::AddTask(TaskFunction task) {
   // submitting a continuation, this might lead to sub-optimal parallelization.
   bool skipNotify = false;
 
-  PerThread* pt = GetPerThread();
+  PerThread *pt = GetPerThread();
   if (pt->parent == this) {
     // Worker thread of this pool, push onto the thread's queue.
-    Queue& q = mThreadData[pt->thread_id].queue;
+    Queue &q = mThreadData[pt->thread_id].queue;
     skipNotify = q.Empty();
     inlineTask = q.PushFront(std::move(task));
   } else {
     // A free-standing thread (or worker of another pool).
     unsigned rnd = FastReduce(pt->rng(), mNumThreads);
-    Queue& q = mThreadData[rnd].queue;
+    Queue &q = mThreadData[rnd].queue;
     inlineTask = q.PushBack(std::move(task));
   }
   // Note: below we touch `*this` after making `task` available to worker
@@ -106,24 +110,27 @@ void NonBlockingWorkQueue<ThreadingEnvironment>::AddTask(TaskFunction task) {
   // program, that is, this is kept alive while any threads can potentially be
   // in Schedule.
   if (!inlineTask.has_value()) {
-    if (!skipNotify && IsNotifyParkedThreadRequired()) mEventCount.Notify(/*notify_all=*/false);
+    if (!skipNotify && IsNotifyParkedThreadRequired())
+      mEventCount.Notify(/*notify_all=*/false);
   } else {
     (*inlineTask)();  // Push failed, execute directly.
   }
 }
 
 template <typename ThreadingEnvironment>
-std::optional<TaskFunction> NonBlockingWorkQueue<ThreadingEnvironment>::NextTask(Queue* queue) {
+std::optional<TaskFunction>
+NonBlockingWorkQueue<ThreadingEnvironment>::NextTask(Queue *queue) {
   return queue->PopFront();
 }
 
 template <typename ThreadingEnvironment>
-std::optional<TaskFunction> NonBlockingWorkQueue<ThreadingEnvironment>::Steal(Queue* queue) {
+std::optional<TaskFunction> NonBlockingWorkQueue<ThreadingEnvironment>::Steal(
+    Queue *queue) {
   return queue->PopBack();
 }
 
 template <typename ThreadingEnvironment>
-bool NonBlockingWorkQueue<ThreadingEnvironment>::Empty(Queue* queue) {
+bool NonBlockingWorkQueue<ThreadingEnvironment>::Empty(Queue *queue) {
   return queue->Empty();
 }
 

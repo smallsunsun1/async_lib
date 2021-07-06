@@ -26,41 +26,56 @@ class WhenAllReadyAwaitable<std::tuple<>> {
 template <typename... Tasks>
 class WhenAllReadyAwaitable<std::tuple<Tasks...>> {
  public:
-  explicit WhenAllReadyAwaitable(Tasks&&... tasks) noexcept(std::conjunction_v<std::is_nothrow_move_constructible<Tasks>...>) : mCounter(sizeof...(Tasks)), mTasks(std::move(tasks)...) {}
+  explicit WhenAllReadyAwaitable(Tasks &&...tasks) noexcept(
+      std::conjunction_v<std::is_nothrow_move_constructible<Tasks>...>)
+      : mCounter(sizeof...(Tasks)), mTasks(std::move(tasks)...) {}
 
-  explicit WhenAllReadyAwaitable(std::tuple<Tasks...>&& tasks) noexcept(std::is_nothrow_move_constructible_v<std::tuple<Tasks...>>) : mCounter(sizeof...(Tasks)), mTasks(std::move(tasks)) {}
+  explicit WhenAllReadyAwaitable(std::tuple<Tasks...> &&tasks) noexcept(
+      std::is_nothrow_move_constructible_v<std::tuple<Tasks...>>)
+      : mCounter(sizeof...(Tasks)), mTasks(std::move(tasks)) {}
 
-  WhenAllReadyAwaitable(WhenAllReadyAwaitable&& other) noexcept : mCounter(sizeof...(Tasks)), mTasks(std::move(other.mTasks)) {}
+  WhenAllReadyAwaitable(WhenAllReadyAwaitable &&other) noexcept
+      : mCounter(sizeof...(Tasks)), mTasks(std::move(other.mTasks)) {}
 
-  auto operator co_await() & noexcept {
+  auto operator co_await() &noexcept {
     struct awaiter {
-      awaiter(WhenAllReadyAwaitable& awaitable) noexcept : m_awaitable(awaitable) {}
+      awaiter(WhenAllReadyAwaitable &awaitable) noexcept
+          : m_awaitable(awaitable) {}
 
       bool await_ready() const noexcept { return m_awaitable.is_ready(); }
 
-      bool await_suspend(std::coroutine_handle<> awaitingCoroutine) noexcept { return m_awaitable.try_await(awaitingCoroutine); }
+      bool await_suspend(std::coroutine_handle<> awaitingCoroutine) noexcept {
+        return m_awaitable.try_await(awaitingCoroutine);
+      }
 
-      std::tuple<Tasks...>& await_resume() noexcept { return m_awaitable.mTasks; }
+      std::tuple<Tasks...> &await_resume() noexcept {
+        return m_awaitable.mTasks;
+      }
 
      private:
-      WhenAllReadyAwaitable& m_awaitable;
+      WhenAllReadyAwaitable &m_awaitable;
     };
 
     return awaiter{*this};
   }
 
-  auto operator co_await() && noexcept {
+  auto operator co_await() &&noexcept {
     struct awaiter {
-      awaiter(WhenAllReadyAwaitable& awaitable) noexcept : m_awaitable(awaitable) {}
+      awaiter(WhenAllReadyAwaitable &awaitable) noexcept
+          : m_awaitable(awaitable) {}
 
       bool await_ready() const noexcept { return m_awaitable.is_ready(); }
 
-      bool await_suspend(std::coroutine_handle<> awaitingCoroutine) noexcept { return m_awaitable.try_await(awaitingCoroutine); }
+      bool await_suspend(std::coroutine_handle<> awaitingCoroutine) noexcept {
+        return m_awaitable.try_await(awaitingCoroutine);
+      }
 
-      std::tuple<Tasks...>&& await_resume() noexcept { return std::move(m_awaitable.mTasks); }
+      std::tuple<Tasks...> &&await_resume() noexcept {
+        return std::move(m_awaitable.mTasks);
+      }
 
      private:
-      WhenAllReadyAwaitable& m_awaitable;
+      WhenAllReadyAwaitable &m_awaitable;
     };
 
     return awaiter{*this};
@@ -76,7 +91,8 @@ class WhenAllReadyAwaitable<std::tuple<Tasks...>> {
 
   template <std::size_t... INDICES>
   void start_tasks(std::integer_sequence<std::size_t, INDICES...>) noexcept {
-    (void)std::initializer_list<int>{(std::get<INDICES>(mTasks).start(mCounter), 0)...};
+    (void)std::initializer_list<int>{
+        (std::get<INDICES>(mTasks).start(mCounter), 0)...};
   }
 
   WhenAllCounter mCounter;
@@ -86,44 +102,53 @@ class WhenAllReadyAwaitable<std::tuple<Tasks...>> {
 template <typename TaskContainer>
 class WhenAllReadyAwaitable {
  public:
-  explicit WhenAllReadyAwaitable(TaskContainer&& tasks) noexcept : mCounter(tasks.size()), mTasks(std::forward<TaskContainer>(tasks)) {}
+  explicit WhenAllReadyAwaitable(TaskContainer &&tasks) noexcept
+      : mCounter(tasks.size()), mTasks(std::forward<TaskContainer>(tasks)) {}
 
-  WhenAllReadyAwaitable(WhenAllReadyAwaitable&& other) noexcept(std::is_nothrow_move_constructible_v<TaskContainer>) : mCounter(other.mTasks.size()), mTasks(std::move(other.mTasks)) {}
+  WhenAllReadyAwaitable(WhenAllReadyAwaitable &&other) noexcept(
+      std::is_nothrow_move_constructible_v<TaskContainer>)
+      : mCounter(other.mTasks.size()), mTasks(std::move(other.mTasks)) {}
 
-  WhenAllReadyAwaitable(const WhenAllReadyAwaitable&) = delete;
-  WhenAllReadyAwaitable& operator=(const WhenAllReadyAwaitable&) = delete;
+  WhenAllReadyAwaitable(const WhenAllReadyAwaitable &) = delete;
+  WhenAllReadyAwaitable &operator=(const WhenAllReadyAwaitable &) = delete;
 
-  auto operator co_await() & noexcept {
+  auto operator co_await() &noexcept {
     class awaiter {
      public:
-      awaiter(WhenAllReadyAwaitable& awaitable) : m_awaitable(awaitable) {}
+      awaiter(WhenAllReadyAwaitable &awaitable) : m_awaitable(awaitable) {}
 
       bool await_ready() const noexcept { return m_awaitable.is_ready(); }
 
-      bool await_suspend(std::coroutine_handle<> awaitingCoroutine) noexcept { return m_awaitable.try_await(awaitingCoroutine); }
+      bool await_suspend(std::coroutine_handle<> awaitingCoroutine) noexcept {
+        return m_awaitable.try_await(awaitingCoroutine);
+      }
 
-      TaskContainer& await_resume() noexcept { return m_awaitable.mTasks; }
+      TaskContainer &await_resume() noexcept { return m_awaitable.mTasks; }
 
      private:
-      WhenAllReadyAwaitable& m_awaitable;
+      WhenAllReadyAwaitable &m_awaitable;
     };
 
     return awaiter{*this};
   }
 
-  auto operator co_await() && noexcept {
+  auto operator co_await() &&noexcept {
     class awaiter {
      public:
-      awaiter(WhenAllReadyAwaitable& awaitable) : m_awaitable(awaitable) {}
+      awaiter(WhenAllReadyAwaitable &awaitable) : m_awaitable(awaitable) {}
 
       bool await_ready() const noexcept { return m_awaitable.is_ready(); }
 
-      bool await_suspend(std::coroutine_handle<> awaitingCoroutine) noexcept { return m_awaitable.try_await(awaitingCoroutine); }
+      bool await_suspend(std::coroutine_handle<> awaitingCoroutine) noexcept {
+        return m_awaitable.try_await(awaitingCoroutine);
+      }
 
-      TaskContainer&& await_resume() noexcept { return std::move(m_awaitable.mTasks); }
+      TaskContainer &&await_resume() noexcept {
+        return std::move(m_awaitable.mTasks);
+      }
 
      private:
-      WhenAllReadyAwaitable& m_awaitable;
+      WhenAllReadyAwaitable &m_awaitable;
     };
 
     return awaiter{*this};
@@ -133,7 +158,7 @@ class WhenAllReadyAwaitable {
   bool is_ready() const noexcept { return mCounter.is_ready(); }
 
   bool try_await(std::coroutine_handle<> awaitingCoroutine) noexcept {
-    for (auto&& task : mTasks) {
+    for (auto &&task : mTasks) {
       task.start(mCounter);
     }
 

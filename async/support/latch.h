@@ -14,15 +14,16 @@ namespace async {
 
 class latch {
  public:
-  explicit latch(std::ptrdiff_t count) : state_(static_cast<uint64_t>(count) << 1), notified_(false) {
+  explicit latch(std::ptrdiff_t count)
+      : state_(static_cast<uint64_t>(count) << 1), notified_(false) {
     assert(count >= 0);
     assert(static_cast<uint64_t>(count) < (1ull << 63));
   }
 
   ~latch() { assert(try_wait()); }
 
-  latch(const latch&) = delete;
-  latch& operator=(const latch&) = delete;
+  latch(const latch &) = delete;
+  latch &operator=(const latch &) = delete;
 
   // Decrements the counter by `n`.
   void count_down(uint64_t = 1);

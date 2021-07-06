@@ -29,10 +29,13 @@ class ThreadLocal {
   static size_t Capacity(size_t numThreads) { return numThreads * 2; }
 
   template <typename... Args>
-  explicit ThreadLocal(size_t capacity, Args... args) : mCapacity(capacity), mConstructor(std::forward<Args>(args)...), mNumLockFreeEntries(0) {
+  explicit ThreadLocal(size_t capacity, Args... args)
+      : mCapacity(capacity),
+        mConstructor(std::forward<Args>(args)...),
+        mNumLockFreeEntries(0) {
     assert(mCapacity >= 0);
     mData.resize(capacity);
-    mPtrs = new std::atomic<Entry*>[mCapacity];
+    mPtrs = new std::atomic<Entry *>[mCapacity];
     for (int i = 0; i < mCapacity; ++i) {
       mPtrs[i].store(nullptr, std::memory_order_relaxed);
     }
@@ -40,7 +43,7 @@ class ThreadLocal {
 
   ~ThreadLocal() { delete[] mPtrs; }
 
-  T& Local() {
+  T &Local() {
     std::thread::id this_thread = std::this_thread::get_id();
     if (mCapacity == 0) return SpilledLocal(this_thread);
 
@@ -54,7 +57,7 @@ class ThreadLocal {
     // 检查是否已经拥有了this_thread这个thread
     int idx = start_idx;
     while (mPtrs[idx].load(std::memory_order_acquire) != nullptr) {
-      Entry& entry = *(mPtrs[idx].load());
+      Entry &entry = *(mPtrs[idx].load());
       if (entry.thread_id == this_thread) return entry.value;
 
       idx += 1;
@@ -63,18 +66,20 @@ class ThreadLocal {
     }
 
     // 如果无锁存储满了，使用lock形式的存储结果
-    if (mNumLockFreeEntries.load(std::memory_order_relaxed) >= mCapacity) return SpilledLocal(this_thread);
+    if (mNumLockFreeEntries.load(std::memory_order_relaxed) >= mCapacity)
+      return SpilledLocal(this_thread);
 
-    int insertionIndex = mNumLockFreeEntries.fetch_add(1, std::memory_order_relaxed);
+    int insertionIndex =
+        mNumLockFreeEntries.fetch_add(1, std::memory_order_relaxed);
     if (insertionIndex >= mCapacity) return SpilledLocal(this_thread);
 
     // 保证在没有竞争的情况下去除mData[insertionIndex]
     mData[insertionIndex] = {this_thread, mConstructor.Construct()};
 
     // 找到结果指针
-    Entry* inserted = mData[insertionIndex].getPointer();
+    Entry *inserted = mData[insertionIndex].getPointer();
 
-    Entry* empty = nullptr;
+    Entry *empty = nullptr;
 
     // Now we have to find an insertion point into the lookup table. We start
     // from the `idx` that was identified as an insertion point above, it's
@@ -94,17 +99,18 @@ class ThreadLocal {
       }
       // Atomic store of the pointer guarantees that any other thread, that will
       // follow this pointer will see all the mutations in the `mData`.
-    } while (!mPtrs[idx].compare_exchange_weak(empty, inserted, std::memory_order_release));
+    } while (!mPtrs[idx].compare_exchange_weak(empty, inserted,
+                                               std::memory_order_release));
 
     return inserted->value;
   }
 
   // WARN: It's not thread safe to call it concurrently with `local()`.
-  void ForEach(absl::FunctionRef<void(std::thread::id, T&)> f) {
+  void ForEach(absl::FunctionRef<void(std::thread::id, T &)> f) {
     // Reading directly from `mData` is unsafe, because only store to the
     // entry in `mPtrs` makes all changes visible to other threads.
     for (int i = 0; i < mCapacity; ++i) {
-      Entry* entry = mPtrs[i].load(std::memory_order_acquire);
+      Entry *entry = mPtrs[i].load(std::memory_order_acquire);
       if (entry == nullptr) continue;
       f(entry->thread_id, entry->value);
     }
@@ -113,7 +119,7 @@ class ThreadLocal {
     if (mNumLockFreeEntries.load(std::memory_order_relaxed) < mCapacity) return;
 
     std::lock_guard<std::mutex> lock(mMu);
-    for (auto& kv : mSpilled) {
+    for (auto &kv : mSpilled) {
       f(kv.first, kv.second);
     }
   }
@@ -125,7 +131,7 @@ class ThreadLocal {
   };
 
   // Use synchronized unordered_map when lock-free storage is full.
-  T& SpilledLocal(std::thread::id this_thread) {
+  T &SpilledLocal(std::thread::id this_thread) {
     std::lock_guard<std::mutex> lock(mMu);
 
     auto it = mSpilled.find(this_thread);
@@ -146,7 +152,7 @@ class ThreadLocal {
 
   // Atomic pointers to the data stored in `mData`. Used as a lookup table for
   // linear probing hash map (https://en.wikipedia.org/wiki/Linear_probing).
-  std::atomic<Entry*>* mPtrs;
+  std::atomic<Entry *> *mPtrs;
 
   // Number of entries stored in the lock free storage.
   std::atomic<int> mNumLockFreeEntries;

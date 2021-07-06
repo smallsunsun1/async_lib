@@ -16,14 +16,22 @@ class function_ref<Ret(Params...)> {
  public:
   function_ref() = default;
   template <typename Callable>
-  function_ref(Callable &&callable,
-               // This is not the copy-constructor.
-               std::enable_if_t<!std::is_same<remove_cv_ref_t<Callable>, function_ref>::value> * = nullptr,
-               // Functor must be callable and return a suitable type.
-               std::enable_if_t<std::is_void<Ret>::value || std::is_convertible<decltype(std::declval<Callable>()(std::declval<Params>()...)), Ret>::value> * = nullptr)
-      : callback(callback_fn<typename std::remove_reference<Callable>::type>), callable(reinterpret_cast<intptr_t>(&callable)) {}
+  function_ref(
+      Callable &&callable,
+      // This is not the copy-constructor.
+      std::enable_if_t<!std::is_same<remove_cv_ref_t<Callable>,
+                                     function_ref>::value> * = nullptr,
+      // Functor must be callable and return a suitable type.
+      std::enable_if_t<std::is_void<Ret>::value ||
+                       std::is_convertible<decltype(std::declval<Callable>()(
+                                               std::declval<Params>()...)),
+                                           Ret>::value> * = nullptr)
+      : callback(callback_fn<typename std::remove_reference<Callable>::type>),
+        callable(reinterpret_cast<intptr_t>(&callable)) {}
 
-  Ret operator()(Params... params) const { return callback(callable, std::forward<Params>(params)...); }
+  Ret operator()(Params... params) const {
+    return callback(callable, std::forward<Params>(params)...);
+  }
 
   explicit operator bool() const { return callback; }
 
@@ -32,7 +40,8 @@ class function_ref<Ret(Params...)> {
   intptr_t callable;
   template <typename Callable>
   static Ret callback_fn(intptr_t callable, Params... params) {
-    return (*reinterpret_cast<Callable *>(callable))(std::forward<Params>(params)...);
+    return (*reinterpret_cast<Callable *>(callable))(std::forward<Params>(
+        params)...);
   }
 };
 

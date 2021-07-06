@@ -12,47 +12,47 @@ template <typename T>
 class RCArray {
  public:
   RCArray() {}
-  explicit RCArray(absl::Span<const T*> values) {
+  explicit RCArray(absl::Span<const T *> values) {
     mValues.reserve(values.size());
-    for (auto* v : values) {
+    for (auto *v : values) {
       v->AddRef();
       mValues.push_back(v);
     }
   }
   explicit RCArray(absl::Span<const RCReference<T>> references) {
     mValues.reserve(references.size());
-    for (auto& ref : references) {
-      auto* v = ref.get();
+    for (auto &ref : references) {
+      auto *v = ref.get();
       v->AddRef();
       mValues.push_back(v);
     }
   }
-  RCArray(RCArray&& other) : mValues(std::move(other.mValues)) {}
-  RCArray& operator=(RCArray&& other) {
-    for (auto* v : mValues) {
+  RCArray(RCArray &&other) : mValues(std::move(other.mValues)) {}
+  RCArray &operator=(RCArray &&other) {
+    for (auto *v : mValues) {
       v->DropRef();
     }
     mValues = std::move(other.mValues);
     return *this;
   }
   ~RCArray() {
-    for (auto* v : mValues) {
+    for (auto *v : mValues) {
       v->DropRef();
     }
   }
-  T* operator[](size_t i) const {
+  T *operator[](size_t i) const {
     assert(i < mValues.size());
     return mValues[i];
   }
   RCArray CopyRef() const { return RCArray(values()); }
-  absl::Span<const T*> values() const { return mValues; }
+  absl::Span<const T *> values() const { return mValues; }
   size_t size() const { return mValues.size(); }
   // Not copyable
-  RCArray(const RCArray&) = delete;
-  RCArray& operator=(const RCArray&) = delete;
+  RCArray(const RCArray &) = delete;
+  RCArray &operator=(const RCArray &) = delete;
 
  private:
-  std::vector<T*> mValues;
+  std::vector<T *> mValues;
 };
 }  // namespace async
 }  // namespace sss

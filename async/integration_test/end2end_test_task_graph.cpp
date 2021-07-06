@@ -21,12 +21,15 @@ int LargeComputeFn(int num) {
 }
 
 int main() {
-  std::cout << "hardware concurrency number! " << std::thread::hardware_concurrency() << "\n";
-  auto runContext = CreateCustomHostContext(std::thread::hardware_concurrency(), 1);
+  std::cout << "hardware concurrency number! "
+            << std::thread::hardware_concurrency() << "\n";
+  auto runContext =
+      CreateCustomHostContext(std::thread::hardware_concurrency(), 1);
   RCReference<TaskGraph> graph = CreateTaskGraph(runContext.get());
-  std::vector<TaskNode*> nodes;
+  std::vector<TaskNode *> nodes;
   for (int i = 0; i < 100; ++i) {
-    TaskNode* node = graph->emplace([i]() { std::cout << LargeComputeFn(i) << std::endl; });
+    TaskNode *node =
+        graph->emplace([i]() { std::cout << LargeComputeFn(i) << std::endl; });
     nodes.push_back(node);
   }
   for (size_t i = 0, e = nodes.size(); i < e - 1; ++i) {

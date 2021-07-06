@@ -19,8 +19,8 @@ class Tracing {
   virtual void RecordTracing(std::string name) = 0;
   virtual void PushTracingScope(std::string name) = 0;
   virtual void PopTracingScope(std::string name) = 0;
-  static Tracing* GetTracing();
-  static std::mutex* GetTracingMutex();
+  static Tracing *GetTracing();
+  static std::mutex *GetTracingMutex();
 };
 
 }  // namespace async

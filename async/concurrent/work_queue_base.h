@@ -21,11 +21,14 @@ struct FastRng {
     // Update the internal state
     state = current * 6364136223846793005ULL + 0xda3e39cb94b95bdbULL;
     // Generate the random output (using the PCG-XSH-RS scheme)
-    return static_cast<unsigned>((current ^ (current >> 22u)) >> (22 + (current >> 61u)));
+    return static_cast<unsigned>((current ^ (current >> 22u)) >>
+                                 (22 + (current >> 61u)));
   }
   uint64_t state;
 };
-inline uint32_t FastReduce(uint32_t x, uint32_t size) { return (static_cast<uint64_t>(x) * static_cast<uint64_t>(size)) >> 32u; }
+inline uint32_t FastReduce(uint32_t x, uint32_t size) {
+  return (static_cast<uint64_t>(x) * static_cast<uint64_t>(size)) >> 32u;
+}
 template <typename Derived>
 struct WorkQueueTraits;
 struct QuiescingState {
@@ -34,8 +37,8 @@ struct QuiescingState {
 };
 class Quiescing {
  public:
-  static Quiescing Start(QuiescingState* state) { return Quiescing(state); }
-  explicit Quiescing(QuiescingState* state) : mState(state) {
+  static Quiescing Start(QuiescingState *state) { return Quiescing(state); }
+  explicit Quiescing(QuiescingState *state) : mState(state) {
     assert(state != nullptr);
     mState->mNumQuiescing.fetch_add(1, std::memory_order_relaxed);
   }
@@ -44,27 +47,31 @@ class Quiescing {
     mState->mNumQuiescing.fetch_sub(1, std::memory_order_relaxed);
   }
 
-  Quiescing(Quiescing&& other) : mState(other.mState) { other.mState = nullptr; }
+  Quiescing(Quiescing &&other) : mState(other.mState) {
+    other.mState = nullptr;
+  }
 
-  Quiescing& operator=(Quiescing&& other) {
+  Quiescing &operator=(Quiescing &&other) {
     mState = other.mState;
     other.mState = nullptr;
     return *this;
   }
 
-  Quiescing(const Quiescing&) = delete;
-  Quiescing& operator=(const Quiescing&) = delete;
+  Quiescing(const Quiescing &) = delete;
+  Quiescing &operator=(const Quiescing &) = delete;
 
   // HasPendingTasks() returns true if some of the tasks added to the owning
   // queue after `*this` was created are not completed.
-  bool HasPendingTasks() const { return mState->mNumPendingTasks.load(std::memory_order_relaxed) != 0; }
+  bool HasPendingTasks() const {
+    return mState->mNumPendingTasks.load(std::memory_order_relaxed) != 0;
+  }
 
  private:
-  QuiescingState* mState;
+  QuiescingState *mState;
 };
 class PendingTask {
  public:
-  explicit PendingTask(QuiescingState* state) : mState(state) {
+  explicit PendingTask(QuiescingState *state) : mState(state) {
     assert(state != nullptr);
     mState->mNumPendingTasks.fetch_add(1, std::memory_order_relaxed);
   }
@@ -74,19 +81,21 @@ class PendingTask {
     mState->mNumPendingTasks.fetch_sub(1, std::memory_order_relaxed);
   }
 
-  PendingTask(PendingTask&& other) : mState(other.mState) { other.mState = nullptr; }
+  PendingTask(PendingTask &&other) : mState(other.mState) {
+    other.mState = nullptr;
+  }
 
-  PendingTask& operator=(PendingTask&& other) {
+  PendingTask &operator=(PendingTask &&other) {
     mState = other.mState;
     other.mState = nullptr;
     return *this;
   }
 
-  PendingTask(const PendingTask&) = delete;
-  PendingTask& operator=(const PendingTask&) = delete;
+  PendingTask(const PendingTask &) = delete;
+  PendingTask &operator=(const PendingTask &) = delete;
 
  private:
-  QuiescingState* mState;
+  QuiescingState *mState;
 };
 
 template <typename Derived>
@@ -97,13 +106,15 @@ class WorkQueueBase {
   using ThreadingEnvironment = typename Traits::ThreadingEnvironment;
 
  public:
-  bool IsQuiescing() const { return mQuiescingState->mNumQuiescing.load(std::memory_order_relaxed) > 0; }
+  bool IsQuiescing() const {
+    return mQuiescingState->mNumQuiescing.load(std::memory_order_relaxed) > 0;
+  }
   void Quiesce();
   std::optional<TaskFunction> Steal();
   bool AllBlocked() const { return NumBlockedThreads() == mNumThreads; }
-  void CheckCallerThread(const char* function_name) const;
+  void CheckCallerThread(const char *function_name) const;
   bool IsInWorkerThread() const {
-    PerThread* per_thread = GetPerThread();
+    PerThread *per_thread = GetPerThread();
     return per_thread->parent == &mDerived;
   }
   void Cancel();
@@ -117,7 +128,7 @@ class WorkQueueBase {
 
   struct PerThread {
     constexpr PerThread() : parent(nullptr), rng(0), thread_id(-1) {}
-    Derived* parent;
+    Derived *parent;
     FastRng rng;    // Random number generator
     int thread_id;  // Worker thread index in the workers queue
   };
@@ -131,7 +142,10 @@ class WorkQueueBase {
   // Returns a TaskFunction with an attached pending tasks counter, if the
   // quiescing mode is on.
   TaskFunction WithPendingTaskCounter(TaskFunction task) {
-    return TaskFunction([task = std::move(task), p = PendingTask(mQuiescingState)]() mutable { task(); });
+    return TaskFunction(
+        [task = std::move(task), p = PendingTask(mQuiescingState)]() mutable {
+          task();
+        });
   }
 
   // TODO(ezhulenev): Make this a runtime parameter? More spinning threads help
@@ -152,7 +166,8 @@ class WorkQueueBase {
   // will be unparked, however this should be very rare in practice.
   static constexpr int kMinActiveThreadsToStartSpinning = 4;
 
-  explicit WorkQueueBase(QuiescingState* quiescing_state, std::string_view name_prefix, int num_threads);
+  explicit WorkQueueBase(QuiescingState *quiescing_state,
+                         std::string_view name_prefix, int num_threads);
   ~WorkQueueBase();
 
   // Main worker thread loop.
@@ -161,7 +176,8 @@ class WorkQueueBase {
   // WaitForWork() blocks until new work is available (returns true), or if it
   // is time to exit (returns false). Can optionally return a task to execute in
   // `task` (in such case `task.has_value() == true` on return).
-  bool WaitForWork(EventCount::Waiter* waiter, std::optional<TaskFunction>* task);
+  bool WaitForWork(EventCount::Waiter *waiter,
+                   std::optional<TaskFunction> *task);
 
   // StartSpinning() checks if the number of threads in the spin loop is less
   // than the allowed maximum, if so increments the number of spinning threads
@@ -192,9 +208,9 @@ class WorkQueueBase {
   // if all queues are empty.
   int NonEmptyQueueIndex();
 
-  static PerThread* GetPerThread() {
+  static PerThread *GetPerThread() {
     static thread_local PerThread perThread;
-    PerThread* pt = &perThread;
+    PerThread *pt = &perThread;
     return pt;
   }
 
@@ -218,7 +234,7 @@ class WorkQueueBase {
 
   // All work queues composed together in a single logical work queue, must
   // share a quiescing state to guarantee correct emptyness check.
-  QuiescingState* mQuiescingState;
+  QuiescingState *mQuiescingState;
 
   // Spinning state layout:
   // - Low 32 bits encode the number of threads that are spinning in steal loop.
@@ -232,7 +248,8 @@ class WorkQueueBase {
   static constexpr uint64_t kNumSpinningMask = (1ull << kNumSpinningBits) - 1;
   static constexpr uint64_t kNumNoNotifyBits = 32;
   static constexpr uint64_t kNumNoNotifyShift = 32;
-  static constexpr uint64_t kNumNoNotifyMask = ((1ull << kNumNoNotifyBits) - 1) << kNumNoNotifyShift;
+  static constexpr uint64_t kNumNoNotifyMask = ((1ull << kNumNoNotifyBits) - 1)
+                                               << kNumNoNotifyShift;
   std::atomic<uint64_t> mSpinningState;
 
   struct SpinningState {
@@ -243,7 +260,8 @@ class WorkQueueBase {
     // Decode `mSpinningState` value.
     static SpinningState Decode(uint64_t state) {
       uint64_t mNumSpinning = (state & kNumSpinningMask);
-      uint64_t mNumNoNotification = (state & kNumNoNotifyMask) >> kNumNoNotifyShift;
+      uint64_t mNumNoNotification =
+          (state & kNumNoNotifyMask) >> kNumNoNotifyShift;
 
       assert(mNumNoNotification <= mNumSpinning);
 
@@ -251,11 +269,13 @@ class WorkQueueBase {
     }
 
     // Encode as `mSpinningState` value.
-    uint64_t Encode() const { return (mNumNoNotification << kNumNoNotifyShift) | mNumSpinning; }
+    uint64_t Encode() const {
+      return (mNumNoNotification << kNumNoNotifyShift) | mNumSpinning;
+    }
   };
 
   EventCount mEventCount;
-  Derived& mDerived;
+  Derived &mDerived;
 };
 
 inline std::vector<unsigned> ComputeCoprimes(int n) {
@@ -276,7 +296,9 @@ inline std::vector<unsigned> ComputeCoprimes(int n) {
 }
 
 template <typename Derived>
-WorkQueueBase<Derived>::WorkQueueBase(QuiescingState* quiescing_state, std::string_view name_prefix, int num_threads)
+WorkQueueBase<Derived>::WorkQueueBase(QuiescingState *quiescing_state,
+                                      std::string_view name_prefix,
+                                      int num_threads)
     : mNumThreads(num_threads),
       mThreadData(num_threads),
       mCoprimes(ComputeCoprimes(num_threads)),
@@ -286,11 +308,12 @@ WorkQueueBase<Derived>::WorkQueueBase(QuiescingState* quiescing_state, std::stri
       mQuiescingState(quiescing_state),
       mSpinningState(0),
       mEventCount(num_threads),
-      mDerived(static_cast<Derived&>(*this)) {
+      mDerived(static_cast<Derived &>(*this)) {
   assert(num_threads >= 1);
   (void)name_prefix;
   for (int i = 0; i < num_threads; i++) {
-    mThreadData[i].thread = ThreadingEnvironment::StartThread([this, i]() { WorkerLoop(i); });
+    mThreadData[i].thread =
+        ThreadingEnvironment::StartThread([this, i]() { WorkerLoop(i); });
   }
 }
 
@@ -306,20 +329,21 @@ WorkQueueBase<Derived>::~WorkQueueBase() {
   } else {
     // Since we were cancelled, there might be entries in the queues.
     // Empty them to prevent their destructor from asserting.
-    for (ThreadData& thread_data : mThreadData) {
+    for (ThreadData &thread_data : mThreadData) {
       thread_data.queue.Flush();
     }
   }
   // All worker threads joined in destructors.
-  for (ThreadData& thread_data : mThreadData) {
+  for (ThreadData &thread_data : mThreadData) {
     ThreadingEnvironment::Join(thread_data.thread.get());
     thread_data.thread.reset();
   }
 }
 
 template <typename Derived>
-void WorkQueueBase<Derived>::CheckCallerThread(const char* function_name) const {
-  PerThread* pt = GetPerThread();
+void WorkQueueBase<Derived>::CheckCallerThread(
+    const char *function_name) const {
+  PerThread *pt = GetPerThread();
   assert(pt->parent != this &&
          "Error, should not be called by a work thread "
          "already managed by the queue.");
@@ -354,13 +378,14 @@ void WorkQueueBase<Derived>::Quiesce() {
 
 template <typename Derived>
 std::optional<TaskFunction> WorkQueueBase<Derived>::Steal() {
-  PerThread* pt = GetPerThread();
+  PerThread *pt = GetPerThread();
   unsigned r = pt->rng();
   unsigned victim = FastReduce(r, mNumThreads);
   unsigned inc = mCoprimes[FastReduce(r, mCoprimes.size())];
 
   for (unsigned i = 0; i < mNumThreads; i++) {
-    std::optional<TaskFunction> t = mDerived.Steal(&(mThreadData[victim].queue));
+    std::optional<TaskFunction> t =
+        mDerived.Steal(&(mThreadData[victim].queue));
     if (t.has_value()) return t;
 
     victim += inc;
@@ -373,13 +398,13 @@ std::optional<TaskFunction> WorkQueueBase<Derived>::Steal() {
 
 template <typename Derived>
 void WorkQueueBase<Derived>::WorkerLoop(int thread_id) {
-  PerThread* pt = GetPerThread();
+  PerThread *pt = GetPerThread();
   pt->parent = &mDerived;
   pt->rng = FastRng(ThreadingEnvironment::ThisThreadIdHash());
   pt->thread_id = thread_id;
 
-  Queue* q = &(mThreadData[thread_id].queue);
-  EventCount::Waiter* waiter = mEventCount.waiter(thread_id);
+  Queue *q = &(mThreadData[thread_id].queue);
+  EventCount::Waiter *waiter = mEventCount.waiter(thread_id);
 
   // TODO(dvyukov,rmlarsen): The time spent in NonEmptyQueueIndex() is
   // proportional to mNumThreads and we assume that new work is scheduled at
@@ -424,7 +449,8 @@ void WorkQueueBase<Derived>::WorkerLoop(int thread_id) {
 }
 
 template <typename Derived>
-bool WorkQueueBase<Derived>::WaitForWork(EventCount::Waiter* waiter, std::optional<TaskFunction>* task) {
+bool WorkQueueBase<Derived>::WaitForWork(EventCount::Waiter *waiter,
+                                         std::optional<TaskFunction> *task) {
   assert(!task->has_value());
   // We already did best-effort emptiness check in Steal, so prepare for
   // blocking.
@@ -487,12 +513,14 @@ bool WorkQueueBase<Derived>::StartSpinning() {
   for (;;) {
     SpinningState state = SpinningState::Decode(spinning);
 
-    if ((state.mNumSpinning - state.mNumNoNotification) >= kMaxSpinningThreads) return false;
+    if ((state.mNumSpinning - state.mNumNoNotification) >= kMaxSpinningThreads)
+      return false;
 
     // Increment the number of spinning threads.
     ++state.mNumSpinning;
 
-    if (mSpinningState.compare_exchange_weak(spinning, state.Encode(), std::memory_order_relaxed)) {
+    if (mSpinningState.compare_exchange_weak(spinning, state.Encode(),
+                                             std::memory_order_relaxed)) {
       return true;
     }
   }
@@ -511,7 +539,8 @@ bool WorkQueueBase<Derived>::StopSpinning() {
     bool has_no_notify_task = state.mNumNoNotification > 0;
     if (has_no_notify_task) --state.mNumNoNotification;
 
-    if (mSpinningState.compare_exchange_weak(spinning, state.Encode(), std::memory_order_relaxed)) {
+    if (mSpinningState.compare_exchange_weak(spinning, state.Encode(),
+                                             std::memory_order_relaxed)) {
       return has_no_notify_task;
     }
   }
@@ -531,7 +560,8 @@ bool WorkQueueBase<Derived>::IsNotifyParkedThreadRequired() {
     // Increment the number of tasks submitted without notification.
     ++state.mNumNoNotification;
 
-    if (mSpinningState.compare_exchange_weak(spinning, state.Encode(), std::memory_order_relaxed)) {
+    if (mSpinningState.compare_exchange_weak(spinning, state.Encode(),
+                                             std::memory_order_relaxed)) {
       return false;
     }
   }
@@ -539,7 +569,7 @@ bool WorkQueueBase<Derived>::IsNotifyParkedThreadRequired() {
 
 template <typename Derived>
 int WorkQueueBase<Derived>::NonEmptyQueueIndex() {
-  PerThread* pt = GetPerThread();
+  PerThread *pt = GetPerThread();
   unsigned r = pt->rng();
   unsigned inc = mNumThreads == 1 ? 1 : mCoprimes[r % mCoprimes.size()];
   unsigned victim = FastReduce(r, mNumThreads);
@@ -557,7 +587,7 @@ int WorkQueueBase<Derived>::NonEmptyQueueIndex() {
 
 template <typename Derived>
 int WorkQueueBase<Derived>::CurrentThreadId() const {
-  const PerThread* pt = GetPerThread();
+  const PerThread *pt = GetPerThread();
   if (pt->parent == this) {
     return pt->thread_id;
   } else {

@@ -5,12 +5,12 @@
 namespace sss {
 namespace async {
 
-std::mutex* Tracing::GetTracingMutex() {
-  static std::mutex* mut = new std::mutex;
+std::mutex *Tracing::GetTracingMutex() {
+  static std::mutex *mut = new std::mutex;
   return mut;
 }
 
-Tracing* Tracing::GetTracing() {
+Tracing *Tracing::GetTracing() {
   assert(false && "Base Tracing Class is abstract and should not be called");
   return nullptr;
 }

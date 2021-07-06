@@ -10,11 +10,15 @@
 namespace sss {
 namespace async {
 
-RCReference<ErrorAsyncValue> EmitErrorAsync(const ExecutionContext& execCtx, std::string_view message) {
+RCReference<ErrorAsyncValue> EmitErrorAsync(const ExecutionContext &execCtx,
+                                            std::string_view message) {
   auto diag = EmitError(execCtx, message);
   return execCtx.host()->MakeErrorAsyncValueRef(std::move(diag));
 }
-RCReference<ErrorAsyncValue> EmitErrorAsync(const ExecutionContext& execCtx, absl::Status error) { return EmitErrorAsync(execCtx, error.message()); }
+RCReference<ErrorAsyncValue> EmitErrorAsync(const ExecutionContext &execCtx,
+                                            absl::Status error) {
+  return EmitErrorAsync(execCtx, error.message());
+}
 
 }  // namespace async
 }  // namespace sss

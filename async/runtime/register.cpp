@@ -17,7 +17,8 @@ void KernelFnRegister::RemoveKernelFn(std::string_view name) {
   }
 }
 
-std::optional<AsyncKernelFn> KernelFnRegister::GetKernelFn(std::string_view name) {
+std::optional<AsyncKernelFn> KernelFnRegister::GetKernelFn(
+    std::string_view name) {
   if (mFuncLibs.find(name) == mFuncLibs.end()) {
     return std::nullopt;
   }
