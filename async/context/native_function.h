@@ -3,7 +3,6 @@
 
 #include <string_view>
 
-#include "absl/container/inlined_vector.h"
 #include "absl/types/span.h"
 #include "async/context/host_context.h"
 #include "async_value.h"
@@ -41,7 +40,7 @@ class GeneralFunction : public Function {
 
 template <typename T>
 void GeneralFunction<T>::Execute(absl::Span<AsyncValue* const> arguments, absl::Span<RCReference<AsyncValue>> results, HostContext* host) const {
-  absl::InlinedVector<AsyncValue*, 4> unavailableArgs;
+  std::vector<AsyncValue*> unavailableArgs;
   for (auto* av : arguments) {
     if (!av->IsAvailable()) unavailableArgs.push_back(av);
   }
@@ -49,21 +48,21 @@ void GeneralFunction<T>::Execute(absl::Span<AsyncValue* const> arguments, absl::
     mCallable(arguments.data(), arguments.size(), results.data(), results.size(), host);
     return;
   }
-  absl::InlinedVector<RCReference<AsyncValue>, 4> args;
+  std::vector<RCReference<AsyncValue>> args;
   args.reserve(arguments.size());
   for (auto* av : arguments) args.push_back(FormRef(av));
 
-  absl::InlinedVector<RCReference<IndirectAsyncValue>, 4> indirectResults;
+  std::vector<RCReference<IndirectAsyncValue>> indirectResults;
   indirectResults.reserve(results.size());
   for (auto& avRef : results) {
     indirectResults.push_back(host->MakeIndirectAsyncValue());
     avRef = indirectResults.back().CopyRef();
   }
   host->RunWhenReady(unavailableArgs, [this, host, args = std::move(args), indirectResults = std::move(indirectResults)]() mutable {
-    absl::InlinedVector<AsyncValue*, 4> argAvs;
+    std::vector<AsyncValue*> argAvs;
     argAvs.reserve(args.size());
     for (const auto& arg : args) argAvs.push_back(arg.get());
-    absl::InlinedVector<RCReference<AsyncValue>, 4> results;
+    std::vector<RCReference<AsyncValue>> results;
     results.resize(indirectResults.size());
     mCallable(argAvs.data(), argAvs.size(), results.data(), results.size(), host);
     for (int i = 0, e = results.size(); i != e; ++i) {

@@ -3,7 +3,6 @@
 
 #include <string_view>
 
-#include "absl/container/inlined_vector.h"
 #include "absl/types/span.h"
 #include "async/context/host_context.h"
 #include "async/support/string_util.h"
@@ -96,7 +95,7 @@ class AsyncKernelFrame {
   }
 
  protected:
-  absl::InlinedVector<AsyncValue*, 8> mAsyncValues;
+  std::vector<AsyncValue*> mAsyncValues;
   int mNumArguments = 0;
   int mNumResults = -1;
   HostContext* mpContext;

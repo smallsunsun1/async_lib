@@ -1,7 +1,8 @@
 #ifndef ASYNC_SUPPORT_RC_ARRAY_
 #define ASYNC_SUPPORT_RC_ARRAY_
 
-#include "absl/container/inlined_vector.h"
+#include <vector>
+
 #include "absl/types/span.h"
 #include "async/support/ref_count.h"
 
@@ -51,7 +52,7 @@ class RCArray {
   RCArray& operator=(const RCArray&) = delete;
 
  private:
-  absl::InlinedVector<T*, 4> mValues;
+  std::vector<T*> mValues;
 };
 }  // namespace async
 }  // namespace sss

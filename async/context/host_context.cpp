@@ -126,7 +126,7 @@ int HostContext::GetNumWorkerThreads() const { return mWorkQueue->GetParallelism
 void HostContext::RunWhenReady(absl::Span<AsyncValue* const> values, unique_function<void()> callee) {
   // Perform a quick scan of the arguments.  If they are all available, or if
   // any is already an error, then we can run the callee synchronously.
-  absl::InlinedVector<AsyncValue*, 4> unavailable_values;
+  std::vector<AsyncValue*> unavailable_values;
   for (auto i : values) {
     if (!i->IsAvailable()) unavailable_values.push_back(i);
   }
@@ -162,7 +162,7 @@ void HostContext::RunWhenReady(absl::Span<AsyncValue* const> values, unique_func
 }
 
 void HostContext::RunWhenReady(absl::Span<const RCReference<AsyncValue>> values, unique_function<void()> callee) {
-  absl::InlinedVector<AsyncValue*, 8> values_ptr;
+  std::vector<AsyncValue*> values_ptr;
   values_ptr.reserve(values.size());
   for (auto& data : values) {
     values_ptr.push_back(data.get());

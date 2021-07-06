@@ -10,7 +10,6 @@
 #include <string>
 #include <unordered_set>
 
-#include "absl/container/inlined_vector.h"
 #include "async/context/async_value.h"
 #include "async/context/kernel_frame.h"
 #include "async/context/native_function.h"
@@ -488,7 +487,7 @@ void RunAsyncGraph(AsyncGraph* graph, std::vector<RCReference<AsyncValue>>& argu
   auto* runContext = graph->GetContext();
   auto* execPtr = runContext->Allocate<GraphExecutor>();
   GraphExecutor* exec = new (execPtr) GraphExecutor(graph);
-  absl::InlinedVector<AsyncValue*, 8> argumentsPtr;
+  std::vector<AsyncValue*> argumentsPtr;
   argumentsPtr.reserve(arguments.size());
   for (auto& elem : arguments) {
     argumentsPtr.push_back(elem.get());

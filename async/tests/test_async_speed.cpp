@@ -6,7 +6,6 @@
 #include <utility>      // for move
 #include <vector>       // for vector
 
-#include "absl/container/inlined_vector.h"  // for InlinedVector
 #include "absl/memory/memory.h"             // for allocator_traits<>::value...
 #include "absl/types/span.h"                // for MakeSpan, MakeConstSpan
 #include "async/context/async_value.h"      // for AsyncValue
@@ -43,7 +42,7 @@ static auto Now() { return std::chrono::steady_clock::now(); }
 int main() {
   auto context = CreateSimpleHostContext();
   RCReference<const SimpleFunction> func = TakeRef(new SimpleFunction("LargeCompute", LargeCompute));
-  absl::InlinedVector<RCReference<AsyncValue>, 4> results;
+  std::vector<RCReference<AsyncValue>> results;
   int numEle = 2000;
   results.resize(numEle);
   auto input1 = context->MakeAvailableAsyncValueRef<std::vector<int>>(100000, 0);
@@ -55,7 +54,7 @@ int main() {
   auto start2 = Now();
   func->Execute(absl::MakeConstSpan({input1.GetAsyncValue()}), absl::MakeSpan(results.data(), 1), context.get());
   for (int i = 0; i < numEle - 1; ++i) {
-    absl::InlinedVector<AsyncValue*, 4> mappedVec;
+    std::vector<AsyncValue*> mappedVec;
     mappedVec.push_back(results[i].get());
     func->Execute(mappedVec, absl::MakeSpan(results.data() + i + 1, 1), context.get());
   }

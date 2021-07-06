@@ -97,7 +97,7 @@ void TaskGraphExecutor::ProcessReadyNodeIndexs(std::vector<unsigned>* readyNodeI
 
 void TaskGraphExecutor::Await() {
   async::latch lat(1);
-  absl::InlinedVector<async::AsyncValue*, 4> input;
+  std::vector<async::AsyncValue*> input;
   input.push_back(mFinishChain.get());
   GetContext()->RunWhenReady(absl::MakeConstSpan(input.data(), input.size()), [&lat]() { lat.count_down(1); });
   lat.wait();

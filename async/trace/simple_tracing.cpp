@@ -56,8 +56,8 @@ class TimeInfoUtility {
 
  private:
   static Time Now() { return std::chrono::steady_clock::now(); }
-  absl::InlinedVector<std::tuple<std::string, Time>, 8> mStack;
-  absl::InlinedVector<TimeInfo, kMaxElement> mActivities;
+  std::vector<std::tuple<std::string, Time>> mStack;
+  std::vector<TimeInfo> mActivities;
 };
 
 }  // namespace

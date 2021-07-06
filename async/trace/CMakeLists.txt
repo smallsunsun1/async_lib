@@ -1,5 +1,5 @@
 file(GLOB header_files "*.h")
 file(GLOB object_files "*.cpp")
 add_library(async_trace ${LIB_TYPE} ${object_files})
-target_link_libraries(async_trace PUBLIC absl::inlined_vector)
+target_link_libraries(async_trace PUBLIC absl::status)
 set_target_properties(async_trace PROPERTIES PUBLIC_HEADER "${header_files}")

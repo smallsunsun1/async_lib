@@ -1,7 +1,6 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_TRACE_SIMPLE_TRACING_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_TRACE_SIMPLE_TRACING_
 
-#include "absl/container/inlined_vector.h"
 #include "tracing.h"
 
 namespace sss {
@@ -44,7 +43,7 @@ class ScopeTracing : public Tracing {
   virtual ~ScopeTracing() {}
 
  private:
-  absl::InlinedVector<internal::ScopeTimeInfoUtility, 4> mTimeInfos;
+  std::vector<internal::ScopeTimeInfoUtility> mTimeInfos;
 };
 
 class ScopedTracing : public Tracing {

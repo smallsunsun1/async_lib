@@ -6,7 +6,6 @@
 #include <memory>   // for unique_ptr
 #include <utility>  // for move
 
-#include "absl/container/inlined_vector.h"  // for InlinedVector
 #include "absl/memory/memory.h"             // for allocator_traits<>::value...
 #include "absl/types/span.h"                // for MakeConstSpan, MakeSpan
 #include "async/context/async_value.h"      // for AsyncValue
@@ -47,15 +46,15 @@ class ComputeTest {
 TEST(ASYNCFUNCTION, V1) {
   auto context = CreateSimpleHostContext();
   RCReference<const SimpleFunction> func = TakeRef(new SimpleFunction("LargeCompute", LargeCompute));
-  absl::InlinedVector<RCReference<AsyncValue>, 4> result1;
-  absl::InlinedVector<RCReference<AsyncValue>, 4> result2;
-  absl::InlinedVector<RCReference<AsyncValue>, 4> result3;
+  std::vector<RCReference<AsyncValue>> result1;
+  std::vector<RCReference<AsyncValue>> result2;
+  std::vector<RCReference<AsyncValue>> result3;
   result1.resize(1);
   result2.resize(1);
   result3.resize(1);
   auto input1 = context->MakeAvailableAsyncValueRef<float>(2);
   func->Execute(absl::MakeConstSpan({input1.GetAsyncValue()}), absl::MakeSpan(result1.data(), result1.size()), context.get());
-  absl::InlinedVector<AsyncValue*, 4> mappedVec;
+  std::vector<AsyncValue*> mappedVec;
   for (size_t i = 0, e = result1.size(); i < e; ++i) {
     mappedVec.push_back(result1[i].get());
   }
