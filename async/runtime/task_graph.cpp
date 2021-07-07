@@ -114,12 +114,21 @@ void TaskGraphExecutor::Destroy() {
 }
 
 void RunTaskGraph(TaskGraph *graph, bool sync) {
+  TaskGraphExecutor *executor = CreateTaskGraphExecutor(graph);
+  if (sync) {
+    executor->Execute();
+    executor->Await();
+    executor->DropRef();
+  } else {
+    TaskGraphExecutor::Execute(executor);
+  }
+}
+
+TaskGraphExecutor *CreateTaskGraphExecutor(TaskGraph *graph) {
   async::HostContext *context = graph->GetContext();
   TaskGraphExecutor *memory = context->Allocate<TaskGraphExecutor>();
   TaskGraphExecutor *executor = new (memory) TaskGraphExecutor(graph);
-  executor->Execute();
-  if (sync) executor->Await();
-  executor->DropRef();
+  return executor;
 }
 
 async::RCReference<TaskGraph> CreateTaskGraph(async::HostContext *context) {

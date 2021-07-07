@@ -176,11 +176,17 @@ class GraphExecutor : public async::ReferenceCounted<GraphExecutor> {
                                // kernel-info(指示多少Arguments还未Ready)
 };
 
+// create a graph executor, caller must be responsible for
+// manage the lifetime of this pointer, typically can use
+// with TakeRef, which can help manage the lifetime
+GraphExecutor *CreateGraphExecutor(AsyncGraph *graph);
+
 void RunAsyncGraph(
     AsyncGraph *graph,
     std::vector<async::RCReference<async::AsyncValue>> &arguments,
     std::vector<async::RCReference<async::AsyncValue>> &results,
     bool sync = true);
+
 async::RCReference<AsyncGraph> CreateAsyncGraph(async::HostContext *context);
 
 }  // namespace sss

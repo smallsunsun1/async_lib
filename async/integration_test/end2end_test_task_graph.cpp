@@ -40,5 +40,12 @@ int main() {
   auto start = high_resolution_clock::now();
   RunTaskGraph(graph.get(), true);
   auto end = high_resolution_clock::now();
-  std::cout << duration_cast<nanoseconds>(end - start).count();
+  std::cout << duration_cast<nanoseconds>(end - start).count() << "\n";
+
+  start = high_resolution_clock::now();
+  RunTaskGraph(graph.get(), false);
+  end = high_resolution_clock::now();
+  std::cout << duration_cast<nanoseconds>(end - start).count() << "\n";
+  runContext->Quiesce();
+  return 0;
 }

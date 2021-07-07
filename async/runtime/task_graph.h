@@ -94,6 +94,12 @@ class TaskGraphExecutor : public async::ReferenceCounted<TaskGraphExecutor> {
 };
 
 void RunTaskGraph(TaskGraph *graph, bool sync = true);
+
+// create a taskgraph executor, caller must be responsible for
+// manage the lifetime of this pointer, typically can use
+// with TakeRef, which can help manage the lifetime
+TaskGraphExecutor *CreateTaskGraphExecutor(TaskGraph *graph);
+
 async::RCReference<TaskGraph> CreateTaskGraph(async::HostContext *context);
 
 }  // namespace sss

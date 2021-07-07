@@ -573,6 +573,13 @@ void RunAsyncGraph(AsyncGraph *graph,
   if (sync) runContext->Await(results);
 }
 
+GraphExecutor *CreateGraphExecutor(AsyncGraph *graph) {
+  auto *runContext = graph->GetContext();
+  auto *execPtr = runContext->Allocate<GraphExecutor>();
+  GraphExecutor *exec = new (execPtr) GraphExecutor(graph);
+  return exec;
+}
+
 async::RCReference<AsyncGraph> CreateAsyncGraph(async::HostContext *context) {
   AsyncGraph *memory = context->Allocate<AsyncGraph>();
   AsyncGraph *graphOri = new (memory) AsyncGraph(context);
