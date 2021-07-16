@@ -26,7 +26,7 @@ class WhenAllReadyAwaitable<std::tuple<>> {
 template <typename... Tasks>
 class WhenAllReadyAwaitable<std::tuple<Tasks...>> {
  public:
-  explicit WhenAllReadyAwaitable(Tasks &&...tasks) noexcept(
+  explicit WhenAllReadyAwaitable(Tasks &&... tasks) noexcept(
       std::conjunction_v<std::is_nothrow_move_constructible<Tasks>...>)
       : mCounter(sizeof...(Tasks)), mTasks(std::move(tasks)...) {}
 

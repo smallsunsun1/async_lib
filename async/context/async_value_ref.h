@@ -1,7 +1,6 @@
 #ifndef ASYNC_CONTEXT_ASYNC_VALUE_REF_
 #define ASYNC_CONTEXT_ASYNC_VALUE_REF_
 
-#include "absl/status/statusor.h"
 #include "async/context/async_value.h"
 #include "async/context/diagnostic.h"
 #include "async/context/location.h"
@@ -63,16 +62,8 @@ class AsyncValueRef {
   // Set the stored value. The AsyncValueRef must be unavailable. After this
   // returns, the AsyncValueRef will be available.
   template <typename... Args>
-  void emplace(Args &&...args) const {
+  void emplace(Args &&... args) const {
     mValue->emplace<T>(std::forward<Args>(args)...);
-  }
-
-  void emplace(absl::StatusOr<T> v) const {
-    if (v) {
-      emplace(std::move(*v));
-    } else {
-      SetError(v.status());
-    }
   }
 
   // If the AsyncValueRef is available, run the waiter immediately. Otherwise,
@@ -98,10 +89,6 @@ class AsyncValueRef {
   }
   void SetError(DecodedDiagnostic diag) const {
     mValue->SetError(std::move(diag));
-  }
-
-  void SetError(const absl::Status &error) const {
-    mValue->SetError(DecodedDiagnostic(error));
   }
 
   explicit operator bool() const { return mValue.get() != nullptr; }

@@ -11,8 +11,6 @@
 #include <type_traits>
 
 #include "async/context/host_context.h"
-#include "third_party/eigen3/unsupported/Eigen/CXX11/Tensor"
-#include "third_party/eigen3/unsupported/Eigen/CXX11/ThreadPool"
 
 namespace sss {
 namespace async {
@@ -30,7 +28,7 @@ class TensorBatchTask : public BatchTask {
   TensorBatchTask() = default;
   template <typename... Args,
             std::enable_if_t<std::is_constructible<T, Args...>::value, int> = 0>
-  TensorBatchTask(Args &&...args) : mData(std::forward<Args>(args)...) {}
+  TensorBatchTask(Args &&... args) : mData(std::forward<Args>(args)...) {}
   TensorBatchTask(std::unique_ptr<T> data) : mData(std::move(data)) {}
   TensorBatchTask &operator=(const TensorBatchTask &) = delete;
   TensorBatchTask(const TensorBatchTask &) = delete;

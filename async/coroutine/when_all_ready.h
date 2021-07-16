@@ -17,7 +17,7 @@ template <typename... Awaitables,
               std::conjunction_v<internal::is_awaitable<std::unwrap_reference_t<
                   std::remove_reference_t<Awaitables>>>...>,
               int> = 0>
-[[nodiscard]] auto WhenAllReady(Awaitables &&...awaitables) {
+[[nodiscard]] auto WhenAllReady(Awaitables &&... awaitables) {
   return internal::WhenAllReadyAwaitable<std::tuple<
       internal::WhenAllTask<typename awaitable_traits<std::unwrap_reference_t<
           std::remove_reference_t<Awaitables>>>::await_result_t>...>>(

@@ -7,8 +7,8 @@
 
 #include "async/context/async_value.h"
 #include "async/context/native_function.h"
+#include "async/runtime/async_kernel.h"
 #include "async/support/ref_count.h"
-#include "async_kernel.h"
 
 namespace sss {
 namespace async {

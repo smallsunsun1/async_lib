@@ -2,15 +2,13 @@
 
 #include <string_view>
 
-#include "absl/status/status.h"
 #include "async/context/execution_context.h"
 #include "async/context/host_context.h"
 #include "async/support/string_util.h"
 
 namespace sss {
 namespace async {
-DecodedDiagnostic::DecodedDiagnostic(const absl::Status &error)
-    : message(error.message()) {}
+
 std::ostream &operator<<(std::ostream &os, const DecodedDiagnostic &diag) {
   if (diag.location) {
     os << diag.location->filename << ":" << diag.location->line << ":"
@@ -20,6 +18,7 @@ std::ostream &operator<<(std::ostream &os, const DecodedDiagnostic &diag) {
   }
   return os << diag.message;
 }
+
 DecodedDiagnostic EmitError(const ExecutionContext &exec_ctx,
                             std::string_view message) {
   auto decoded_loc = exec_ctx.location().Decode();

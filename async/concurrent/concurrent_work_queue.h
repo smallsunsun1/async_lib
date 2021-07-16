@@ -6,8 +6,8 @@
 #include <string_view>
 
 #include "absl/types/span.h"
-#include "async/context/task_function.h"
 #include "async/support/ref_count.h"
+#include "async/support/task_function.h"
 
 namespace sss {
 namespace async {

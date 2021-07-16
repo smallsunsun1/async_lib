@@ -125,7 +125,7 @@ class AsyncValue {
   // kConcrete. Requires that this AsyncValue previously have state
   // kUnconstructed or kConstructed.
   template <typename T, typename... Args>
-  void emplace(Args &&...args);
+  void emplace(Args &&... args);
 
   void SetError(DecodedDiagnostic diag);
 
@@ -428,7 +428,7 @@ class ConcreteAsyncValue : public AsyncValue {
   // Make a ConcreteAsyncValue with kConstructed state.
   template <typename... Args>
   explicit ConcreteAsyncValue(HostContextPtr host, ConstructedPayload,
-                              Args &&...args)
+                              Args &&... args)
       : AsyncValue(host, Kind::kConcrete, State::kConstructed, TypeTag<T>()) {
     new (&mData) T(std::forward<Args>(args)...);
   }
@@ -436,7 +436,7 @@ class ConcreteAsyncValue : public AsyncValue {
   // Make a ConcreteAsyncValue with kConcrete state.
   template <typename... Args>
   explicit ConcreteAsyncValue(HostContextPtr host, ConcretePayload,
-                              Args &&...args)
+                              Args &&... args)
       : AsyncValue(host, Kind::kConcrete, State::kConcrete, TypeTag<T>()) {
     new (&mData) T(std::forward<Args>(args)...);
   }
@@ -472,7 +472,7 @@ class ConcreteAsyncValue : public AsyncValue {
   // Construct the payload of the AsyncValue in place and change its state to
   // kConcrete. Requires that this AsyncValue previously have state unavailable.
   template <typename... Args>
-  void emplace(Args &&...args) {
+  void emplace(Args &&... args) {
     new (&mData) T(std::forward<Args>(args)...);
     NotifyAvailable(State::kConcrete);
   }
@@ -676,7 +676,7 @@ inline void AsyncValue::SetStateConcrete() {
 }
 
 template <typename T, typename... Args>
-void AsyncValue::emplace(Args &&...args) {
+void AsyncValue::emplace(Args &&... args) {
   assert(GetTypeId<T>() == mTypeId && "Incorrect accessor");
   assert(IsUnconstructed() && kind() == Kind::kConcrete);
 

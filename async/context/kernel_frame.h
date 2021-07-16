@@ -30,12 +30,12 @@ class AsyncKernelFrame {
   }
   int GetNumResults() const { return mNumResults; }
   template <typename T, typename... Args>
-  void EmplaceResultAt(int index, Args &&...args) {
+  void EmplaceResultAt(int index, Args &&... args) {
     SetResultAt(index, mpContext->MakeAvailableAsyncValueRef<T>(
                            std::forward<Args>(args)...));
   }
   template <typename T, typename... Args>
-  void EmplaceResult(Args &&...args) {
+  void EmplaceResult(Args &&... args) {
     EmplaceResultAt<T>(0, std::forward<Args>(args)...);
   }
   void SetResultAt(int index, RCReference<AsyncValue> value) {
@@ -70,7 +70,7 @@ class AsyncKernelFrame {
     return GetMutableAsyncValues(mNumArguments, mNumResults);
   }
   template <typename... Args>
-  RCReference<AsyncValue> EmitError(Args &&...args) {
+  RCReference<AsyncValue> EmitError(Args &&... args) {
     return mpContext->MakeErrorAsyncValueRef(
         StrCat(std::forward<Args>(args)...));
   }

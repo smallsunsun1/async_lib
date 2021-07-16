@@ -1,7 +1,7 @@
 #ifndef INFERENCE_MEDICAL_COMMON_CPP_ASYNC_TRACE_SIMPLE_TRACING_
 #define INFERENCE_MEDICAL_COMMON_CPP_ASYNC_TRACE_SIMPLE_TRACING_
 
-#include "tracing.h"
+#include "async/trace/tracing.h"
 
 namespace sss {
 namespace async {

@@ -17,11 +17,11 @@ template <typename... Awaitables,
               std::conjunction_v<internal::is_awaitable<std::unwrap_reference_t<
                   std::remove_reference_t<Awaitables>>>...>,
               int> = 0>
-[[nodiscard]] auto WhenAll(Awaitables &&...awaitables) {
+[[nodiscard]] auto WhenAll(Awaitables &&... awaitables) {
   return Fmap(
       [](auto &&taskTuple) {
         return std::apply(
-            [](auto &&...tasks) {
+            [](auto &&... tasks) {
               return std::make_tuple(
                   static_cast<decltype(tasks)>(tasks).non_void_result()...);
             },
