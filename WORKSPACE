@@ -24,13 +24,29 @@ bazel_skylib_workspace()
 
 http_archive(
   name = "rules_cc",
+  sha256 = "9a446e9dd9c1bb180c86977a8dc1e9e659550ae732ae58bd2e8fd51e15b2c91d",
   urls = ["https://github.com/bazelbuild/rules_cc/archive/262ebec3c2296296526740db4aefce68c80de7fa.zip"],
   strip_prefix = "rules_cc-262ebec3c2296296526740db4aefce68c80de7fa",
 )
 
-load("//third_party/gtest:workspace.bzl", gtest = "repo")
-load("//third_party/absl:workspace.bzl", absl = "repo")
+http_archive(
+    name = "rules_fuzzing",
+    sha256 = "127d7c45e9b7520b3c42145b3cb1b8c26477cdaed0521b02a0298907339fefa1",
+    strip_prefix = "rules_fuzzing-0.2.0",
+    urls = ["https://github.com/bazelbuild/rules_fuzzing/archive/v0.2.0.zip"],
+)
 
+load("@rules_fuzzing//fuzzing:repositories.bzl", "rules_fuzzing_dependencies")
+rules_fuzzing_dependencies()
+
+load("@rules_fuzzing//fuzzing:init.bzl", "rules_fuzzing_init")
+rules_fuzzing_init()
+
+load("//third_party/gtest:workspace.bzl", gtest = "repo")
 gtest()
 
+load("//third_party/absl:workspace.bzl", absl = "repo")
 absl()
+
+load("//third_party/tcmalloc:workspace.bzl", tcmalloc = "repo")
+tcmalloc()

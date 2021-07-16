@@ -11,6 +11,6 @@ cc_library(
         "tracing.h",
     ],
     deps = [
-        "@absl//absl/status:status",
+        "@com_google_absl//absl/status:status",
     ],
 )

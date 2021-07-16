@@ -21,7 +21,5 @@ cc_library(
         "concurrent_vector.h",
         "task_function.h"
     ],
-    deps = [
-        "@absl//absl/types:span"
-    ],
+    deps = ["@com_google_absl//absl/types:span"],
 )

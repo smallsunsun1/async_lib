@@ -18,7 +18,11 @@ Pre Request:
 A compiler which support c++17 feature, such as gcc9.x or newer
 
 How to build:  
+Build With Cmake  
 mkdir build && cd build   
 cmake -DCMAKE_BUILD_TYPE=Release ..  
 cmake --build . -j\`nproc\`
 
+
+Build With Bazel  
+bazel build //...

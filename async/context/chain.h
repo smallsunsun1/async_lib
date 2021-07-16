@@ -3,7 +3,9 @@
 
 namespace sss {
 namespace async {
+
 struct Chain {};
+
 }  // namespace async
 }  // namespace sss
 

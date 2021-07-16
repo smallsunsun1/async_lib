@@ -35,7 +35,7 @@ cc_library(
     deps = [
         "//async/support:support",
         "//async/concurrent:concurrent",
-        "@absl//absl/strings:strings"
+        "@com_google_absl//absl/strings:strings"
     ],
 )
 
