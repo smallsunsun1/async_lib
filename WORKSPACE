@@ -50,3 +50,6 @@ absl()
 
 load("//third_party/tcmalloc:workspace.bzl", tcmalloc = "repo")
 tcmalloc()
+
+load("//third_party/benchmark:workspace.bzl", benchmark = "repo")
+benchmark()

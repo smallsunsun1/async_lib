@@ -143,3 +143,14 @@ cc_test(
         "unique_function_unittest.cpp",
     ],
 )
+
+cc_test(
+    name = "base_benchmark_test",
+    deps = [
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+    size = "small",
+    srcs = [
+        "base_benchmark_test.cpp"
+    ],
+)
