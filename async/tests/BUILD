@@ -97,6 +97,18 @@ cc_test(
 )
 
 cc_test(
+    name = "task_priority_queue_unittest",
+    deps = [
+        "//async/runtime:runtime",
+        "@com_google_googletest//:gtest"
+    ],
+    size = "small",
+    srcs = [
+        "task_priority_queue_unittest.cpp",
+    ],
+)
+
+cc_test(
     name = "test_async_speed_unittest",
     deps = [
         "//async/runtime:runtime",

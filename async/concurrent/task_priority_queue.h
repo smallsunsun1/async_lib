@@ -458,51 +458,51 @@ class TaskPriorityDeque {
   }
 };
 
-class TaskPriorityLockDeque {
- public:
-  TaskPriorityLockDeque() = default;
-  TaskPriorityLockDeque(const TaskPriorityLockDeque &) = delete;
-  TaskPriorityLockDeque &operator=(const TaskPriorityLockDeque &) = delete;
-  std::optional<TaskFunction> PushFront(TaskFunction task,
-                                        TaskPriority priority) {
-    std::lock_guard<std::mutex> lock(mu_);
-    queue_.emplace(priority, std::move(task));
-    return std::nullopt;
-  }
-  std::optional<TaskFunction> PushFront(TaskFunction task) {
-    return PushFront(std::move(task), TaskPriority::kDefault);
-  }
-  std::optional<TaskFunction> PopFront() {
-    if (Empty()) return std::nullopt;
-    std::optional<TaskFunction> result(
-        std::move(const_cast<Elem &>(queue_.top()).task));
-    queue_.pop();
-    return result;
-  }
-  bool Empty() const {
-    std::lock_guard<std::mutex> lock(mu_);
-    return queue_.empty();
-  }
-  size_t Size() const {
-    std::lock_guard<std::mutex> lock(mu_);
-    return queue_.size();
-  }
-  void Flush() {
-    while (!Empty()) {
-      std::optional<TaskFunction> task = PopFront();
-      assert(task.has_value());
-    }
-  }
+// class TaskPriorityLockDeque {
+//  public:
+//   TaskPriorityLockDeque() = default;
+//   TaskPriorityLockDeque(const TaskPriorityLockDeque &) = delete;
+//   TaskPriorityLockDeque &operator=(const TaskPriorityLockDeque &) = delete;
+//   std::optional<TaskFunction> PushFront(TaskFunction task,
+//                                         TaskPriority priority) {
+//     std::lock_guard<std::mutex> lock(mu_);
+//     queue_.emplace(priority, std::move(task));
+//     return std::nullopt;
+//   }
+//   std::optional<TaskFunction> PushFront(TaskFunction task) {
+//     return PushFront(std::move(task), TaskPriority::kDefault);
+//   }
+//   std::optional<TaskFunction> PopFront() {
+//     if (Empty()) return std::nullopt;
+//     std::optional<TaskFunction> result(
+//         std::move(const_cast<Elem &>(queue_.top()).task));
+//     queue_.pop();
+//     return result;
+//   }
+//   bool Empty() const {
+//     std::lock_guard<std::mutex> lock(mu_);
+//     return queue_.empty();
+//   }
+//   size_t Size() const {
+//     std::lock_guard<std::mutex> lock(mu_);
+//     return queue_.size();
+//   }
+//   void Flush() {
+//     while (!Empty()) {
+//       std::optional<TaskFunction> task = PopFront();
+//       assert(task.has_value());
+//     }
+//   }
 
- private:
-  struct Elem {
-    uint8_t state;
-    TaskFunction task;
-    bool operator<(const Elem &other) { return state < other.state; }
-  };
-  mutable std::mutex mu_;
-  std::priority_queue<Elem> queue_;
-};
+//  private:
+//   struct Elem {
+//     uint8_t state;
+//     TaskFunction task;
+//     bool operator<(const Elem &other) { return state < other.state; }
+//   };
+//   mutable std::mutex mu_;
+//   std::priority_queue<Elem> queue_;
+// };
 
 }  // namespace async
 }  // namespace sss
