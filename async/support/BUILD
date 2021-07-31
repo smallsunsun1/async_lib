@@ -19,7 +19,8 @@ cc_library(
         "rc_array.h",
         "function_ref.h",
         "concurrent_vector.h",
-        "task_function.h"
+        "task_function.h",
+        "span.h"
     ],
     deps = ["@com_google_absl//absl/types:span"],
 )

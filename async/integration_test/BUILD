@@ -6,7 +6,7 @@ config_setting(
 )
 config_setting(
     name = "normal_malloc",
-    define_values = {"malloc": "normal"},
+    define_values = {"malloc" : "normal"},
 )
 
 malloc = select({
@@ -20,7 +20,7 @@ cc_test(
     deps = [
         "//async/runtime:runtime",
     ],
-    malloc = "@com_google_tcmalloc//tcmalloc",
+    malloc = malloc,
     srcs = [
         "end2end_test_async_graph.cpp",
     ]

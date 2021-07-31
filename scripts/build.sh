@@ -1,1 +1,1 @@
-bazel build //... --define malloc=normal
+bazel build //... --define=malloc=normal

@@ -6,6 +6,7 @@ build --cxxopt='-fdiagnostics-color=always'
 build --cxxopt='-Wall'
 build --cxxopt='-Wextra'
 build --cxxopt='-Wno-invalid-offsetof'
+build --features=-default_compile_flags
 
 build:asan --strip=never
 build:asan --copt -fsanitize=address
