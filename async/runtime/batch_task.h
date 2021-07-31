@@ -75,9 +75,12 @@ class Batch {
     return mSize;
   }
   bool IsClosed() const { return mClosed.load(); }
-  void WaitUntilClosed() { mNotifier.Wait(); }
+  void WaitUntilClosed() { 
+    std::unique_lock<std::mutex> lk(mMu);
+    mNotifier.wait(lk);
+  }
   void Close() {
-    mNotifier.Notify();
+    mNotifier.notify_all();
     mClosed.store(true);
   }
 
@@ -86,7 +89,7 @@ class Batch {
   std::vector<std::unique_ptr<TaskType>> mTasks;
   size_t mSize;
   // 下面的变量用于指示当前batch是否已经close
-  Eigen::Notification mNotifier;
+  std::condition_variable mNotifier;
   std::atomic<bool> mClosed;
 };
 
