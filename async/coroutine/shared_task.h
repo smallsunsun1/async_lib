@@ -259,7 +259,7 @@ class [[nodiscard]] SharedTask {
     // in the SharedTaskPromise constructor.
   }
 
-  SharedTask(SharedTask && other) noexcept : mCoroutine(other.mCoroutine) {
+  SharedTask(SharedTask &&other) noexcept : mCoroutine(other.mCoroutine) {
     other.mCoroutine = nullptr;
   }
 
@@ -296,7 +296,7 @@ class [[nodiscard]] SharedTask {
     return *this;
   }
 
-  void swap(SharedTask & other) noexcept {
+  void swap(SharedTask &other) noexcept {
     std::swap(mCoroutine, other.mCoroutine);
   }
 

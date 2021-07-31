@@ -108,7 +108,7 @@ class HostContext {
 
   // Allocate and initialize an object of type T.
   template <typename T, typename... Args>
-  T *Construct(Args &&... args) {
+  T *Construct(Args &&...args) {
     T *buf = Allocate<T>();
     return new (buf) T(std::forward<Args>(args)...);
   }
@@ -134,11 +134,11 @@ class HostContext {
   // consumption. The AsyncValueRef should be made available later by invoking
   // AsyncValueRef::SetStateConcrete or AsyncValueRef::SetError.
   template <typename T, typename... Args>
-  AsyncValueRef<T> MakeConstructedAsyncValueRef(Args &&... args);
+  AsyncValueRef<T> MakeConstructedAsyncValueRef(Args &&...args);
 
   // Allocate and construct an available AsyncValueRef.
   template <typename T, typename... Args>
-  AsyncValueRef<T> MakeAvailableAsyncValueRef(Args &&... args);
+  AsyncValueRef<T> MakeAvailableAsyncValueRef(Args &&...args);
 
   // Construct an empty IndirectAsyncValue, not forwarding to anything.
   RCReference<IndirectAsyncValue> MakeIndirectAsyncValue();
@@ -250,7 +250,7 @@ class HostContext {
 };
 
 template <typename T, typename... Args>
-AsyncValueRef<T> HostContext::MakeConstructedAsyncValueRef(Args &&... args) {
+AsyncValueRef<T> HostContext::MakeConstructedAsyncValueRef(Args &&...args) {
   return AsyncValueRef<T>(TakeRef(Construct<internal::ConcreteAsyncValue<T>>(
       mInstancePtr,
       typename internal::ConcreteAsyncValue<T>::ConstructedPayload{},
@@ -258,7 +258,7 @@ AsyncValueRef<T> HostContext::MakeConstructedAsyncValueRef(Args &&... args) {
 }
 
 template <typename T, typename... Args>
-AsyncValueRef<T> HostContext::MakeAvailableAsyncValueRef(Args &&... args) {
+AsyncValueRef<T> HostContext::MakeAvailableAsyncValueRef(Args &&...args) {
   return AsyncValueRef<T>(TakeRef(Construct<internal::ConcreteAsyncValue<T>>(
       mInstancePtr, typename internal::ConcreteAsyncValue<T>::ConcretePayload{},
       std::forward<Args>(args)...)));

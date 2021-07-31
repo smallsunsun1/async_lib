@@ -45,7 +45,7 @@ class ConcurrentVector {
   //
   // Returns the index of the newly inserted item.
   template <typename... Args>
-  size_t emplace_back(Args &&... args) {
+  size_t emplace_back(Args &&...args) {
     std::lock_guard<std::mutex> lock(mMutex);
 
     auto &last = mAllAllocatedElements.back();

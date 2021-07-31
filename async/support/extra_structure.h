@@ -175,8 +175,8 @@ struct PointerLikeTypeTraits<PointerUnion<PTs...>> {
 
   // The number of bits available are the min of the pointer types minus the
   // bits needed for the discriminator.
-  static constexpr int NumLowBitsAvailable = PointerLikeTypeTraits<decltype(
-      PointerUnion<PTs...>::Val)>::NumLowBitsAvailable;
+  static constexpr int NumLowBitsAvailable = PointerLikeTypeTraits<
+      decltype(PointerUnion<PTs...>::Val)>::NumLowBitsAvailable;
 };
 
 }  // namespace async

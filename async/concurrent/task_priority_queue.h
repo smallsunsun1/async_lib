@@ -5,6 +5,7 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
+#include <list>
 #include <mutex>
 #include <optional>
 #include <queue>
@@ -60,7 +61,7 @@ class TaskPriorityDeque {
     }
   }
   TaskPriorityDeque(const TaskPriorityDeque &) = delete;
-  void operator=(const TaskPriorityDeque &) = delete;
+  TaskPriorityDeque &operator=(const TaskPriorityDeque &) = delete;
 
   ~TaskPriorityDeque() { assert(Size() == 0); }
 
@@ -458,51 +459,123 @@ class TaskPriorityDeque {
   }
 };
 
-// class TaskPriorityLockDeque {
-//  public:
-//   TaskPriorityLockDeque() = default;
-//   TaskPriorityLockDeque(const TaskPriorityLockDeque &) = delete;
-//   TaskPriorityLockDeque &operator=(const TaskPriorityLockDeque &) = delete;
-//   std::optional<TaskFunction> PushFront(TaskFunction task,
-//                                         TaskPriority priority) {
-//     std::lock_guard<std::mutex> lock(mu_);
-//     queue_.emplace(priority, std::move(task));
-//     return std::nullopt;
-//   }
-//   std::optional<TaskFunction> PushFront(TaskFunction task) {
-//     return PushFront(std::move(task), TaskPriority::kDefault);
-//   }
-//   std::optional<TaskFunction> PopFront() {
-//     if (Empty()) return std::nullopt;
-//     std::optional<TaskFunction> result(
-//         std::move(const_cast<Elem &>(queue_.top()).task));
-//     queue_.pop();
-//     return result;
-//   }
-//   bool Empty() const {
-//     std::lock_guard<std::mutex> lock(mu_);
-//     return queue_.empty();
-//   }
-//   size_t Size() const {
-//     std::lock_guard<std::mutex> lock(mu_);
-//     return queue_.size();
-//   }
-//   void Flush() {
-//     while (!Empty()) {
-//       std::optional<TaskFunction> task = PopFront();
-//       assert(task.has_value());
-//     }
-//   }
+// 用于非定长Task场景中
+class TaskPriorityLockDeque {
+ public:
+  TaskPriorityLockDeque() = default;
+  TaskPriorityLockDeque(const TaskPriorityLockDeque &) = delete;
+  TaskPriorityLockDeque &operator=(const TaskPriorityLockDeque &) = delete;
+  // 这里实际上可以返回void，为了保持接口一致，返回std::nullopt
+  std::optional<TaskFunction> PushFront(TaskFunction task,
+                                        TaskPriority priority) {
+    std::lock_guard<std::mutex> lk(mu_);
+    if (priority == TaskPriority::kCritical) {
+      critical_priority_queue_.push_front(std::move(task));
+    } else if (priority == TaskPriority::kHigh) {
+      high_priority_queue_.push_front(std::move(task));
+    } else if (priority == TaskPriority::kDefault) {
+      default_priority_queue_.push_front(std::move(task));
+    } else {
+      low_priority_queue_.push_front(std::move(task));
+    }
+    elems_ += 1;
+    return std::nullopt;
+  }
+  std::optional<TaskFunction> PushFront(TaskFunction task) {
+    return PushFront(std::move(task), TaskPriority::kDefault);
+  }
+  // 这里实际上可以返回void，为了保持接口一致，返回std::nullopt
+  std::optional<TaskFunction> PushBack(TaskFunction task,
+                                       TaskPriority priority) {
+    std::lock_guard<std::mutex> lk(mu_);
+    if (priority == TaskPriority::kCritical) {
+      critical_priority_queue_.push_back(std::move(task));
+    } else if (priority == TaskPriority::kHigh) {
+      high_priority_queue_.push_back(std::move(task));
+    } else if (priority == TaskPriority::kDefault) {
+      default_priority_queue_.push_back(std::move(task));
+    } else {
+      low_priority_queue_.push_back(std::move(task));
+    }
+    elems_ += 1;
+    return std::nullopt;
+  }
+  std::optional<TaskFunction> PushBack(TaskFunction task) {
+    return PushBack(std::move(task), TaskPriority::kDefault);
+  }
+  std::optional<TaskFunction> PopFront() {
+    std::lock_guard<std::mutex> lk(mu_);
+    if (elems_ == 0) return std::nullopt;
+    if (!critical_priority_queue_.empty()) {
+      auto res = std::move(critical_priority_queue_.front());
+      critical_priority_queue_.pop_front();
+      return res;
+    }
+    if (!high_priority_queue_.empty()) {
+      auto res = std::move(high_priority_queue_.front());
+      high_priority_queue_.pop_front();
+      return res;
+    }
+    if (!default_priority_queue_.empty()) {
+      auto res = std::move(default_priority_queue_.front());
+      default_priority_queue_.pop_front();
+      return res;
+    }
+    if (!low_priority_queue_.empty()) {
+      auto res = std::move(low_priority_queue_.front());
+      low_priority_queue_.pop_front();
+      return res;
+    }
+    elems_ -= 1;
+  }
+  std::optional<TaskFunction> PopBack() {
+    std::lock_guard<std::mutex> lk(mu_);
+    if (elems_ == 0) return std::nullopt;
+    if (!critical_priority_queue_.empty()) {
+      auto res = std::move(critical_priority_queue_.back());
+      critical_priority_queue_.pop_back();
+      return res;
+    }
+    if (!high_priority_queue_.empty()) {
+      auto res = std::move(high_priority_queue_.back());
+      high_priority_queue_.pop_back();
+      return res;
+    }
+    if (!default_priority_queue_.empty()) {
+      auto res = std::move(default_priority_queue_.back());
+      default_priority_queue_.pop_back();
+      return res;
+    }
+    if (!low_priority_queue_.empty()) {
+      auto res = std::move(low_priority_queue_.back());
+      low_priority_queue_.pop_back();
+      return res;
+    }
+    elems_ -= 1;
+  }
+  bool Empty() const {
+    std::lock_guard<std::mutex> lock(mu_);
+    return elems_ == 0;
+  }
+  size_t Size() const {
+    std::lock_guard<std::mutex> lock(mu_);
+    return elems_;
+  }
+  void Flush() {
+    while (!Empty()) {
+      std::optional<TaskFunction> task = PopFront();
+      assert(task.has_value());
+    }
+  }
 
-//  private:
-//   struct Elem {
-//     uint8_t state;
-//     TaskFunction task;
-//     bool operator<(const Elem &other) { return state < other.state; }
-//   };
-//   mutable std::mutex mu_;
-//   std::priority_queue<Elem> queue_;
-// };
+ private:
+  mutable std::mutex mu_;
+  std::list<TaskFunction> critical_priority_queue_;
+  std::list<TaskFunction> high_priority_queue_;
+  std::list<TaskFunction> default_priority_queue_;
+  std::list<TaskFunction> low_priority_queue_;
+  size_t elems_;
+};
 
 }  // namespace async
 }  // namespace sss

@@ -22,7 +22,7 @@ std::ostream &operator<<(std::ostream &os, const DecodedDiagnostic &diagnostic);
 DecodedDiagnostic EmitError(const ExecutionContext &exec_ctx,
                             std::string_view message);
 template <typename... Args>
-DecodedDiagnostic EmitError(const ExecutionContext &exec_ctx, Args &&... args) {
+DecodedDiagnostic EmitError(const ExecutionContext &exec_ctx, Args &&...args) {
   return EmitError(exec_ctx,
                    std::string_view{absl::StrCat(std::forward<Args>(args)...)});
 }

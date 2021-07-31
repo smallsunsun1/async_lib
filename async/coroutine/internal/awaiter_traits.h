@@ -35,8 +35,9 @@ struct is_awaiter<T, std::void_t<decltype(std::declval<T>().await_ready()),
     : public std::conjunction<
           std::is_constructible<bool,
                                 decltype(std::declval<T>().await_ready())>,
-          is_valid_await_suspend_return_value<decltype(
-              std::declval<T>().await_suspend(std::coroutine_handle<>()))>> {};
+          is_valid_await_suspend_return_value<
+              decltype(std::declval<T>().await_suspend(
+                  std::coroutine_handle<>()))>> {};
 
 template <typename T>
 inline constexpr bool is_awaiter_v = is_awaiter<T>::value;

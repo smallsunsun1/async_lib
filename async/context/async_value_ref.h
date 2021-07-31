@@ -62,7 +62,7 @@ class AsyncValueRef {
   // Set the stored value. The AsyncValueRef must be unavailable. After this
   // returns, the AsyncValueRef will be available.
   template <typename... Args>
-  void emplace(Args &&... args) const {
+  void emplace(Args &&...args) const {
     mValue->emplace<T>(std::forward<Args>(args)...);
   }
 

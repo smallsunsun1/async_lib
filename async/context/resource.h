@@ -36,14 +36,14 @@ class ResourceManager {
     return data;
   }
   template <typename T, typename... Args>
-  T *GetOrCreateResource(std::string_view name, Args &&... args) {
+  T *GetOrCreateResource(std::string_view name, Args &&...args) {
     std::lock_guard<std::mutex> lock(mMu);
     auto res = mResource.try_emplace(
         name, std::make_any<T>(std::forward<Args>(args)...));
     return std::any_cast<T>(&res.first->second);
   }
   template <typename T, typename... Args>
-  T *CreateResource(std::string_view name, Args &&... args) {
+  T *CreateResource(std::string_view name, Args &&...args) {
     std::lock_guard<std::mutex> lock(mMu);
     auto res = mResource.try_emplace(
         name, std::make_any<T>(std::forward<Args>(args)...));

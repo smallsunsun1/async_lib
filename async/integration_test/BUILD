@@ -4,10 +4,15 @@ config_setting(
     name = "custom_malloc",
     define_values = {"malloc" : "tcmalloc"},
 )
+config_setting(
+    name = "normal_malloc",
+    define_values = {"malloc": "normal"},
+)
 
 malloc = select({
     ":custom_malloc": "@com_google_tcmalloc//tcmalloc",
-    "//conditions:default": "@bazel_tools//tools/cpp:malloc"
+    ":normal_malloc": "@bazel_tools//tools/cpp:malloc",
+    "//conditions:default": "@bazel_tools//tools/cpp:malloc",
 })
 
 cc_test(

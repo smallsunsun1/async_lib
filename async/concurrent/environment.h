@@ -10,7 +10,7 @@ namespace internal {
 struct StdThreadingEnvironment {
   using Thread = std::thread;
   template <typename Function, typename... Args>
-  static std::unique_ptr<Thread> StartThread(Function &&f, Args &&... args) {
+  static std::unique_ptr<Thread> StartThread(Function &&f, Args &&...args) {
     return std::make_unique<Thread>(std::forward<Function>(f),
                                     std::forward<Args>(args)...);
   }

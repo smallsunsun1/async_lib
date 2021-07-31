@@ -1,9 +1,12 @@
+# startup --output_base="/home/sunjiahe/bazel_build_cache"
+
 build --color=yes
 build --cxxopt='-std=c++17'
 build --cxxopt='-fdiagnostics-color=always'
 build --cxxopt='-Wall'
 build --cxxopt='-Wextra'
 build --cxxopt='-Wno-invalid-offsetof'
+
 build:asan --strip=never
 build:asan --copt -fsanitize=address
 build:asan --copt -DADDRESS_SANITIZER
