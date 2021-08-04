@@ -4,4 +4,4 @@ build
 .clangd
 *.o
 compile_commands.json
-bazel*
+/bazel*
