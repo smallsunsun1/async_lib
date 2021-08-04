@@ -51,6 +51,9 @@ absl()
 load("//third_party/glog:workspace.bzl", glog = "repo")
 glog()
 
+load("//third_party/gflags:workspace.bzl", gflags = "repo")
+gflags()
+
 load("//third_party/tcmalloc:workspace.bzl", tcmalloc = "repo")
 tcmalloc()
 

@@ -1,6 +1,5 @@
 build
 .cache
-tools/*
 .vscode
 .clangd
 *.o
