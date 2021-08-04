@@ -36,43 +36,43 @@ cc_test(
     name = "coroutine_test",
     srcs = select({
         ":with_coroutine": ["tests/coroutine_test.cpp"],
-        "//conditions:default": []
+        "//conditions:default": ["tests/empty_test.cpp"]
     }),
     deps = [
         ":coroutine",
     ],
-    copts = [
-        "-fcoroutines",
-        "-std=c++20",
-    ],
+    copts = select({
+        ":with_coroutine": ["-fcoroutines", "-std=c++20"],
+        "//conditions:default": []
+    }),
 )
 
 cc_test(
     name = "coroutine_thread_pool_test",
     srcs = select({
         ":with_coroutine": ["tests/coroutine_thread_pool_test.cpp"],
-        "//conditions:default": []
+        "//conditions:default": ["tests/empty_test.cpp"]
     }),
     deps = [
         ":coroutine",
     ],
-    copts = [
-        "-fcoroutines",
-        "-std=c++20",
-    ],
+    copts = select({
+        ":with_coroutine": ["-fcoroutines", "-std=c++20"],
+        "//conditions:default": []
+    }),
 )
 
 cc_test(
     name = "when_all_test",
     srcs = select({
         ":with_coroutine": ["tests/when_all_test.cpp"],
-        "//conditions:default": []
+        "//conditions:default": ["tests/empty_test.cpp"]
     }),
     deps = [
         ":coroutine",
     ],
-    copts = [
-        "-fcoroutines",
-        "-std=c++20",
-    ],
+    copts = select({
+        ":with_coroutine": ["-fcoroutines", "-std=c++20"],
+        "//conditions:default": []
+    }),
 )
