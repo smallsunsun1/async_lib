@@ -1,0 +1,22 @@
+syntax = "proto3";
+option cc_enable_arenas = true;
+package sss.async;
+
+message ContextConfig {
+    uint32 non_block_worker_threads = 1;
+    uint32 block_worker_threads = 2;
+}
+
+message ClientConfig {
+    enum ClientType {
+        kUnary = 0;
+        kStream = 1;
+    };
+    ClientType type = 1;
+}
+
+message SessionConfig {
+    ContextConfig context_config = 1;
+    repeated string worker_addresses = 2;
+    ClientConfig client_config = 3;
+}

@@ -11,9 +11,9 @@
 #include "tools/proto/message.grpc.pb.h"
 #include "tools/proto/message.pb.h"
 
-ABSL_FLAG(std::string, server_address, "127.0.0.1:8008",
+ABSL_FLAG(std::string, server_address, "127.0.0.1:50051",
           "service_address for client to query");
-ABSL_FLAG(bool, use_health_check, true, "whether to use health check service");
+ABSL_FLAG(bool, use_health_check, false, "whether to use health check service");
 
 namespace sss {
 namespace async {
@@ -151,7 +151,8 @@ class RpcWorkAsyncStreamServer {
     }
   }
   grpc::Status DoRunFunc(Request* req, Response* res) {
-    res->set_type("Hello" + req->type());
+    res->set_type("Hello" + req->type() + "\n" +
+                  absl::GetFlag(FLAGS_server_address));
     return grpc::Status::OK;
   }
   void Run(const std::string& server_address) {
@@ -319,5 +320,5 @@ int main(int argc, char* argv[]) {
   std::unique_ptr<sss::async::HostContext> context =
       sss::async::CreateCustomHostContext(4, 8);
   sss::async::RpcWorkAsyncStreamServer server(context.get(), 4);
-  server.Run("localhost:50051");
+  server.Run(absl::GetFlag(FLAGS_server_address));
 }

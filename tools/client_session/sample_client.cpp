@@ -5,12 +5,10 @@
 namespace sss {
 namespace async {
 
-std::string AsyncUnaryClient::RemoteCall(const std::string& request) {
-  Request remote_request;
-  remote_request.set_type(request);
+std::string AsyncUnaryClient::RemoteCall(const Request& request) {
   grpc::ClientContext context;
   Response result;
-  grpc::Status status = stub_->RemoteCall(&context, remote_request, &result);
+  grpc::Status status = stub_->RemoteCall(&context, request, &result);
   if (status.ok()) {
     return result.type();
   } else {
@@ -19,12 +17,10 @@ std::string AsyncUnaryClient::RemoteCall(const std::string& request) {
   }
 }
 
-void AsyncUnaryClient::AsyncRemoteCall(const std::string& request) {
+void AsyncUnaryClient::AsyncRemoteCall(const Request& request) {
   AsyncCallData* req_data = new AsyncCallData();
-  Request req;
-  req.set_type(request);
   req_data->reader =
-      stub_->PrepareAsyncRemoteCall(&req_data->context, req, queue_.get());
+      stub_->PrepareAsyncRemoteCall(&req_data->context, request, queue_.get());
   req_data->reader->StartCall();
   req_data->reader->Finish(&req_data->response, &req_data->status,
                            (void*)req_data);

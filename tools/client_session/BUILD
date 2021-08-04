@@ -26,5 +26,9 @@ cc_binary(
     ],
     deps = [
         ":sample_client",
+        "//tools/proto:cc_config_proto",
     ],
+    data = [
+        "//tools/data:session_config",
+    ]
 )

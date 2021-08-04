@@ -17,8 +17,8 @@ class AsyncUnaryClient {
  public:
   explicit AsyncUnaryClient(std::shared_ptr<grpc::ChannelInterface> channel)
       : stub_(RpcWork::NewStub(channel)) {}
-  std::string RemoteCall(const std::string& request);
-  void AsyncRemoteCall(const std::string& request);
+  std::string RemoteCall(const Request& request);
+  void AsyncRemoteCall(const Request& request);
   void HandleAsyncWork();
 
  private:

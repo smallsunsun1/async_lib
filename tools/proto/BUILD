@@ -9,3 +9,17 @@ cc_grpc_library(
     ],
     deps = [],
 )
+
+proto_library(
+    name = "config_proto",
+    srcs = [
+        "config.proto",
+    ]
+)
+
+cc_proto_library(
+    name = "cc_config_proto",
+    deps = [
+        "config_proto",
+    ]
+)

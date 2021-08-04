@@ -1,6 +1,6 @@
 package(default_visibility = ["//visibility:public"])
 
-cc_library(
+cc_binary(
     name = "sample_worker",
     srcs = [
         "sample_worker.cpp",
