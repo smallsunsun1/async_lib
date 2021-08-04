@@ -34,15 +34,13 @@ TEST(TaskQueueTool, EnPopqueueTest) {
           std::cout << "hello world!" << std::endl;
         };
         mLockFreeQueue.PushFront(TaskFunction(std::move(f)));
-        // mLockFreeQueue.PushBack(TaskFunction(std::move(ff)));
       }
     });
   }
   for (int i = 0; i < numCores; ++i) {
-    totalPopThreads.emplace_back([&mLockFreeQueue, numIterations]() {
-      for (int j = 0; j < numIterations; ++j) {
+    totalPopThreads.emplace_back([&mLockFreeQueue]() {
+      while (!mLockFreeQueue.Empty()) {
         mLockFreeQueue.PopBack();
-        // mLockFreeQueue.PopFront();
       }
     });
   }
@@ -69,7 +67,6 @@ TEST(TaskQueueTool, EnPopqueueTest) {
         };
         std::lock_guard<std::mutex> lock(globalMutex);
         mLockQueue.push_front(TaskFunction(std::move(f)));
-        // mLockQueue.push_back(TaskFunction(std::move(ff)));
       }
     });
   }

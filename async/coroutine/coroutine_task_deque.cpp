@@ -30,7 +30,7 @@ unsigned CoroutineTaskDeque::CalculateSize(unsigned front,
   // larger than it is during concurrent modifications. E.g. push can
   // increment size before the corresponding pop has decremented it.
   // So the computed size can be up to kCapacity + 1, fix it.
-  assert(size <= kCapacity + 1);
+  assert((unsigned)size <= kCapacity + 1);
   if (size > static_cast<int>(kCapacity)) size = kCapacity;
   return static_cast<unsigned>(size);
 }

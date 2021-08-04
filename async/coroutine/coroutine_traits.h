@@ -1,7 +1,7 @@
 #ifndef ASYNC_COROUTINE_COROUTINE_TRAITS_
 #define ASYNC_COROUTINE_COROUTINE_TRAITS_
 
-#include "internal/awaiter_traits.h"
+#include "async/coroutine/internal/awaiter_traits.h"
 namespace sss {
 namespace async {
 

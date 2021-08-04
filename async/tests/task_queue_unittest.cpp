@@ -35,8 +35,8 @@ TEST(TaskQueueTool, EnPopqueueTest) {
     });
   }
   for (int i = 0; i < numCores; ++i) {
-    totalPopThreads.emplace_back([&mLockFreeQueue, numIterations]() {
-      for (int j = 0; j < numIterations; ++j) {
+    totalPopThreads.emplace_back([&mLockFreeQueue]() {
+      while (!mLockFreeQueue.Empty()) {
         mLockFreeQueue.PopBack();
       }
     });

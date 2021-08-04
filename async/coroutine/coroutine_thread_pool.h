@@ -47,9 +47,9 @@ class CoroutineThreadPool {
   }
   explicit CoroutineThreadPool(int numThreads)
       : mNumThreads(numThreads),
-        mCancelled(false),
+        mThreadData(numThreads),
         mCoprimes(internal::ComputeCoprimes(numThreads)),
-        mThreadData(numThreads) {
+        mCancelled(false) {
     assert(numThreads >= 1 && "thread number must be larger than 1");
     for (int i = 0; i < numThreads; ++i) {
       mThreadData[i].thread =

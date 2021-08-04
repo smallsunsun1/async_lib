@@ -6,8 +6,8 @@
 #include <exception>
 #include <stdexcept>
 
-#include "coroutine_notifier.h"
-#include "coroutine_traits.h"
+#include "async/coroutine/coroutine_notifier.h"
+#include "async/coroutine/coroutine_traits.h"
 
 namespace sss {
 namespace async {
