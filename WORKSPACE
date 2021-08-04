@@ -48,8 +48,39 @@ gtest()
 load("//third_party/absl:workspace.bzl", absl = "repo")
 absl()
 
+load("//third_party/glog:workspace.bzl", glog = "repo")
+glog()
+
 load("//third_party/tcmalloc:workspace.bzl", tcmalloc = "repo")
 tcmalloc()
 
 load("//third_party/benchmark:workspace.bzl", benchmark = "repo")
 benchmark()
+
+load("//third_party/protobuf:workspace.bzl", protobuf = "repo")
+protobuf()
+
+http_archive(
+    name = "rules_proto",
+    sha256 = "602e7161d9195e50246177e7c55b2f39950a9cf7366f74ed5f22fd45750cd208",
+    strip_prefix = "rules_proto-97d8af4dc474595af3900dd85cb3a29ad28cc313",
+    urls = [
+        "https://github.com/bazelbuild/rules_proto/archive/97d8af4dc474595af3900dd85cb3a29ad28cc313.tar.gz",
+    ],
+)
+
+load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
+rules_proto_dependencies()
+
+http_archive(
+    name = "com_github_grpc_grpc",
+    sha256 = "f60e5b112913bf776a22c16a3053cc02cf55e60bf27a959fd54d7aaf8e2da6e8",
+    strip_prefix = "grpc-1.38.1",
+    urls = [
+        "https://github.com/grpc/grpc/archive/refs/tags/v1.38.1.tar.gz",
+    ],
+)
+load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
+grpc_deps()
+load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
+grpc_extra_deps()

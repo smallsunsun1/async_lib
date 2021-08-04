@@ -75,7 +75,7 @@ class Batch {
     return mSize;
   }
   bool IsClosed() const { return mClosed.load(); }
-  void WaitUntilClosed() { 
+  void WaitUntilClosed() {
     std::unique_lock<std::mutex> lk(mMu);
     mNotifier.wait(lk);
   }

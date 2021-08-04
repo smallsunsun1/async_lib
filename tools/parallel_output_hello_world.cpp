@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "async/context/chain.h"
 #include "async/context/host_context.h"
 #include "async/context/kernel_frame.h"

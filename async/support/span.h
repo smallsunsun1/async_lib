@@ -69,7 +69,6 @@ class span {
   span(std::initializer_list<value_type> v) noexcept
       : span(v.begin(), v.size()) {}
 
-
   constexpr pointer data() const noexcept { return ptr_; }
 
   constexpr size_type size() const noexcept { return len_; }
@@ -197,6 +196,5 @@ struct hash<sss::async::span<T>> {
 };
 
 }  // namespace std
-
 
 #endif /* ASYNC_SUPPORT_SPAN_ */
