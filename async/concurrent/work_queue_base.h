@@ -148,8 +148,7 @@ class WorkQueueBase {
         });
   }
 
-  // TODO(ezhulenev): Make this a runtime parameter? More spinning threads help
-  // to reduce latency at the cost of wasted CPU cycles.
+  // TODO(jhsun)改为运行时参数tune是否是更有效的？
   static constexpr int kMaxSpinningThreads = 1;
 
   // The number of steal loop spin iterations before parking (this number is
@@ -406,10 +405,6 @@ void WorkQueueBase<Derived>::WorkerLoop(int thread_id) {
   Queue *q = &(mThreadData[thread_id].queue);
   EventCount::Waiter *waiter = mEventCount.waiter(thread_id);
 
-  // TODO(dvyukov,rmlarsen): The time spent in NonEmptyQueueIndex() is
-  // proportional to mNumThreads and we assume that new work is scheduled at
-  // a constant rate, so we set spin_count to 5000 / mNumThreads. The
-  // constant was picked based on a fair dice roll, tune it.
   const int spin_count = mNumThreads > 0 ? kSpinCount / mNumThreads : 0;
 
   while (!mCancelled) {

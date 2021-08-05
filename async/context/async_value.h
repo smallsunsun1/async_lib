@@ -43,9 +43,6 @@ constexpr bool kMaybeBase = std::is_class<T>::value && !std::is_final<T>::value;
 class AsyncValue {
  public:
   ~AsyncValue();
-  // TODO: Rename Is* methods to be more consistent with the states. For example
-  // we can rename them to IsError(), IsConcrete(),
-  // IsUnavailableIndirect().
 
   unsigned NumCount() const { return mRefCount.load(); }
 

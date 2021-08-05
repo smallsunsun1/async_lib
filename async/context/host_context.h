@@ -11,9 +11,9 @@
 namespace sss {
 namespace async {
 
-class DecodedDiagnostic;
+struct DecodedDiagnostic;
 
-class Chain;
+struct Chain;
 class ConcurrentWorkQueue;
 class HostAllocator;
 class TypeDescriptor;
@@ -123,10 +123,6 @@ class HostContext {
   // Allocate an unconstructed AsyncValueRef. The AsyncValueRef should be made
   // available later by invoking AsyncValueRef::emplace or
   // AsyncValueRef::SetError.
-  //
-  // TODO(lauj, jingdong) Move MakeUnconstructedAsyncValueRef and
-  // MakeAvailableAsyncValueRef to async_value_ref.h. These methods should not
-  // depend on HostContext.
   template <typename T>
   AsyncValueRef<T> MakeUnconstructedAsyncValueRef();
 

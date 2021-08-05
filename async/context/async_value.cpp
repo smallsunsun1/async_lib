@@ -35,7 +35,7 @@ const AsyncValue::TypeInfo &AsyncValue::GetTypeInfo() const {
   TypeInfoTable *typeInfoTable = AsyncValue::GetTypeInfoTableSingleton();
   assert(mTypeId != 0);
 
-  // TODO(sanjoy): Once ConcurentVector supports it, we should check that
+  // TODO: Once ConcurentVector supports it, we should check that
   // mTypeId - 1 is within range.
   return (*typeInfoTable)[mTypeId - 1];
 }
@@ -76,8 +76,6 @@ void AsyncValue::RunWaiters(NotifierListNode *list) {
   HostContext *host = GetHostContext();
   while (list) {
     auto *node = list;
-    // TODO(chky): pass state into mNotification so that waiters do not need to
-    // check atomic state again.
     node->mNotification();
     list = node->mNext;
     host->Destruct(node);
