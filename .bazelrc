@@ -1,5 +1,12 @@
 # startup --output_base="/home/sunjiahe/bazel_build_cache"
 
+build:debug -c dbg
+build:debug --copt="-g"
+build:debug --strip="never"
+build:optimize -c opt
+build:optimize --copt="-O3"
+build:optimize --strip="always"
+
 build --color=yes
 build --cxxopt='-std=c++17'
 build --cxxopt='-fdiagnostics-color=always'
