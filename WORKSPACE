@@ -33,11 +33,6 @@ benchmark()
 load("//third_party/protobuf:workspace.bzl", protobuf = "repo")
 protobuf()
 
-load("//third_party/rules_proto:workspace.bzl", rules_proto = "repo")
-rules_proto()
-load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
-rules_proto_dependencies()
-
 load("//third_party/grpc:workspace.bzl", grpc = "repo")
 grpc()
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")

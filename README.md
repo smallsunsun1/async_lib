@@ -3,10 +3,11 @@ This respority mainly borrow code from https://github.com/tensorflow/runtime.
 
 original LICENSE is ORI_LICENSE.
 
-For easy of use, this repo only depend on abseil for thirdparty dependency(only depend on absl::Span), can be removed easily.  
-googletest, benchmark just for test use.  
-tcmalloc is for performance consideration in some situation. 
+## Usage
+Refer to documents and examples on tools directory, unittest and integration test are
+also useful to write simple example
 
+## Detail
 Some custom execution mode such as GraphMode and TaskGraphMode are added.
 
 Start to add some coroutine functions and tools. Currently coroutine are just under development and should not be used.
@@ -22,12 +23,19 @@ A compiler which support c++17 feature, such as gcc9.x or newer
 
 Bazel is the preferred build system for this repo
 
-(CMake build is now out of data, please use bazel build system)  
+## Build With Cmake
+(CMake build is now out of date, please use bazel build system)  
 ~~How to build:~~  
 ~~Build With Cmake~~  
 ~~mkdir build && cd build~~  
 ~~cmake -DCMAKE_BUILD_TYPE=Release ..~~  
 ~~cmake --build . -j\`nproc\`~~
 
-Build With Bazel(version 4.0.0 or upper are tested)  
+## Build With Bazel(version 4.0.0 or newer are tested)  
+### Build:  
 bash scripts/build.sh
+### Test:  
+bash scripts/test.sh
+
+### Clean:  
+bash scripts/clean.sh
