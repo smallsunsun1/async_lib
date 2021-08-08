@@ -22,11 +22,12 @@ A compiler which support c++17 feature, such as gcc9.x or newer
 
 Bazel is the preferred build system for this repo
 
-How to build:  
-Build With Cmake  
-mkdir build && cd build  
-cmake -DCMAKE_BUILD_TYPE=Release ..  
-cmake --build . -j\`nproc\`
+(CMake build is now out of data, please use bazel build system)  
+~~How to build:~~  
+~~Build With Cmake~~  
+~~mkdir build && cd build~~  
+~~cmake -DCMAKE_BUILD_TYPE=Release ..~~  
+~~cmake --build . -j\`nproc\`~~
 
 Build With Bazel(version 4.0.0 or upper are tested)  
 bash scripts/build.sh
