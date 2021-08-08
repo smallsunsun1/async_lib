@@ -1,4 +1,6 @@
-# startup --output_base="/home/sunjiahe/bazel_build_cache"
+build --show_timestamps
+# Do not show warnings from external dependencies.
+# build --output_filter="^//"
 
 build:debug -c dbg
 build:debug --copt="-g"
@@ -6,6 +8,8 @@ build:debug --strip="never"
 build:optimize -c opt
 build:optimize --copt="-O3"
 build:optimize --strip="always"
+build:optimize --copt=-march=native
+build:optimize --host_copt=-march=native
 
 build --color=yes
 build --cxxopt='-std=c++17'

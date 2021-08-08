@@ -1,0 +1,10 @@
+syntax = "proto3";
+option cc_enable_arenas = true;
+package sss.async;
+
+import "async/runtime/proto/node.proto";
+
+message AsyncGraph {
+    repeated Node nodes = 1;
+    string version = 2;
+};
