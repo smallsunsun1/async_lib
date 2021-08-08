@@ -1,5 +1,10 @@
 #include "async/runtime/graph.h"
 
+#include <fcntl.h>
+#include <glog/logging.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <google/protobuf/text_format.h>
+
 #include <cassert>
 #include <fstream>
 #include <iostream>
@@ -13,6 +18,7 @@
 #include "async/context/async_value.h"
 #include "async/context/kernel_frame.h"
 #include "async/context/native_function.h"
+#include "async/runtime/proto/graph.pb.h"
 #include "async/runtime/register.h"
 
 namespace sss {
@@ -220,6 +226,79 @@ void AsyncGraph::Dump(const std::string &filename) const {
   outFile.close();
 }
 
+void AsyncGraph::DumpToProtobuf(const std::string &filename,
+                                GraphPbKind mode) const {
+  AsyncGraphDef graph_def;
+  for (size_t i = 0, numNodes = mAsyncNodes.size(); i < numNodes; ++i) {
+    AsyncNodeDef *node_def = graph_def.add_nodes();
+    for (size_t j = 0, numInputs = mAsyncNodes[i]->GetNumInputs();
+         j < numInputs; ++j) {
+      node_def->add_input_names(mAsyncNodes[i]->GetInputNameAt(j));
+    }
+    for (size_t j = 0, numOutputs = mAsyncNodes[i]->GetNumResults();
+         j < numOutputs; ++j) {
+      node_def->add_output_names(mAsyncNodes[i]->GetOutputNameAt(j));
+    }
+    node_def->set_func_name(mAsyncNodes[i]->mFuncName);
+  }
+  if (mode == GraphPbKind::kBinaryMode) {
+    std::string serialized_graph = graph_def.SerializeAsString();
+    std::ofstream ofs(filename);
+    ofs << serialized_graph;
+    ofs.close();
+  } else if (mode == GraphPbKind::kTxtMode) {
+    std::ofstream ofs(filename);
+    std::string output;
+    google::protobuf::TextFormat::PrintToString(graph_def, &output);
+    ofs << output;
+    ofs.close();
+  } else {
+    LOG(ERROR) << "unsupported save out mode";
+  }
+}
+
+void AsyncGraph::LoadFromProtobuf(const std::string &filename,
+                                  GraphPbKind mode) {
+  AsyncGraphDef graph_def;
+  bool valid_load = true;
+  if (mode == GraphPbKind::kTxtMode) {
+    std::ifstream ifs(filename);
+    std::istreambuf_iterator<char> begin(ifs);
+    std::istreambuf_iterator<char> end;
+    std::string input(begin, end);
+    google::protobuf::TextFormat::ParseFromString(input, &graph_def);
+  } else if (mode == GraphPbKind::kBinaryMode) {
+    std::ifstream ifs(filename, std::ios::binary);
+    std::istreambuf_iterator<char> begin(ifs);
+    std::istreambuf_iterator<char> end;
+    std::string input(begin, end);
+    graph_def.ParseFromString(input);
+  } else {
+    LOG(ERROR) << "unsupported save out mode";
+    valid_load = false;
+  }
+  if (valid_load) {
+    for (const auto &node : graph_def.nodes()) {
+      std::optional<AsyncKernelFn> kernelFunction =
+          GET_KERNEL_FN(node.func_name());
+      if (!kernelFunction.has_value()) {
+        LOG(ERROR) << "can't find kernel name: " << node.func_name() << "\n";
+        assert(false);
+      }
+      std::vector<std::string> inputNames(node.input_names_size());
+      std::vector<std::string> outputNames(node.output_names_size());
+      for (int i = 0, num_size = node.input_names_size(); i < num_size; ++i) {
+        inputNames[i] = node.input_names(i);
+      }
+      for (int i = 0, num_size = node.output_names_size(); i < num_size; ++i) {
+        outputNames[i] = node.output_names(i);
+      }
+      (void)emplace(inputNames, outputNames, kernelFunction.value(),
+                    node.func_name());
+    }
+  }
+}
+
 void AsyncGraph::Load(const std::string &filename) {
   std::ifstream inFile(filename);
   std::string graphLineInfo;
@@ -239,7 +318,7 @@ void AsyncGraph::Load(const std::string &filename) {
         std::optional<AsyncKernelFn> kernelFunction = GET_KERNEL_FN(res[1]);
         kernelName = res[1];
         if (!kernelFunction.has_value()) {
-          std::cerr << "can't find kernel name: " << res[1] << "\n";
+          LOG(ERROR) << "can't find kernel name: " << res[1] << "\n";
           assert(false);
         }
         kernelFn = kernelFunction.value();
@@ -509,32 +588,32 @@ void GraphExecutor::Execute(
 }
 
 void GraphExecutor::DebugFn() {
-  std::cout << "Check Unsed By Kernel\n";
+  LOG(INFO) << "Check Unsed By Kernel\n";
   for (auto value : graph->mUsedByKernlTable) {
-    std::cout << "first: " << value.first << "\n";
+    LOG(INFO) << "first: " << value.first << "\n";
     for (size_t i = 0, e = value.second.mResultTable.size(); i < e; ++i) {
-      std::cout << "index: " << i << "\n";
+      LOG(INFO) << "index: " << i << "\n";
       for (size_t j = 0, e2 = value.second.mResultTable[i].size(); j < e2;
            ++j) {
-        std::cout << value.second.mResultTable[i][j] << "\n";
+        LOG(INFO) << value.second.mResultTable[i][j] << "\n";
       }
-      std::cout << " \n";
+      LOG(INFO) << " \n";
     }
   }
-  std::cout << "Check Function Info\n";
-  std::cout << "Check AsyncValue Infos\n";
+  LOG(INFO) << "Check Function Info\n";
+  LOG(INFO) << "Check AsyncValue Infos\n";
   for (size_t i = 0, e = mFunctionInfo.mAsyncValueInfos.size(); i < e; ++i) {
-    std::cout << "user count: " << mFunctionInfo.mAsyncValueInfos[i].mUserCount
+    LOG(INFO) << "user count: " << mFunctionInfo.mAsyncValueInfos[i].mUserCount
               << " value: " << mFunctionInfo.mAsyncValueInfos[i].mValue << "\n";
   }
-  std::cout << "Check Kernel Infos\n";
+  LOG(INFO) << "Check Kernel Infos\n";
   for (size_t i = 0, e = mFunctionInfo.mKernelInfos.size(); i < e; ++i) {
-    std::cout << "KERNEL: " << mFunctionInfo.mKernelInfos[i].mArgumentsNotReady
+    LOG(INFO) << "KERNEL: " << mFunctionInfo.mKernelInfos[i].mArgumentsNotReady
               << "\n";
   }
-  std::cout << "Check Final Nodes\n";
+  LOG(INFO) << "Check Final Nodes\n";
   for (size_t i = 0, e = graph->mAsyncNodes.size(); i < e; ++i) {
-    std::cout << "Nodes: " << graph->mAsyncNodes[i] << "\n";
+    LOG(INFO) << "Nodes: " << graph->mAsyncNodes[i] << "\n";
   }
 }
 

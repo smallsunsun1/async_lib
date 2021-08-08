@@ -65,11 +65,24 @@ int main() {
   auto end = high_resolution_clock::now();
   std::cout << duration_cast<nanoseconds>(end - start).count() << std::endl;
 
-  graph->Dump("./graph.txt");
+  const std::string txt_filename = "./graph.txt";
+  graph->Dump(txt_filename);
   graph->Reset();
-  graph->Load("./graph.txt");
+  graph->Load(txt_filename);
   graph->BuildGraph();
-  graph->Dump("./graph2.txt");
+
+  const std::string pb_filename = "./graph2.pb.txt";
+  graph->DumpToProtobuf(pb_filename);
+  graph->Reset();
+  graph->LoadFromProtobuf(pb_filename);
+  graph->BuildGraph();
+
+  const std::string pb_binary_filename = "./graph3.pb";
+  graph->DumpToProtobuf(pb_binary_filename, AsyncGraph::kBinaryMode);
+  graph->Reset();
+  graph->LoadFromProtobuf(pb_binary_filename, AsyncGraph::kBinaryMode);
+  graph->BuildGraph();
+
   std::vector<RCReference<AsyncValue>> input;
   input.push_back(runContext->MakeAvailableAsyncValueRef<int>(0));
   std::vector<RCReference<AsyncValue>> output;
@@ -78,7 +91,8 @@ int main() {
   end = high_resolution_clock::now();
   std::cout << "async time : "
             << duration_cast<nanoseconds>(end - start).count() << std::endl;
-  fs::remove("./graph.txt");
+  fs::remove(txt_filename);
+  fs::remove(pb_filename);
   RCReference<AsyncGraph> subGraph =
       graph->SubGraph(std::vector<std::string>{"result1", "result2"});
   subGraph->BuildGraph();

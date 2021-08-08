@@ -57,6 +57,10 @@ class AsyncNode {
 
 class AsyncGraph : public async::ReferenceCounted<AsyncGraph> {
  public:
+  enum GraphPbKind {
+    kTxtMode = 0,
+    kBinaryMode = 1,
+  };
   AsyncGraph(async::HostContext *context) : mpContext(context) {}
   AsyncGraph() = delete;
   AsyncGraph(const AsyncGraph &) = delete;
@@ -66,8 +70,14 @@ class AsyncGraph : public async::ReferenceCounted<AsyncGraph> {
   void Destroy();
   void BuildGraph();
   void Reset();
-  void Dump(const std::string &filename) const;
-  void Load(const std::string &filename);
+  [[deprecated("Use DumpToProtobuf Instead")]] void Dump(
+      const std::string &filename) const;
+  [[deprecated("Use LoadFromProtobuf Instead")]] void Load(
+      const std::string &filename);
+  void DumpToProtobuf(const std::string &filename,
+                      GraphPbKind mode = GraphPbKind::kTxtMode) const;
+  void LoadFromProtobuf(const std::string &filename,
+                        GraphPbKind mode = GraphPbKind::kTxtMode);
   async::RCReference<AsyncGraph> SubGraph(
       const std::vector<std::string> &outputNames);
   async::HostContext *GetContext() { return mpContext; }

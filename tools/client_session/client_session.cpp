@@ -1,4 +1,3 @@
-#include <fcntl.h>
 #include <glog/logging.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/text_format.h>
@@ -7,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -86,17 +86,12 @@ ClientSession::ClientSession(const SessionConfig& config) : config_(config) {
 int main(int argc, char* argv[]) {
   absl::ParseCommandLine(argc, argv);
   std::string config_file = absl::GetFlag(FLAGS_config_file);
-  int file_descriptor = open(config_file.c_str(), O_RDONLY);
-  if (file_descriptor < 0) {
-    LOG(ERROR) << "config file not exist : " << config_file.c_str();
-    return -1;
-  }
-  google::protobuf::io::FileInputStream in_stream(file_descriptor);
+  std::ifstream ifs(config_file);
+  std::istreambuf_iterator<char> begin(ifs);
+  std::istreambuf_iterator<char> end;
+  std::string input(begin, end);
   sss::async::SessionConfig config;
-  if (!google::protobuf::TextFormat::Parse(&in_stream, &config)) {
-    LOG(ERROR) << "parse config file failed : " << config_file.c_str();
-    return -1;
-  }
+  google::protobuf::TextFormat::ParseFromString(input, &config);
   auto session = std::make_unique<sss::async::ClientSession>(config);
   sss::async::Request request;
   request.set_type("hello world");

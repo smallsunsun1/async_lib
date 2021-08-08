@@ -16,5 +16,7 @@ cc_library(
     ],
     deps = [
         "//async/context:host_context",
+        "//async/runtime/proto:cc_graph_proto",
+        "@com_github_google_glog//:glog",
     ],
 )
