@@ -1,6 +1,6 @@
 build --show_timestamps
 # Do not show warnings from external dependencies.
-# build --output_filter="^//"
+build --output_filter="^//"
 
 build:debug -c dbg
 build:debug --copt="-g"
