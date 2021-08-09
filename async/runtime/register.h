@@ -2,6 +2,7 @@
 #define ASYNC_RUNTIME_REGISTER_
 
 #include <optional>
+#include <string>
 #include <string_view>
 #include <unordered_map>
 
@@ -12,15 +13,16 @@ namespace async {
 
 class KernelFnRegister {
  public:
-  void InsertKernelFn(std::string_view name, AsyncKernelFn fn);
-  void RemoveKernelFn(std::string_view name);
-  std::optional<AsyncKernelFn> GetKernelFn(std::string_view name);
+  void InsertKernelFn(const std::string& name, AsyncKernelFn fn);
+  void RemoveKernelFn(const std::string& name);
+  std::optional<AsyncKernelFn> GetKernelFn(const std::string& name);
+  AsyncKernelFn MustGetKernelFn(const std::string& name);
 
  private:
-  std::unordered_map<std::string_view, AsyncKernelFn> mFuncLibs;
+  std::unordered_map<std::string, AsyncKernelFn> mFuncLibs;
 };
 
-inline KernelFnRegister &GetKernelFnRegister() {
+inline KernelFnRegister& GetKernelFnRegister() {
   static KernelFnRegister fnRegister;
   return fnRegister;
 }
@@ -34,10 +36,10 @@ inline KernelFnRegister &GetKernelFnRegister() {
   ASYNC_STATIC_KERNEL_REGISTRATION_(NAME, FUNC, __COUNTER__)
 #define ASYNC_STATIC_KERNEL_REGISTRATION_(NAME, FUNC, N) \
   ASYNC_STATIC_KERNEL_REGISTRATION__(NAME, FUNC, N)
-#define ASYNC_STATIC_KERNEL_REGISTRATION__(NAME, FUNC, N)          \
+#define ASYNC_STATIC_KERNEL_REGISTRATION__(NAME, FUNC, N)    \
   static bool async_static_kernel_##N##_registered_ = []() { \
-    GetKernelFnRegister().InsertKernelFn(NAME, FUNC);       \
-    return true;                                            \
+    GetKernelFnRegister().InsertKernelFn(NAME, FUNC);        \
+    return true;                                             \
   }()
 
 }  // namespace async
