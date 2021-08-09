@@ -1,14 +1,12 @@
 #include "async/context/resource.h"
 
-#include <gtest/gtest-message.h>    // for Message
-#include <gtest/gtest-test-part.h>  // for TestPartResult
+#include <gtest/gtest.h>
 
 #include <memory>    // for unique_ptr
 #include <optional>  // for optional
 #include <string>    // for string
 
 #include "async/support/type_traits.h"  // for async, sss
-#include "gtest/gtest_pred_impl.h"      // for Test, InitGoogleTest, RUN_...
 
 using namespace sss;
 using namespace async;
