@@ -166,3 +166,15 @@ cc_test(
         "span_unittest.cpp",
     ],
 )
+
+cc_test(
+    name = "register_kernel_unittest",
+    deps = [
+        "//async/runtime:runtime",
+        "@com_google_googletest//:gtest",
+    ],
+    size = "small",
+    srcs = [
+        "register_kernel_unittest.cpp",
+    ],
+)

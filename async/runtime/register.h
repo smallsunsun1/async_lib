@@ -30,6 +30,16 @@ inline KernelFnRegister &GetKernelFnRegister() {
 #define UNREGISTER_KERNEL_FN(name_) GetKernelFnRegister().RemoveKernelFn(name_)
 #define GET_KERNEL_FN(name_) GetKernelFnRegister().GetKernelFn(name_)
 
+#define ASYNC_STATIC_KERNEL_REGISTRATION(NAME, FUNC) \
+  ASYNC_STATIC_KERNEL_REGISTRATION_(NAME, FUNC, __COUNTER__)
+#define ASYNC_STATIC_KERNEL_REGISTRATION_(NAME, FUNC, N) \
+  ASYNC_STATIC_KERNEL_REGISTRATION__(NAME, FUNC, N)
+#define ASYNC_STATIC_KERNEL_REGISTRATION__(NAME, FUNC, N)          \
+  static bool async_static_kernel_##N##_registered_ = []() { \
+    GetKernelFnRegister().InsertKernelFn(NAME, FUNC);       \
+    return true;                                            \
+  }()
+
 }  // namespace async
 }  // namespace sss
 

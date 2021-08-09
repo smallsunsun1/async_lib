@@ -1,3 +1,5 @@
+startup --output_base=/home/sunjiahe/bazel_build_cache/async_lib 
+
 build --show_timestamps
 # Do not show warnings from external dependencies.
 build --output_filter="^//"
