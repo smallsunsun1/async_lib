@@ -6,9 +6,9 @@
 #include <string_view>
 #include <unordered_map>
 
-#include "async/runtime/async_kernel.h"
 #include "async/context/async_value.h"
 #include "async/context/kernel_frame.h"
+#include "async/runtime/async_kernel.h"
 
 namespace sss {
 namespace async {
@@ -29,16 +29,18 @@ inline KernelFnRegister& GetKernelFnRegister() {
   return fnRegister;
 }
 
-template <typename T, typename Ret, typename ...Args, size_t... N>
-auto GenWrappedLambdaImpl(Ret(T::*func)(Args...), T* cls, std::index_sequence<N...> seq) {
-  return [cls, func](CommonAsyncKernelFrame* kernelFrame){
+template <typename T, typename Ret, typename... Args, size_t... N>
+auto GenWrappedLambdaImpl(Ret (T::*func)(Args...), T* cls,
+                          std::index_sequence<N...> seq) {
+  return [cls, func](CommonAsyncKernelFrame* kernelFrame) {
     return (cls->*func)(kernelFrame->GetArgAt<Args>(N)...);
   };
 }
 
-template <typename T, typename Ret, typename ...Args>
-auto GenWrappedLambda(Ret(T::*func)(Args...), T* cls) {
-  return GenWrappedLambdaImpl(func, cls, std::make_index_sequence<sizeof...(Args)>());
+template <typename T, typename Ret, typename... Args>
+auto GenWrappedLambda(Ret (T::*func)(Args...), T* cls) {
+  return GenWrappedLambdaImpl(func, cls,
+                              std::make_index_sequence<sizeof...(Args)>());
 }
 
 #define REGISTER_CLASS_KERNEL_FN(classMemberFuncPtr, classPtr) \

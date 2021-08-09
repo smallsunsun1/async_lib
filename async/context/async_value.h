@@ -3,8 +3,8 @@
 
 #include <atomic>
 #include <cassert>
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <type_traits>
 
@@ -344,6 +344,7 @@ class AsyncValue {
                      NotifierListNodePointerTraits>;
   std::atomic<WaitersAndState> mWaitersAndState;
 
+ public:
   /// We assume (and static_assert) that this is the offset of
   /// ConcreteAsyncValue::mData, which is the same as the offset of
   /// ConcreteAsyncValue::mError.
@@ -398,7 +399,8 @@ class AsyncValue {
 };
 
 // We only optimize the code for 64-bit architectures for now.
-static_assert(sizeof(AsyncValue) == AsyncValue::kDataOrErrorOffset || sizeof(void *) != 8,
+static_assert(sizeof(AsyncValue) == AsyncValue::kDataOrErrorOffset ||
+                  sizeof(void *) != 8,
               "Unexpected size for AsyncValue");
 
 namespace internal {

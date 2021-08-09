@@ -34,8 +34,7 @@ class HostBuffer : public ReferenceCounted<HostBuffer> {
     mInlined.allocator = allocator;
   }
   HostBuffer(void *ptr, size_t size, Deallocator deallocator)
-      : mSize(size),
-        mIsLined(false) {
+      : mSize(size), mIsLined(false) {
     mOutOfLine.ptr = ptr;
     mOutOfLine.deallocator = std::move(deallocator);
   }

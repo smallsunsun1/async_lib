@@ -85,8 +85,8 @@ class LeakCheckAllocator : public ProfiledAllocator {
 
 std::unique_ptr<HostAllocator> CreateProfiledAllocator(
     std::unique_ptr<HostAllocator> allocator) {
-  return std::unique_ptr<HostAllocator>(new ProfiledAllocator(std::move(allocator)));
-  // return std::make_unique<ProfiledAllocator>(std::move(allocator));
+  return std::unique_ptr<HostAllocator>(
+      new ProfiledAllocator(std::move(allocator)));
 }
 
 }  // namespace async

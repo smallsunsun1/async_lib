@@ -356,25 +356,24 @@ std::vector<std::string> AsyncGraph::GetOutputNames() const {
 }
 
 void GraphExecutor::Reset() {
-    assert(graph->mIsConstructed && "Graph Must Be Constructed");
-    mFunctionInfo.mAsyncValueInfos.clear();
-    mFunctionInfo.mKernelInfos.clear();
-    mFunctionInfo.mAsyncValueInfos.reserve(
-        graph->mFunctionInfo.mAsyncValueInfos.size());
-    for (size_t i = 0, e = graph->mFunctionInfo.mAsyncValueInfos.size(); i != e;
-         ++i) {
-      mFunctionInfo.mAsyncValueInfos.emplace_back(
-          graph->mFunctionInfo.mAsyncValueInfos[i].mUserCount);
-    }
-    mFunctionInfo.mKernelInfos.reserve(
-        graph->mFunctionInfo.mKernelInfos.size());
-    for (size_t i = 0, e = graph->mFunctionInfo.mKernelInfos.size(); i != e;
-         ++i) {
-      mFunctionInfo.mKernelInfos.emplace_back(
-          graph->mFunctionInfo.mKernelInfos[i].mArgumentsNotReady.load(
-              std::memory_order_relaxed));
-    }
+  assert(graph->mIsConstructed && "Graph Must Be Constructed");
+  mFunctionInfo.mAsyncValueInfos.clear();
+  mFunctionInfo.mKernelInfos.clear();
+  mFunctionInfo.mAsyncValueInfos.reserve(
+      graph->mFunctionInfo.mAsyncValueInfos.size());
+  for (size_t i = 0, e = graph->mFunctionInfo.mAsyncValueInfos.size(); i != e;
+       ++i) {
+    mFunctionInfo.mAsyncValueInfos.emplace_back(
+        graph->mFunctionInfo.mAsyncValueInfos[i].mUserCount);
   }
+  mFunctionInfo.mKernelInfos.reserve(graph->mFunctionInfo.mKernelInfos.size());
+  for (size_t i = 0, e = graph->mFunctionInfo.mKernelInfos.size(); i != e;
+       ++i) {
+    mFunctionInfo.mKernelInfos.emplace_back(
+        graph->mFunctionInfo.mKernelInfos[i].mArgumentsNotReady.load(
+            std::memory_order_relaxed));
+  }
+}
 
 void GraphExecutor::InitializeArgumentRegisters(
     absl::Span<AsyncValue *const> arguments,
