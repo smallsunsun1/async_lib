@@ -110,29 +110,10 @@ class GraphExecutor : public async::ReferenceCounted<GraphExecutor> {
  public:
   GraphExecutor(AsyncGraph *inGraph) : graph(inGraph) {
     graph->AddRef();
-    Reset();
+    Reset(/*resetFromOri = true*/);
   }
   // 需要在内部graph已经被构建时调用
-  void Reset() {
-    assert(graph->mIsConstructed && "Graph Must Be Constructed");
-    mFunctionInfo.mAsyncValueInfos.clear();
-    mFunctionInfo.mKernelInfos.clear();
-    mFunctionInfo.mAsyncValueInfos.reserve(
-        graph->mFunctionInfo.mAsyncValueInfos.size());
-    for (size_t i = 0, e = graph->mFunctionInfo.mAsyncValueInfos.size(); i != e;
-         ++i) {
-      mFunctionInfo.mAsyncValueInfos.emplace_back(
-          graph->mFunctionInfo.mAsyncValueInfos[i].mUserCount);
-    }
-    mFunctionInfo.mKernelInfos.reserve(
-        graph->mFunctionInfo.mKernelInfos.size());
-    for (size_t i = 0, e = graph->mFunctionInfo.mKernelInfos.size(); i != e;
-         ++i) {
-      mFunctionInfo.mKernelInfos.emplace_back(
-          graph->mFunctionInfo.mKernelInfos[i].mArgumentsNotReady.load(
-              std::memory_order_relaxed));
-    }
-  }
+  void Reset();
   ~GraphExecutor();
   // 释放当前的graph
   void Destroy();
