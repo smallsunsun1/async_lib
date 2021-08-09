@@ -4,6 +4,7 @@
 #include <atomic>
 #include <cassert>
 #include <cstdint>
+#include <cstddef>
 #include <string>
 #include <type_traits>
 
@@ -13,6 +14,10 @@
 #include "async/support/concurrent_vector.h"
 #include "async/support/ref_count.h"
 #include "async/support/unique_function.h"
+
+#ifdef _WIN32
+#define ssize_t std::int64_t
+#endif
 
 namespace sss {
 namespace async {
@@ -342,7 +347,11 @@ class AsyncValue {
   /// We assume (and static_assert) that this is the offset of
   /// ConcreteAsyncValue::mData, which is the same as the offset of
   /// ConcreteAsyncValue::mError.
+#ifdef _WIN32
+  static constexpr int kDataOrErrorOffset = 24;
+#else
   static constexpr int kDataOrErrorOffset = 16;
+#endif
 
  private:
   template <typename T>
@@ -389,7 +398,7 @@ class AsyncValue {
 };
 
 // We only optimize the code for 64-bit architectures for now.
-static_assert(sizeof(AsyncValue) == 16 || sizeof(void *) != 8,
+static_assert(sizeof(AsyncValue) == AsyncValue::kDataOrErrorOffset || sizeof(void *) != 8,
               "Unexpected size for AsyncValue");
 
 namespace internal {
@@ -496,6 +505,16 @@ class ConcreteAsyncValue : public AsyncValue {
   }
 
   static void VerifyOffsets() {
+#ifdef _WIN32
+    static_assert(offsetof(ConcreteAsyncValue<T>, mData) ==
+                      AsyncValue::kDataOrErrorOffset,
+                  "Offset of ConcreteAsyncValue::mData is assumed to be "
+                  "AsyncValue::kDataOrErrorOffset == 24");
+    static_assert(offsetof(ConcreteAsyncValue<T>, mError) ==
+                      AsyncValue::kDataOrErrorOffset,
+                  "Offset of ConcreteAsyncValue::mError is assumed to be "
+                  "AsyncValue::kDataOrErrorOffset == 24");
+#else
     static_assert(offsetof(ConcreteAsyncValue<T>, mData) ==
                       AsyncValue::kDataOrErrorOffset,
                   "Offset of ConcreteAsyncValue::mData is assumed to be "
@@ -504,6 +523,7 @@ class ConcreteAsyncValue : public AsyncValue {
                       AsyncValue::kDataOrErrorOffset,
                   "Offset of ConcreteAsyncValue::mError is assumed to be "
                   "AsyncValue::kDataOrErrorOffset == 16");
+#endif
   }
 
   static const uint16_t concrete_type_id_;

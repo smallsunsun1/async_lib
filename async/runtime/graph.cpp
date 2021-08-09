@@ -243,7 +243,7 @@ void AsyncGraph::DumpToProtobuf(const std::string &filename,
   }
   if (mode == GraphPbKind::kBinaryMode) {
     std::string serialized_graph = graph_def.SerializeAsString();
-    std::ofstream ofs(filename);
+    std::ofstream ofs(filename, std::ios::binary);
     ofs << serialized_graph;
     ofs.close();
   } else if (mode == GraphPbKind::kTxtMode) {

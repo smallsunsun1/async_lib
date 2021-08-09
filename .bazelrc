@@ -1,4 +1,10 @@
-startup --output_base=/home/sunjiahe/bazel_build_cache/async_lib 
+#startup --output_base=/home/sunjiahe/bazel_build_cache/async_lib 
+
+# For windows build options
+# startup --windows_enable_symlinks
+# build --enable_runfiles
+# build --cxxopt='/std:c++17'
+# build --cxxopt='-DGLOG_NO_ABBREVIATED_SEVERITIES'
 
 build --show_timestamps
 # Do not show warnings from external dependencies.
@@ -13,6 +19,7 @@ build:optimize --strip="always"
 build:optimize --copt=-march=native
 build:optimize --host_copt=-march=native
 
+# For Linux build options
 build --color=yes
 build --cxxopt='-std=c++17'
 build --cxxopt='-fdiagnostics-color=always'

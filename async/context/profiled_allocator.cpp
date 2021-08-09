@@ -16,6 +16,7 @@ void AtomicUpdateMax(T const &value, std::atomic<T> *maxValue) noexcept {
          !maxValue->compare_exchange_weak(prevMaxValue, value)) {
   }
 }
+}  // namespace
 
 class ProfiledAllocator : public HostAllocator {
  public:
@@ -81,11 +82,11 @@ class LeakCheckAllocator : public ProfiledAllocator {
     }
   }
 };
-}  // namespace
 
 std::unique_ptr<HostAllocator> CreateProfiledAllocator(
     std::unique_ptr<HostAllocator> allocator) {
-  return std::make_unique<ProfiledAllocator>(std::move(allocator));
+  return std::unique_ptr<HostAllocator>(new ProfiledAllocator(std::move(allocator)));
+  // return std::make_unique<ProfiledAllocator>(std::move(allocator));
 }
 
 }  // namespace async

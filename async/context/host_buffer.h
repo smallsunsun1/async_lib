@@ -30,11 +30,15 @@ class HostBuffer : public ReferenceCounted<HostBuffer> {
  private:
   friend class ReferenceCounted<HostBuffer>;
   HostBuffer(size_t size, HostAllocator *allocator)
-      : mSize(size), mIsLined(true), mInlined{.allocator = allocator} {}
+      : mSize(size), mIsLined(true) {
+    mInlined.allocator = allocator;
+  }
   HostBuffer(void *ptr, size_t size, Deallocator deallocator)
       : mSize(size),
-        mIsLined(false),
-        mOutOfLine{.ptr = ptr, .deallocator = std::move(deallocator)} {}
+        mIsLined(false) {
+    mOutOfLine.ptr = ptr;
+    mOutOfLine.deallocator = std::move(deallocator);
+  }
   ~HostBuffer();
   void Destroy();
   size_t mSize : 63;
