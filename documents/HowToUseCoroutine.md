@@ -1,6 +1,6 @@
 一: 说明
 当前Coroutine的代码还处于未完成的状态，只支持最简单的ThreadPool提交任务，并在特定的位置同步等待相应Task完成的操作  
-如果需要使用coroutine，使用gcc10以上版本的编译器，同时cmake编译时开启-DUSE_CXX_20=ON来开启c++20的编译  
+如果需要使用coroutine，使用gcc10以上版本的编译器
 
 一个简单的Sample：
 

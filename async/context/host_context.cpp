@@ -3,6 +3,7 @@
 #include <iostream>
 #include <mutex>
 #include <thread>
+#include <glog/logging.h>
 
 #include "async/concurrent/concurrent_work_queue.h"
 #include "async/context/chain.h"
@@ -244,7 +245,7 @@ SharedContext::~SharedContext() {}
 
 std::unique_ptr<HostContext> CreateSimpleHostContext() {
   return std::make_unique<HostContext>(
-      [](const DecodedDiagnostic &in) { std::cout << in.message << std::endl; },
+      [](const DecodedDiagnostic &in) { LOG(INFO) << in.message; },
       CreateMallocAllocator(),
       CreateMultiThreadedWorkQueue(std::thread::hardware_concurrency(),
                                    2 * std::thread::hardware_concurrency()));
@@ -253,7 +254,7 @@ std::unique_ptr<HostContext> CreateSimpleHostContext() {
 std::unique_ptr<HostContext> CreateCustomHostContext(int numNonBlockThreads,
                                                      int numBlockThreads) {
   return std::make_unique<HostContext>(
-      [](const DecodedDiagnostic &in) { std::cout << in.message << std::endl; },
+      [](const DecodedDiagnostic &in) { LOG(INFO) << in.message << std::endl; },
       CreateMallocAllocator(),
       CreateMultiThreadedWorkQueue(numNonBlockThreads, numBlockThreads));
 }

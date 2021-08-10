@@ -35,7 +35,8 @@ cc_library(
     deps = [
         "//async/support:support",
         "//async/concurrent:concurrent",
-        "@com_google_absl//absl/strings:strings"
+        "@com_google_absl//absl/strings:strings",
+        "@com_github_google_glog//:glog",
     ],
 )
 
